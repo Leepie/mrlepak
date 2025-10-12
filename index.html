@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Analisis PPSA vs PraSPM — SMK Dato' Kamaruddin</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN (diminta tersedia) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+  // Jadikan legend semua carta berbentuk bulat secara lalai
+  if (window.Chart) {
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+    Chart.defaults.plugins.legend.labels.boxWidth  = 12; // pilihan
+    Chart.defaults.plugins.legend.labels.boxHeight = 12; // pilihan
+  }
+</script>
+
+
+  <style>
+    /* Pilihan: gradient halus & glass card */
+    .bg-hero {
+      background: radial-gradient(1200px 600px at 10% 0%, rgba(59,130,246,.15), transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(168,85,247,.12), transparent 60%),
+                  linear-gradient(180deg, #f8fafc, #eef2ff);
+    }
+    @media (prefers-color-scheme: dark) {
+      .bg-hero {
+        background: radial-gradient(1200px 600px at 10% 0%, rgba(59,130,246,.25), transparent 60%),
+                    radial-gradient(900px 500px at 90% 10%, rgba(168,85,247,.22), transparent 60%),
+                    linear-gradient(180deg, #0b1020, #0a0f1d);
+      }
+    }
+    .glass {
+      backdrop-filter: saturate(140%) blur(10px);
+      -webkit-backdrop-filter: saturate(140%) blur(10px);
+      background: rgba(255,255,255,.72);
+    }
+    @media (prefers-color-scheme: dark) {
+      .glass {
+        background: rgba(13,17,23,.6);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-hero text-slate-800 dark:text-slate-100">
+
+  <!-- Wrapper -->
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <main class="w-full max-w-3xl glass rounded-2xl shadow-xl border border-white/40 dark:border-white/10 p-6 sm:p-10">
+      <!-- Header -->
+      <header class="flex flex-col items-center text-center gap-4">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/ms/b/ba/Sekolah_Menengah_Kebangsaan_Dato%27_Kamaruddin.jpg"
+          alt="Logo SMK Dato' Kamaruddin"
+          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full ring-2 ring-white/60 dark:ring-white/20 object-cover"
+          loading="eager"
+          decoding="async"
+        />
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Analisis PPSA vs PraSPM
+          </h1>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-1">
+            “Sistem Analisis Prestasi Akademik SMK Dato` Kamaruddin"
+          </p>
+        </div>
+      </header>
+
+      <!-- Divider -->
+      <div class="my-8 border-t border-slate-200/70 dark:border-white/10"></div>
+
+      <!-- Action Buttons (centered) -->
+      <section class="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4">
+        <a href="https://leepie.github.io/AnalisisData/1/index.html"
+           class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 text-base sm:text-lg font-semibold
+                  bg-blue-600 hover:bg-blue-700 active:scale-[.99] text-white shadow-lg shadow-blue-600/20
+                  transition-transform">
+          <span class="mr-2">PPSA</span>
+          <svg class="w-5 h-5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
+          </svg>
+        </a>
+
+        <a href="https://leepie.github.io/AnalisisData/2/index.html"
+           class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 text-base sm:text-lg font-semibold
+                  bg-violet-600 hover:bg-violet-700 active:scale-[.99] text-white shadow-lg shadow-violet-600/20
+                  transition-transform">
+          <span class="mr-2">PraSPM</span>
+          <svg class="w-5 h-5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
+          </svg>
+        </a>
+      </section>
+
+      <!-- Footer -->
+      <footer class="mt-10 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        &copy; <span id="yearNow"></span> SMK Dato' Kamaruddin — Analisis PPSA vs PraSPM
+      </footer>
+    </main>
+  </div>
+
+  <!-- Skrip minimum (tiada pihak ketiga selain diminta) -->
+  <script>
+    // Set tahun semasa di footer
+    document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+    // (Chart.js dimuatkan seperti diminta; tidak digunakan pada halaman ini)
+    // Jika diperlukan di masa depan, kanvas boleh ditambah dan dirujuk di sini.
+  </script>
+</body>
+</html>
