@@ -1219,285 +1219,269 @@
 
             <!-- =================== TAB 5: ANALISIS INDIVIDU CETAKAN SIJIL  =================== -->
             <!-- 🎯 Section 1: Pilihan kelas & murid (Sticky) -->
+           <!-- =================== TAB 5: ANALISIS INDIVIDU CETAKAN SIJIL =================== -->
             <section data-tab-panel="individu" class="hidden">
-
-                <!-- 🎯 Sticky bar: Pilihan kelas & murid -->
-                <div class="cz-sticky-card bg-white/80 backdrop-blur border-b border-gray-100">
-                    <div class="container-max px-4 py-4">
-                        <div class="bg-white rounded-2xl border border-gray-100 px-4 sm:px-6 py-5">
-                            <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-5">
-                                <span>👤</span> Cetak Slip Individu
-                            </h2>
-
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                                <div>
-                                    <label for="kelasFilterIndividu" class="field-label">Kelas</label>
-                                    <select id="kelasFilterIndividu" class="select-like mt-1" onchange="updateMuridDropdownIndividu()">
-                                        <option value="">Pilih Kelas</option>
-                                    </select>
-                                </div>
-
-                                <div class="md:col-span-2">
-                                    <label for="muridFilterIndividu" class="field-label">Nama Murid</label>
-                                    <select id="muridFilterIndividu" class="select-like mt-1">
-                                        <option value="">Pilih Nama Murid</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <button class="btn-primary btn-green mt-6 md:mt-0" onclick="janaSlipIndividu()">
-                                        Cetak Slip Individu
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+            
+              <!-- 🎯 Sticky bar: Pilihan kelas & murid -->
+              <div class="cz-sticky-card bg-white/80 backdrop-blur border-b border-gray-100">
+                <div class="container-max px-4 py-4">
+                  <div class="bg-white rounded-2xl border border-gray-100 px-4 sm:px-6 py-5">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-5">
+                      <span>👤</span> Cetak Slip Individu
+                    </h2>
+            
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                      <div>
+                        <label for="kelasFilterIndividu" class="field-label">Kelas</label>
+                        <select id="kelasFilterIndividu" class="select-like mt-1" onchange="updateMuridDropdownIndividu()">
+                          <option value="">Pilih Kelas</option>
+                        </select>
+                      </div>
+            
+                      <div class="md:col-span-2">
+                        <label for="muridFilterIndividu" class="field-label">Nama Murid</label>
+                        <select id="muridFilterIndividu" class="select-like mt-1">
+                          <option value="">Pilih Nama Murid</option>
+                        </select>
+                      </div>
+            
+                      <div>
+                        <button class="btn-primary btn-green mt-6 md:mt-0" onclick="janaSlipIndividu()">
+                          Cetak Slip Individu
+                        </button>
+                      </div>
                     </div>
+                  </div>
                 </div>
-
-                <!-- ✅ Slip hanya dalam tab individu -->
-                <div id="slipIndividuSection" class="container-max px-4 py-4 hidden">
-                    <div class="slip-wrapper">
-                        <div class="slip-container">
-                            <!-- Header -->
-                            <div class="slip-header">
-                                <img src="https://upload.wikimedia.org/wikipedia/ms/b/ba/Sekolah_Menengah_Kebangsaan_Dato%27_Kamaruddin.jpg" alt="Logo">
-                                <p><b>SEKOLAH MENENGAH DATO` KAMARUDDIN<br>
-                                        JALAN BESAR, 34500 BATU KURAU, PERAK.</b></p>
-                                <p class="slip-title">SLIP KEPUTUSAN PEPERIKSAAN PRA SPM SESI AKADEMIK TAHUN 2025</p>
-                            </div>
-
-                            <!-- Maklumat Murid -->
-                            <table>
-                                <tr>
-                                    <td colspan="3"><b>NAMA :</b> <span id="namaMurid"></span></td>
-                                </tr>
-                                <tr>
-                                    <td><b>KELAS :</b> <span id="kelasMurid"></span></td>
-                                    <td colspan="2"><b>NO K/P :</b> <span id="icMurid"></span></td>
-                                </tr>
-                            </table>
-
-                            <!-- Jadual Subjek -->
-                            <table style="margin-top:10px;">
-                                <tr>
-                                    <th style="width:30px">BIL</th>
-                                    <th style="width:300px">MATA PELAJARAN</th>
-                                    <th style="width:100px">MARKAH</th>
-                                    <th style="width:100px">GRED</th>
-                                    <th style="width:300px">ULASAN GURU</th>
-                                </tr>
-                                <tbody id="subjectBody"></tbody>
-                            </table>
-
-                            <!-- Ringkasan -->
-                            <table style="margin-top:15px;">
-                                <tr>
-                                    <td class="grey">JUMLAH MARKAH :</td>
-                                    <td class="center" id="jumlahMarkah"></td>
-                                </tr>
-                                <tr>
-                                    <td class="grey">PERATUS :</td>
-                                    <td class="center" id="peratus"></td>
-                                </tr>
-                                <tr>
-                                    <td class="grey">GRED PURATA :</td>
-                                    <td class="center" id="gpk"></td>
-                                </tr>
-                                <tr>
-                                    <td class="grey">KEDUDUKAN DALAM KELAS :</td>
-                                    <td class="center" id="kedudukanKelas"></td>
-                                </tr>
-                                <tr>
-                                    <td class="grey">KEDUDUKAN DALAM TINGKATAN :</td>
-                                    <td class="center" id="kedudukanTingkatan"></td>
-                                </tr>
-                                <tr>
-                                    <td class="grey">KEHADIRAN :</td>
-                                    <td class="center" id="kehadiran"></td>
-                                </tr>
-                                <tr>
-                                    <td class="grey">PENCAPAIAN GRED KESELURUHAN :</td>
-                                    <td class="center" id="gredKeseluruhan"></td>
-                                </tr>
-                                <tr>
-                                    <td class="grey">KEPUTUSAN :</td>
-                                    <td class="center" id="keputusan"></td>
-                                </tr>
-                            </table>
-                            <!--
-        <div style="text-align:center; margin-top:20px;">
-          <button onclick="window.print()" class="btn-primary btn-gree">
-            🖨️
-          </button>
-        </div>
-                    -->
-                            <div class="print-btn" style="text-align:center; margin-top:20px;">
-                                <button onclick="window.print()">🖨️</button>
-                            </div>
-
-                        </div>
+              </div>
+            
+              <!-- ✅ Slip hanya dalam tab individu -->
+              <div id="slipIndividuSection" class="container-max px-4 py-4 hidden">
+                <div class="slip-wrapper">
+                  <div class="slip-container">
+                    <!-- Header -->
+                    <div class="slip-header">
+                      <img src="https://upload.wikimedia.org/wikipedia/ms/b/ba/Sekolah_Menengah_Kebangsaan_Dato%27_Kamaruddin.jpg" alt="Logo">
+                      <p><b>SEKOLAH MENENGAH DATO` KAMARUDDIN<br>
+                          JALAN BESAR, 34500 BATU KURAU, PERAK.</b></p>
+                      <p class="slip-title">SLIP KEPUTUSAN PEPERIKSAAN PRA SPM SESI AKADEMIK TAHUN 2025</p>
                     </div>
+            
+                    <!-- Maklumat Murid -->
+                    <table>
+                      <tr>
+                        <td colspan="3"><b>NAMA :</b> <span id="namaMurid"></span></td>
+                      </tr>
+                      <tr>
+                        <td><b>KELAS :</b> <span id="kelasMurid"></span></td>
+                        <td colspan="2"><b>NO K/P :</b> <span id="icMurid"></span></td>
+                      </tr>
+                    </table>
+            
+                    <!-- Jadual Subjek -->
+                    <table style="margin-top:10px;">
+                      <tr>
+                        <th style="width:30px">BIL</th>
+                        <th style="width:300px">MATA PELAJARAN</th>
+                        <th style="width:100px">MARKAH</th>
+                        <th style="width:100px">GRED</th>
+                        <th style="width:300px">ULASAN GURU</th>
+                      </tr>
+                      <tbody id="subjectBody"></tbody>
+                    </table>
+            
+                    <!-- Ringkasan -->
+                    <table style="margin-top:15px;">
+                      <tr>
+                        <td class="grey">JUMLAH MARKAH :</td>
+                        <td class="center" id="jumlahMarkah"></td>
+                      </tr>
+                      <tr>
+                        <td class="grey">PERATUS :</td>
+                        <td class="center" id="peratus"></td>
+                      </tr>
+                      <tr>
+                        <td class="grey">GRED PURATA :</td>
+                        <td class="center" id="gpk"></td>
+                      </tr>
+                      <tr>
+                        <td class="grey">KEDUDUKAN DALAM KELAS :</td>
+                        <td class="center" id="kedudukanKelas"></td>
+                      </tr>
+                      <tr>
+                        <td class="grey">KEDUDUKAN DALAM TINGKATAN :</td>
+                        <td class="center" id="kedudukanTingkatan"></td>
+                      </tr>
+                      <tr>
+                        <td class="grey">KEHADIRAN :</td>
+                        <td class="center" id="kehadiran"></td>
+                      </tr>
+                      <tr>
+                        <td class="grey">PENCAPAIAN GRED KESELURUHAN :</td>
+                        <td class="center" id="gredKeseluruhan"></td>
+                      </tr>
+                      <tr>
+                        <td class="grey">KEPUTUSAN :</td>
+                        <td class="center" id="keputusan"></td>
+                      </tr>
+                    </table>
+            
+                    <div class="print-btn" style="text-align:center; margin-top:20px;">
+                      <button onclick="window.print()">🖨️</button>
+                    </div>
+            
+                  </div>
                 </div>
+              </div>
             </section>
-
+            
             <!-- 🎯 Global CSS -->
             <style>
-                /* Slip styling */
+              /* Slip styling */
+              #slipIndividuSection .slip-container {
+                width: 1000px;
+                margin: 20px auto;
+                border: 1px solid #ddd;
+                border-radius: 12px;
+                padding: 20px;
+                background: #fff;
+                font-family: Arial, sans-serif;
+                font-size: 12pt;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+              }
+            
+              #slipIndividuSection .slip-wrapper {
+                overflow-x: auto; /* ✅ Tambah scroll kiri-kanan */
+                overflow-y: hidden;
+                max-width: 100%;
+                -webkit-overflow-scrolling: touch;
+              }
+            
+              #slipIndividuSection .slip-header {
+                text-align: center;
+              }
+            
+              #slipIndividuSection .slip-header img {
+                height: 100px;
+                display: block;
+                margin: 0 auto;
+              }
+            
+              #slipIndividuSection .slip-title {
+                font-weight: bold;
+                text-decoration: underline;
+                margin: 10px 0;
+              }
+            
+              #slipIndividuSection table {
+                border-collapse: collapse;
+                width: 100%;
+                table-layout: fixed;
+              }
+            
+              #slipIndividuSection td,
+              #slipIndividuSection th {
+                border: 1px solid black;
+                padding: 4px;
+                vertical-align: middle;
+              }
+            
+              #slipIndividuSection th {
+                background: #d9d9d9;
+              }
+            
+              #slipIndividuSection .grey {
+                background: #d9d9d9;
+                font-weight: bold;
+                text-align: left;
+              }
+            
+              #slipIndividuSection .center {
+                text-align: center;
+              }
+            
+              #slipIndividuSection .ulasan-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                height: 100%;
+              }
+            
+              #slipIndividuSection .ulasan-space {
+                flex: 1;
+              }
+            
+              #slipIndividuSection .label-row {
+                text-align: center;
+                font-weight: bold;
+                background: #d9d9d9;
+                padding: 2px;
+                font-size: 11pt;
+                border-top: 1px solid black;
+              }
+            
+              #slipIndividuSection .sign-space {
+                height: 85px;
+                border-bottom: 1px solid #000;
+                margin-bottom: 6px;
+              }
+            
+              #slipIndividuSection .subject-row td {
+                height: 28px;
+              }
+            
+              .btn-green {
+                background-color: #16a34a !important;
+                color: #fff !important;
+              }
+            
+              .btn-green:hover {
+                background-color: #15803d !important;
+                color: #fff !important;
+              }
+            
+              @media print {
+                .print-btn {
+                  display: none !important;
+                }
+            
+                #slipIndividuSection .slip-wrapper {
+                  overflow: visible !important; /* ✅ pastikan tiada scroll bila cetak */
+                }
+            
+                body * {
+                  visibility: hidden;
+                }
+            
+                #slipIndividuSection,
+                #slipIndividuSection * {
+                  visibility: visible;
+                }
+            
+                #slipIndividuSection {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: 100%;
+                  margin: 0;
+                  border: none;
+                  box-shadow: none;
+                }
+            
                 #slipIndividuSection .slip-container {
-                    width: 1000px;
-                    margin: 20px auto;
-                    border: 1px solid #ddd;
-                    /* skrin lembut */
-                    border-radius: 12px;
-                    /* rounded macam kad */
-                    padding: 20px;
-                    background: #fff;
-                    /* putih */
-                    font-family: Arial, sans-serif;
-                    font-size: 12pt;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-                    /* shadow halus */
+                  border: 1px solid #000 !important;
+                  border-radius: 0 !important;
+                  box-shadow: none !important;
                 }
-
-                #slipIndividuSection .slip-header {
-                    text-align: center;
-                }
-
-                #slipIndividuSection .slip-header img {
-                    height: 100px;
-                    display: block;
-                    margin: 0 auto;
-                }
-
-                #slipIndividuSection .slip-title {
-                    font-weight: bold;
-                    text-decoration: underline;
-                    margin: 10px 0;
-                }
-
-                #slipIndividuSection table {
-                    border-collapse: collapse;
-                    width: 100%;
-                    table-layout: fixed;
-                }
-
+            
+                #slipIndividuSection table,
                 #slipIndividuSection td,
                 #slipIndividuSection th {
-                    border: 1px solid black;
-                    padding: 4px;
-                    vertical-align: middle;
+                  border: 1px solid #000 !important;
                 }
-
-                #slipIndividuSection th {
-                    background: #d9d9d9;
-                }
-
-                #slipIndividuSection .grey {
-                    background: #d9d9d9;
-                    font-weight: bold;
-                    text-align: left;
-                }
-
-                #slipIndividuSection .center {
-                    text-align: center;
-                }
-
-                #slipIndividuSection .ulasan-container {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-end;
-                    height: 100%;
-                }
-
-                #slipIndividuSection .ulasan-space {
-                    flex: 1;
-                }
-
-                #slipIndividuSection .label-row {
-                    text-align: center;
-                    font-weight: bold;
-                    background: #d9d9d9;
-                    padding: 2px;
-                    font-size: 11pt;
-                    border-top: 1px solid black;
-                }
-
-                #slipIndividuSection .sign-space {
-                    height: 85px;
-                    border-bottom: 1px solid #000;
-                    margin-bottom: 6px;
-                }
-
-                #slipIndividuSection .subject-row td {
-                    height: 28px;
-                }
-
-                /* Hijau override utk btn-primary */
-                .btn-green {
-                    background-color: #16a34a !important;
-                    /* green-600 */
-                    color: #fff !important;
-                }
-
-                .btn-green:hover {
-                    background-color: #15803d !important;
-                    /* green-700 */
-                    color: #fff !important;
-                }
-
-                @media print {
-
-                    .print-btn {
-                        display: none !important;
-                    }
-
-                    /* Buang semua selain slip */
-                    body * {
-                        visibility: hidden;
-                    }
-
-                    #slipIndividuSection,
-                    #slipIndividuSection * {
-                        visibility: visible;
-                    }
-
-                    #slipIndividuSection {
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        width: 100%;
-                        margin: 0;
-                        border: none;
-                        box-shadow: none;
-                    }
-
-                    #slipIndividuSection .slip-container {
-                        border: 1px solid #000 !important;
-                        border-radius: 0 !important;
-                        box-shadow: none !important;
-                    }
-
-                    #slipIndividuSection table,
-                    #slipIndividuSection td,
-                    #slipIndividuSection th {
-                        border: 1px solid #000 !important;
-                    }
-
-                    /* Footer rasmi */
-                    /*
-          body::after {
-            content: "@ 2025 XCode Mr LePaK  - Analisis PPSA vs PraSPM";
-            position: fixed;
-            bottom: 5px;
-            left: 5px;
-            font-size: 7pt;
-            font-family: Arial, sans-serif;
-            color: #000;
-            visibility: visible;
-          }
-        }
-          */
+              }
             </style>
+
 
             <!-- Dummy content untuk test scroll -->
             <!-- <div style="height:2000px; background:linear-gradient(white,lightgray);">
@@ -3548,7 +3532,7 @@
                 }
 
 
-                     function cetakCombatZone() {
+            function cetakCombatZone() {
               if (!muridDataCZ || muridDataCZ.length === 0) {
                 alert("Tiada data untuk dicetak. Sila klik 'Jana Analisis Combat Zone' terlebih dahulu.");
                 return;
@@ -3689,7 +3673,7 @@
               printWindow.document.close();
               printWindow.print();
             }
-
+                            
                 // ================== (TAMAT SCRIPT) ==================
             </script>
             <script>
