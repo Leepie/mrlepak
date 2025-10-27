@@ -1,11 +1,18 @@
+
+                /* ========= CSV & UTIL ========= */
+                /* PRASPM */
+                //const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRck15kwRkf75NPm1IouErXU_CDgHjMEGw1nm0FNCu1XAkIb3EF0XV36Mq66wui_0imgyC9OKzoVQl9/pub?gid=22937657&single=true&output=csv";       
+                /* PPSA */
+                const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdnpPQ7vfOqMuuV-DzAmPtQjCEZBwVtXxLBpGFUguqC3ZqqouMN_Bey3AIzXSPBlziV1bNKSpGjfBY/pub?gid=1172655606&single=true&output=csv";
+
 <!DOCTYPE html>
 <html lang="ms">
     <!--  
     XCode Analisis PPSA Vs PraSPM
     Tarikh Bina: 15 Sept 2025
     Script Oleh: Mr LePaK | PKP En Suhairi Hj. Shoib
-    SMK Dato` Kamaruddin, Batu Kurau
     -->
+
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -297,12 +304,12 @@
                         <div class="flex items-center space-x-4">
                             <img src="https://upload.wikimedia.org/wikipedia/ms/b/ba/Sekolah_Menengah_Kebangsaan_Dato%27_Kamaruddin.jpg" alt="SMK Dato' Kamaruddin Logo" class="h-16 w-16 object-contain rounded-full border" />
                             <div>
-                                <h1 class="text-2xl font-bold text-gray-900">PPSA</h1>
+                                <h1 class="text-2xl font-bold text-gray-900">PraSPM</h1>
                                 <p class="text-sm text-gray-600">AEE6058</p>
                                 <p class="text-sm font-medium text-gray-800">SMK Dato` Kamaruddin</p>
                                 <div class="flex items-center space-x-2 mt-1">
                                     <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
-                                    <span class="text-xs text-gray-600">Data PPSA</span>
+                                    <span class="text-xs text-gray-600">Data PraSPM</span>
                                 </div>
                             </div>
                         </div>
@@ -347,8 +354,7 @@
                 </div>
             </div>
 
-            <!-- =================== TAB 1: Analisis Keseluruhan (kekal) =================== -->
-            <!-- (…semua kandungan Tab 1 kekal seperti versi sebelum ini, tidak diubah…) -->
+            <!-- =================== TAB 1: Analisis Keseluruhan  =================== -->
             <!-- Sticky card -->
             <section data-tab-panel="keseluruhan" class="sticky-card bg-white/80 backdrop-blur border-b border-gray-100">
                 <div class="container-max px-4 py-4">
@@ -467,173 +473,167 @@
                 </div>
             </section>
 
-         <!-- =================== TAB 2:--> 
+            <!-- =================== TAB 2  =================== :-->
 
             <section class="container-max px-4 pb-10 hidden" data-tab-panel="keseluruhan" data-reveal>
-              <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-                
-                <!-- 🔰 Tajuk & Butang Cetak Rumusan -->
-                <div class="px-5 sm:px-6 py-3 flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <span class="text-2xl">📚</span>
-                    <h2 class="text-xl font-semibold text-gray-800">Jadual Analisis Mata Pelajaran</h2>
-                  </div>
-            
-                  <!-- 🖨️ Butang Cetak (ikon gaya Combat Zone) -->
-                  <button onclick="printRumusan()" title="Cetak Rumusan"
-                    class="text-gray-500 hover:text-indigo-600 transition-transform duration-200 hover:scale-110">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M6 9V2h12v7m-3 4h3a2 2 0 012 2v5h-4v-3H8v3H4v-5a2 2 0 012-2h3m0 0V9h6v4H9z" />
-                    </svg>
-                  </button>
-                </div>
-            
-                <!-- 🧮 Jadual Analisis Subjek -->
-                <div class="table-wrapper">
-                  <table class="w-full text-[14px] border-collapse whitespace-nowrap min-w-[1100px]">
-                    <thead>
-                      <tr class="bg-green-600 text-white">
-                        <th class="px-2.5 py-2 text-center">Mata Pelajaran</th>
-                        <th class="px-2.5 py-2 text-center">Hadir</th>
-                        <th class="px-2.5 py-2 text-center">TH</th>
-                        <th class="px-2.5 py-2 text-center">A+</th>
-                        <th class="px-2.5 py-2 text-center">A</th>
-                        <th class="px-2.5 py-2 text-center">A-</th>
-                        <th class="px-2.5 py-2 text-center">B+</th>
-                        <th class="px-2.5 py-2 text-center">B</th>
-                        <th class="px-2.5 py-2 text-center">C+</th>
-                        <th class="px-2.5 py-2 text-center">C</th>
-                        <th class="px-2.5 py-2 text-center">D</th>
-                        <th class="px-2.5 py-2 text-center">E</th>
-                        <th class="px-2.5 py-2 text-center">G</th>
-                        <th class="px-2.5 py-2 text-center">%Lulus</th>
-                        <th class="px-2.5 py-2 text-center">%Gagal</th>
-                        <th class="px-2.5 py-2 text-center">
-                          GPMP
-                          <span id="gpmpSortBtn" class="sort-btn align-middle">
-                            <svg class="up" viewBox="0 0 24 24">
-                              <path d="M7 14l5-5 5 5z" />
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+
+                    <!-- 🔰 Tajuk & Butang Cetak Rumusan -->
+                    <div class="px-5 sm:px-6 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">📚</span>
+                            <h2 class="text-xl font-semibold text-gray-800">Jadual Analisis Mata Pelajaran</h2>
+                        </div>
+
+                        <!-- 🖨️ Butang Cetak (ikon gaya Combat Zone) -->
+                        <button onclick="printRumusan()" title="Cetak Rumusan" class="text-gray-500 hover:text-indigo-600 transition-transform duration-200 hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7m-3 4h3a2 2 0 012 2v5h-4v-3H8v3H4v-5a2 2 0 012-2h3m0 0V9h6v4H9z" />
                             </svg>
-                            <svg class="down" viewBox="0 0 24 24">
-                              <path d="M7 10l5 5 5-5z" />
-                            </svg>
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody id="analisisSubjekBody" class="divide-y"></tbody>
-                  </table>
+                        </button>
+                    </div>
+
+                    <!-- 🧮 Jadual Analisis Subjek -->
+                    <div class="table-wrapper">
+                        <table class="w-full text-[14px] border-collapse whitespace-nowrap min-w-[1100px]">
+                            <thead>
+                                <tr class="bg-green-600 text-white">
+                                    <th class="px-2.5 py-2 text-center">Mata Pelajaran</th>
+                                    <th class="px-2.5 py-2 text-center">Hadir</th>
+                                    <th class="px-2.5 py-2 text-center">TH</th>
+                                    <th class="px-2.5 py-2 text-center">A+</th>
+                                    <th class="px-2.5 py-2 text-center">A</th>
+                                    <th class="px-2.5 py-2 text-center">A-</th>
+                                    <th class="px-2.5 py-2 text-center">B+</th>
+                                    <th class="px-2.5 py-2 text-center">B</th>
+                                    <th class="px-2.5 py-2 text-center">C+</th>
+                                    <th class="px-2.5 py-2 text-center">C</th>
+                                    <th class="px-2.5 py-2 text-center">D</th>
+                                    <th class="px-2.5 py-2 text-center">E</th>
+                                    <th class="px-2.5 py-2 text-center">G</th>
+                                    <th class="px-2.5 py-2 text-center">%Lulus</th>
+                                    <th class="px-2.5 py-2 text-center">%Gagal</th>
+                                    <th class="px-2.5 py-2 text-center">
+                                        GPMP
+                                        <span id="gpmpSortBtn" class="sort-btn align-middle">
+                                            <svg class="up" viewBox="0 0 24 24">
+                                                <path d="M7 14l5-5 5 5z" />
+                                            </svg>
+                                            <svg class="down" viewBox="0 0 24 24">
+                                                <path d="M7 10l5 5 5-5z" />
+                                            </svg>
+                                        </span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="analisisSubjekBody" class="divide-y"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="h-3"></div>
                 </div>
-            
-                <div class="h-3"></div>
-              </div>
             </section>
 
-
-          <!-- Tambahan -->
-            <!-- =================== TAB 2:
-            <!-- 💾 PAPARAN KHAS UNTUK CETAK (A4 LANDSCAPE + FORMAT BETUL) -->
+            \ <!-- =================== TAB 1  =================== -->
+            <!-- 💾 PAPARAN KHAS UNTUK CETAK (A4 LANDSCAPE + FORMAT) -->
             <section id="rumusanCetak" style="display:none;">
-              <!-- ⚠️ Buang header sekolah di sini! Tajuk & logo dijana semasa print -->
-            
-              <table style="width:100%; border-collapse:collapse; font-size:10px;">
-                <thead>
-                  <tr style="background:#33691E; color:#fff;">
-                    <th rowspan="2" style="border:1px solid #000; width:18%; padding:5px;">SUBJEK</th>
-                    <th colspan="11" style="border:1px solid #000; text-align:center; background:#274f5b;">GRED</th>
-                    <th colspan="3" style="border:1px solid #000; text-align:center; background:#255391;">BILANGAN CALON</th>
-                    <th colspan="3" style="border:1px solid #000; text-align:center; background:#331d70;">KEPUTUSAN MATA PELAJARAN</th>
-                    <th rowspan="2" style="border:1px solid #000; background:#8E24AA; color:#fff;">GPMP</th>
-                  </tr>
-                  <tr>
-                    <th style="border:1px solid #000; background:#54808b;">A+</th>
-                    <th style="border:1px solid #000; background:#54808b;">A</th>
-                    <th style="border:1px solid #000; background:#54808b;">A-</th>
-                    <th style="border:1px solid #000; background:#54808b;">B+</th>
-                    <th style="border:1px solid #000; background:#54808b;">B</th>
-                    <th style="border:1px solid #000; background:#54808b;">C+</th>
-                    <th style="border:1px solid #000; background:#54808b;">C</th>
-                    <th style="border:1px solid #000; background:#54808b;">D</th>
-                    <th style="border:1px solid #000; background:#54808b;">E</th>
-                    <th style="border:1px solid #000; background:#54808b;">G</th>
-                    <th style="border:1px solid #000; background:#54808b;">TH</th>
-                    <th style="border:1px solid #000; background:#5084c0;">JUMLAH</th>
-                    <th style="border:1px solid #000; background:#5084c0;">HADIR</th>
-                    <th style="border:1px solid #000; background:#5084c0;">% HADIR</th>
-                    <th style="border:1px solid #000; background:#624fa1;">LULUS</th>
-                    <th style="border:1px solid #000; background:#624fa1;">GAGAL</th>
-                    <th style="border:1px solid #000; background:#624fa1;">% LULUS</th>
-                  </tr>
-                </thead>
-                <tbody id="rumusanBody"></tbody>
-                <tfoot id="rumusanFoot"></tfoot>
-              </table>
-            
-              <div class="footer" style="text-align:center; font-size:7px; color:#333; margin-top:30px;">
-                Dicetak secara automatik daripada Sistem Analisis PPSA vs PraSPM<br>
-                © 2025 Hakcipta Terpelihara XCode Mr LePaK
-              </div>
+                <!-- ⚠️ Buang header sekolah di sini! Tajuk & logo dijana semasa print -->
+                <table style="width:100%; border-collapse:collapse; font-size:10px;">
+                    <thead>
+                        <tr style="background:#33691E; color:#fff;">
+                            <th rowspan="2" style="border:1px solid #000; width:18%; padding:5px;">SUBJEK</th>
+                            <th colspan="11" style="border:1px solid #000; text-align:center; background:#274f5b;">GRED</th>
+                            <th colspan="3" style="border:1px solid #000; text-align:center; background:#255391;">BILANGAN CALON</th>
+                            <th colspan="3" style="border:1px solid #000; text-align:center; background:#331d70;">KEPUTUSAN MATA PELAJARAN</th>
+                            <th rowspan="2" style="border:1px solid #000; background:#8E24AA; color:#fff;">GPMP</th>
+                        </tr>
+                        <tr>
+                            <th style="border:1px solid #000; background:#54808b;">A+</th>
+                            <th style="border:1px solid #000; background:#54808b;">A</th>
+                            <th style="border:1px solid #000; background:#54808b;">A-</th>
+                            <th style="border:1px solid #000; background:#54808b;">B+</th>
+                            <th style="border:1px solid #000; background:#54808b;">B</th>
+                            <th style="border:1px solid #000; background:#54808b;">C+</th>
+                            <th style="border:1px solid #000; background:#54808b;">C</th>
+                            <th style="border:1px solid #000; background:#54808b;">D</th>
+                            <th style="border:1px solid #000; background:#54808b;">E</th>
+                            <th style="border:1px solid #000; background:#54808b;">G</th>
+                            <th style="border:1px solid #000; background:#54808b;">TH</th>
+                            <th style="border:1px solid #000; background:#5084c0;">JUMLAH</th>
+                            <th style="border:1px solid #000; background:#5084c0;">HADIR</th>
+                            <th style="border:1px solid #000; background:#5084c0;">% HADIR</th>
+                            <th style="border:1px solid #000; background:#624fa1;">LULUS</th>
+                            <th style="border:1px solid #000; background:#624fa1;">GAGAL</th>
+                            <th style="border:1px solid #000; background:#624fa1;">% LULUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rumusanBody"></tbody>
+                    <tfoot id="rumusanFoot"></tfoot>
+                </table>
+
+                <div class="footer" style="text-align:center; font-size:7px; color:#333; margin-top:30px;">
+                    Dicetak secara automatik daripada Sistem Analisis PPSA vs PraSPM<br>
+                    © 2025 Hakcipta Terpelihara XCode Mr LePaK
+                </div>
             </section>
-            
+
             <script>
-            function janaRumusanCetak() {
-              const sourceRows = document.querySelectorAll("#analisisSubjekBody tr");
-              const tbody = document.getElementById("rumusanBody");
-              const tfoot = document.getElementById("rumusanFoot");
-              tbody.innerHTML = "";
-              tfoot.innerHTML = "";
-            
-              const total = Array(18).fill(0);
-              const toNum = (s) => parseFloat(String(s).replace(/[^\d.-]/g, "")) || 0;
-            
-              sourceRows.forEach((row, index) => {
-                const c = row.querySelectorAll("td");
-                if (c.length < 16) return;
-            
-                let subjek = (c[0]?.innerText || "").trim();
-                subjek = subjek.replace(/^\[[A-Z]+\]\s*-\s*/g, "").trim();
-            
-                const aPlus = toNum(c[3]?.innerText);
-                const a = toNum(c[4]?.innerText);
-                const aMin = toNum(c[5]?.innerText);
-                const bPlus = toNum(c[6]?.innerText);
-                const b = toNum(c[7]?.innerText);
-                const cPlus = toNum(c[8]?.innerText);
-                const cc = toNum(c[9]?.innerText);
-                const d = toNum(c[10]?.innerText);
-                const e = toNum(c[11]?.innerText);
-                const g = toNum(c[12]?.innerText);
-                const th = toNum(c[2]?.innerText);
-                const jumlah = toNum(c[1]?.innerText);
-                const hadir = jumlah - th;
-                const perHadir = jumlah ? ((hadir / jumlah) * 100).toFixed(2) + "%" : "";
-                const lulus = hadir - g;
-                const gagal = g;
-                const perLulus = jumlah ? ((lulus / jumlah) * 100).toFixed(1) + "%" : "";
-                const gpmp = c[15]?.innerText || "";
-            
-                const vals = [aPlus,a,aMin,bPlus,b,cPlus,cc,d,e,g,th,jumlah,hadir,lulus,gagal];
-                vals.forEach((v,i)=> total[i]+=v);
-            
-                const bgColor = index % 2 === 0 ? "#ffffff" : "#f7f7f7";
-                const tr = document.createElement("tr");
-                tr.style.background = bgColor;
-                tr.innerHTML = `
+                function janaRumusanCetak() {
+                    const sourceRows = document.querySelectorAll("#analisisSubjekBody tr");
+                    const tbody = document.getElementById("rumusanBody");
+                    const tfoot = document.getElementById("rumusanFoot");
+                    tbody.innerHTML = "";
+                    tfoot.innerHTML = "";
+
+                    const total = Array(18).fill(0);
+                    const toNum = (s) => parseFloat(String(s).replace(/[^\d.-]/g, "")) || 0;
+
+                    sourceRows.forEach((row, index) => {
+                        const c = row.querySelectorAll("td");
+                        if (c.length < 16) return;
+
+                        let subjek = (c[0]?.innerText || "").trim();
+                        subjek = subjek.replace(/^\[[A-Z]+\]\s*-\s*/g, "").trim();
+
+                        const aPlus = toNum(c[3]?.innerText);
+                        const a = toNum(c[4]?.innerText);
+                        const aMin = toNum(c[5]?.innerText);
+                        const bPlus = toNum(c[6]?.innerText);
+                        const b = toNum(c[7]?.innerText);
+                        const cPlus = toNum(c[8]?.innerText);
+                        const cc = toNum(c[9]?.innerText);
+                        const d = toNum(c[10]?.innerText);
+                        const e = toNum(c[11]?.innerText);
+                        const g = toNum(c[12]?.innerText);
+                        const th = toNum(c[2]?.innerText);
+                        const jumlah = toNum(c[1]?.innerText);
+                        const hadir = jumlah - th;
+                        const perHadir = jumlah ? ((hadir / jumlah) * 100).toFixed(2) + "%" : "";
+                        const lulus = hadir - g;
+                        const gagal = g;
+                        const perLulus = jumlah ? ((lulus / jumlah) * 100).toFixed(1) + "%" : "";
+                        const gpmp = c[15]?.innerText || "";
+
+                        const vals = [aPlus, a, aMin, bPlus, b, cPlus, cc, d, e, g, th, jumlah, hadir, lulus, gagal];
+                        vals.forEach((v, i) => total[i] += v);
+
+                        const bgColor = index % 2 === 0 ? "#ffffff" : "#f7f7f7";
+                        const tr = document.createElement("tr");
+                        tr.style.background = bgColor;
+                        tr.innerHTML = `
                   <td style="text-align:left; padding-left:6px;">${subjek}</td>
                   <td>${aPlus}</td><td>${a}</td><td>${aMin}</td><td>${bPlus}</td><td>${b}</td>
                   <td>${cPlus}</td><td>${cc}</td><td>${d}</td><td>${e}</td><td>${g}</td><td>${th}</td>
                   <td>${jumlah}</td><td>${hadir}</td><td>${perHadir}</td>
                   <td>${lulus}</td><td>${gagal}</td><td>${perLulus}</td><td>${gpmp}</td>
                 `;
-                tbody.appendChild(tr);
-              });
-            
-              const jumlahSemua = document.createElement("tr");
-              jumlahSemua.style.background = "#dcedc8";
-              jumlahSemua.style.fontWeight = "bold";
-              jumlahSemua.innerHTML = `
+                        tbody.appendChild(tr);
+                    });
+
+                    const jumlahSemua = document.createElement("tr");
+                    jumlahSemua.style.background = "#dcedc8";
+                    jumlahSemua.style.fontWeight = "bold";
+                    jumlahSemua.innerHTML = `
                 <td style="text-align:left; padding-left:6px;">SEMUA SUBJEK</td>
                 ${total.slice(0,11).map(v=>`<td>${v}</td>`).join("")}
                 <td>${total[11]}</td>
@@ -644,24 +644,24 @@
                 <td>${((total[13]/total[11])*100).toFixed(2)}%</td>
                 <td>5.29</td>
               `;
-              tfoot.appendChild(jumlahSemua);
-            }
-            
-            function printRumusan() {
-              janaRumusanCetak();
-            
-              const section = document.getElementById("rumusanCetak");
-              const content = section.innerHTML;
-            
-              const tarikhCetak = new Date().toLocaleDateString('ms-MY', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-              });
-            
-              const printWindow = window.open("", "_blank", "width=1200,height=800");
-              printWindow.document.open();
-              printWindow.document.write(`
+                    tfoot.appendChild(jumlahSemua);
+                }
+
+                function printRumusan() {
+                    janaRumusanCetak();
+
+                    const section = document.getElementById("rumusanCetak");
+                    const content = section.innerHTML;
+
+                    const tarikhCetak = new Date().toLocaleDateString('ms-MY', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+
+                    const printWindow = window.open("", "_blank", "width=1200,height=800");
+                    printWindow.document.open();
+                    printWindow.document.write(`
               <html>
                 <head>
                   <title>Rumusan Pencapaian Mengikut Subjek</title>
@@ -720,131 +720,143 @@
                   ${content}
                 </body>
               </html>`);
-              printWindow.document.close();
-            
-              printWindow.onload = () => {
-                printWindow.focus();
-                printWindow.print();
-                //setTimeout(() => printWindow.close(), 800);
-              };
-            }
+                    printWindow.document.close();
+
+                    printWindow.onload = () => {
+                        printWindow.focus();
+                        printWindow.print();
+                        // setTimeout(() => printWindow.close(), 800);
+                    };
+                }
             </script>
-             
+
             <style>
-            @page {
-              size: A4 landscape;
-              margin: 8mm;
-            }
-            
-            @media print {
-              /* ==========================
+                @page {
+                    size: A4 landscape;
+                    margin: 8mm;
+                }
+
+                @media print {
+
+                    /* ==========================
                  Umum & Asas
                  ========================== */
-              html, body {
-                width: 297mm;
-                height: 210mm;
-                margin: 0;
-                padding: 0;
-                background: #fff;
-                font-family: Arial, sans-serif;
-              }
-            
-              /* ==========================
+                    html,
+                    body {
+                        width: 297mm;
+                        height: 210mm;
+                        margin: 0;
+                        padding: 0;
+                        background: #fff;
+                        font-family: Arial, sans-serif;
+                    }
+
+                    /* ==========================
                  Paparan hanya #rumusanCetak
                  ========================== */
-              body > *:not(#rumusanCetak) {
-                display: none !important;
-              }
-            
-              #rumusanCetak {
-                display: block !important;
-                padding: 15px 20px;
-              }
-            
-              /* ==========================
+                    body>*:not(#rumusanCetak) {
+                        display: none !important;
+                    }
+
+                    #rumusanCetak {
+                        display: block !important;
+                        padding: 15px 20px;
+                    }
+
+                    /* ==========================
                  Tajuk
                  ========================== */
-              #rumusanCetak h2 {
-                text-align: center;
-                margin-bottom: 10px;
-                font-size: 18px;
-                font-weight: bold;
-                color: #212121;
-              }
-            
-              /* ==========================
+                    #rumusanCetak h2 {
+                        text-align: center;
+                        margin-bottom: 10px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #212121;
+                    }
+
+                    /* ==========================
                  Jadual
                  ========================== */
-              #rumusanCetak table {
-                width: 100%;
-                border-collapse: collapse;
-                table-layout: fixed;
-                font-size: 10px;
-              }
-            
-              #rumusanCetak th,
-              #rumusanCetak td {
-                border: 0.5pt solid #000;
-                padding: 3px 5px;
-                text-align: center;
-              }
-            
-              th[rowspan="2"] {
-                vertical-align: middle;
-              }
-            
-              tbody td:first-child {
-                text-align: left;
-                padding-left: 6px;
-              }
-            
-              /* ==========================
+                    #rumusanCetak table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        font-size: 10px;
+                    }
+
+                    #rumusanCetak th,
+                    #rumusanCetak td {
+                        border: 0.5pt solid #000;
+                        padding: 3px 5px;
+                        text-align: center;
+                    }
+
+                    th[rowspan="2"] {
+                        vertical-align: middle;
+                    }
+
+                    tbody td:first-child {
+                        text-align: left;
+                        padding-left: 6px;
+                    }
+
+                    /* ==========================
                  Warna Header
                  ========================== */
-              #rumusanCetak thead tr:first-child {
-                background: #33691E; /* Hijau gelap */
-                color: #fff;
-              }
-            
-              #rumusanCetak thead tr:nth-child(2) th:nth-child(1n+2):nth-child(-n+10) {
-                background: #1E88E5; /* GRED (A+ hingga E) */
-                color: #fff;
-              }
-            
-              #rumusanCetak thead tr:nth-child(2) th:nth-child(11),
-              #rumusanCetak thead tr:nth-child(2) th:nth-child(12),
-              #rumusanCetak thead tr:nth-child(2) th:nth-child(13) {
-                background: #1976D2; /* BIL. CALON */
-                color: #fff;
-              }
-            
-              #rumusanCetak thead tr:nth-child(2) th:nth-child(14),
-              #rumusanCetak thead tr:nth-child(2) th:nth-child(15),
-              #rumusanCetak thead tr:nth-child(2) th:nth-child(16) {
-                background: #4527A0; /* KEPUTUSAN MATA PELAJARAN */
-                color: #fff;
-              }
-            
-              #rumusanCetak thead tr:first-child th:last-child,
-              #rumusanCetak thead tr:nth-child(2) th:last-child {
-                background: #8E24AA; /* GPMP */
-                color: #fff;
-              }
-            
-              /* ==========================
+                    #rumusanCetak thead tr:first-child {
+                        background: #33691E;
+                        /* Hijau gelap */
+                        color: #fff;
+                    }
+
+                    #rumusanCetak thead tr:nth-child(2) th:nth-child(1n+2):nth-child(-n+10) {
+                        background: #1E88E5;
+                        /* GRED (A+ hingga E) */
+                        color: #fff;
+                    }
+
+                    #rumusanCetak thead tr:nth-child(2) th:nth-child(11),
+                    #rumusanCetak thead tr:nth-child(2) th:nth-child(12),
+                    #rumusanCetak thead tr:nth-child(2) th:nth-child(13) {
+                        background: #1976D2;
+                        /* BIL. CALON */
+                        color: #fff;
+                    }
+
+                    #rumusanCetak thead tr:nth-child(2) th:nth-child(14),
+                    #rumusanCetak thead tr:nth-child(2) th:nth-child(15),
+                    #rumusanCetak thead tr:nth-child(2) th:nth-child(16) {
+                        background: #4527A0;
+                        /* KEPUTUSAN MATA PELAJARAN */
+                        color: #fff;
+                    }
+
+                    #rumusanCetak thead tr:first-child th:last-child,
+                    #rumusanCetak thead tr:nth-child(2) th:last-child {
+                        background: #8E24AA;
+                        /* GPMP */
+                        color: #fff;
+                    }
+
+                    /* ==========================
                  Badan & Jumlah
                  ========================== */
-              tbody tr:nth-child(odd) { background: #ffffff; }
-              tbody tr:nth-child(even) { background: #f9f9f9; }
-            
-              #rumusanCetak tfoot td {
-                background: #e8f5e9;
-                font-weight: bold;
-                text-align: center;
-              }
-            }
+                    tbody tr:nth-child(odd) {
+                        background: #ffffff;
+                    }
+
+                    tbody tr:nth-child(even) {
+                        background: #f9f9f9;
+                    }
+
+                    #rumusanCetak tfoot td {
+                        background: #e8f5e9;
+                        font-weight: bold;
+                        text-align: center;
+                    }
+                }
             </style>
-          <!-- Tamat Tambahan -->
+            <!-- Tamat Tambahan -->
             <!-- =================== TAB 2: Analisis Mata Pelajaran =================== -->
             <section data-tab-panel="matapelajaran" class="sticky-card bg-white/80 backdrop-blur border-b border-gray-100 hidden">
                 <div class="container-max px-4 py-4">
@@ -1203,7 +1215,6 @@
                 </div>
             </section>
 
-            <!-- Sticky card -->
             <!-- =============== TAB 4: Analisis Combat Zone =============== -->
             <!-- Sticky Card -->
             <section data-tab-panel="combatzone" class="cz-sticky-card bg-white/80 backdrop-blur border-b border-gray-100 hidden">
@@ -1367,7 +1378,6 @@
                         </button>
                     </div>
 
-
                     <!-- Butang Tab Kategori -->
                     <div class="flex gap-2 mb-4 flex-wrap">
                         <button id="combatZoneTab-kualiti1" class="px-3 py-1 rounded bg-gray-200 text-gray-700 kategori-btn" onclick="switchCombatZoneCategory('kualiti1')">
@@ -1411,6 +1421,32 @@
             </section>
             <!-- ====== GAYA KHAS Combat Zone ====== -->
             <style>
+                /* --- Gaya umum untuk header dengan butang sort --- */
+                th .sort-btn {
+                    display: inline-flex;
+                    /* ⬅️ sejajar sebelah teks */
+                    flex-direction: column;
+                    /* masih kekalkan ▲ di atas ▼ */
+                    align-items: center;
+                    /* tengah-tengah menegak */
+                    justify-content: center;
+                    margin-left: 4px;
+                    /* jarak dari teks */
+                    vertical-align: middle;
+                    /* sejajar dengan teks */
+                }
+
+                th .sort-btn svg {
+                    width: 8px;
+                    height: 8px;
+                    fill: #1e40af;
+                    /* warna ikon biru */
+                    display: block;
+                    line-height: 1;
+                    margin: -2px 0;
+                    /* rapatkan jarak antara ikon */
+                }
+
                 .cz-field-label {
                     font-size: .65rem;
                     color: #374151;
@@ -1553,271 +1589,322 @@
                 }
             </style>
 
-           <!-- 🎯 Section 1: Pilihan kelas & murid (Sticky) -->
-           <!-- =================== TAB 5: ANALISIS INDIVIDU CETAKAN SIJIL =================== -->
-            <section data-tab-panel="individu" class="hidden">
-            
-              <!-- 🎯 Sticky bar: Pilihan kelas & murid -->
-              <div class="cz-sticky-card bg-white/80 backdrop-blur border-b border-gray-100">
-                <div class="container-max px-4 py-4">
-                  <div class="bg-white rounded-2xl border border-gray-100 px-4 sm:px-6 py-5">
-                    <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-5">
-                      <span>👤</span> Cetak Slip Individu
-                    </h2>
-            
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                      <div>
-                        <label for="kelasFilterIndividu" class="field-label">Kelas</label>
-                        <select id="kelasFilterIndividu" class="select-like mt-1" onchange="updateMuridDropdownIndividu()">
-                          <option value="">Pilih Kelas</option>
-                        </select>
-                      </div>
-            
-                      <div class="md:col-span-2">
-                        <label for="muridFilterIndividu" class="field-label">Nama Murid</label>
-                        <select id="muridFilterIndividu" class="select-like mt-1">
-                          <option value="">Pilih Nama Murid</option>
-                        </select>
-                      </div>
-            
-                      <div>
-                        <button class="btn-primary btn-green mt-6 md:mt-0" onclick="janaSlipIndividu()">
-                          Cetak Slip Individu
-                        </button>
-                      </div>
+            <!-- 🎯 Section 1: Pilihan kelas & murid (Sticky) -->
+            <!-- =================== TAB 5: ANALISIS INDIVIDU CETAKAN SIJIL =================== -->
+            <section data-tab-panel="individu" class="hidden"> <!-- 🎯 Sticky bar: Pilihan kelas & murid -->
+                <div class="cz-sticky-card bg-white/80 backdrop-blur border-b border-gray-100">
+                    <div class="container-max px-4 py-4">
+                        <div class="bg-white rounded-2xl border border-gray-100 px-4 sm:px-6 py-5">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-5"> <span>👤</span> Cetak Slip Individu </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                <div> <label for="kelasFilterIndividu" class="field-label">Kelas</label> <select id="kelasFilterIndividu" class="select-like mt-1" onchange="updateMuridDropdownIndividu()">
+                                        <option value="">Pilih Kelas</option>
+                                    </select> </div>
+                                <div class="md:col-span-2"> <label for="muridFilterIndividu" class="field-label">Nama Murid</label> <select id="muridFilterIndividu" class="select-like mt-1">
+                                        <option value="">Pilih Nama Murid</option>
+                                    </select> </div>
+                                <div> <button class="btn-primary btn-green mt-6 md:mt-0" onclick="janaSlipIndividu()"> Cetak Slip Individu </button> </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
+                </div> <!-- ✅ Slip hanya dalam tab individu -->
+                <div id="slipIndividuSection" class="container-max px-4 py-4 hidden">
+                    <div class="slip-wrapper">
+                        <div class="slip-container"> <!-- Header -->
+                            <div class="slip-header"> <img src="https://upload.wikimedia.org/wikipedia/ms/b/ba/Sekolah_Menengah_Kebangsaan_Dato%27_Kamaruddin.jpg" alt="Logo">
+                                <p><b>SEKOLAH MENENGAH DATO KAMARUDDIN<br> JALAN BESAR, 34500 BATU KURAU, PERAK.</b></p>
+                                <p class="slip-title">SLIP KEPUTUSAN PEPERIKSAAN PPSA SESI AKADEMIK TAHUN 2025</p>
+                            </div> <!-- Maklumat Murid -->
+                            <table>
+                                <tr>
+                                    <td colspan="3"><b>NAMA :</b> <span id="namaMurid"></span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>KELAS :</b> <span id="kelasMurid"></span></td>
+                                    <td colspan="2"><b>NO K/P :</b> <span id="icMurid"></span></td>
+                                </tr>
+                            </table> <!-- Jadual Subjek -->
+                            <table style="margin-top:10px;">
+                                <tr>
+                                    <th style="width:30px">BIL</th>
+                                    <th style="width:300px">MATA PELAJARAN</th>
+                                    <th style="width:100px">MARKAH</th>
+                                    <th style="width:100px">GRED</th>
+                                    <th style="width:300px">ULASAN GURU</th>
+                                </tr>
+                                <tbody id="subjectBody"></tbody>
+                            </table> <!-- Ringkasan -->
+                            <table style="margin-top:15px;">
+                                <tr>
+                                    <td class="grey">JUMLAH MARKAH :</td>
+                                    <td class="center" id="jumlahMarkah"></td>
+                                </tr>
+                                <tr>
+                                    <td class="grey">PERATUS :</td>
+                                    <td class="center" id="peratus"></td>
+                                </tr>
+                                <tr>
+                                    <td class="grey">GRED PURATA :</td>
+                                    <td class="center" id="gpk"></td>
+                                </tr>
+                                <tr>
+                                    <td class="grey">KEDUDUKAN DALAM KELAS :</td>
+                                    <td class="center" id="kedudukanKelas"></td>
+                                </tr>
+                                <tr>
+                                    <td class="grey">KEDUDUKAN DALAM TINGKATAN :</td>
+                                    <td class="center" id="kedudukanTingkatan"></td>
+                                </tr>
+                                <tr>
+                                    <td class="grey">KEHADIRAN :</td>
+                                    <td class="center" id="kehadiran"></td>
+                                </tr>
+                                <tr>
+                                    <td class="grey">PENCAPAIAN GRED KESELURUHAN :</td>
+                                    <td class="center" id="gredKeseluruhan"></td>
+                                </tr>
+                                <tr>
+                                    <td class="grey">KEPUTUSAN :</td>
+                                    <td class="center" id="keputusan"></td>
+                                </tr>
+                            </table>
+                            <div class="print-btn" style="text-align:center; margin-top:20px;"> <button onclick="cetakSlipIndividu()">🖨️</button> </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            
-              <!-- ✅ Slip hanya dalam tab individu -->
-              <div id="slipIndividuSection" class="container-max px-4 py-4 hidden">
-                <div class="slip-wrapper">
-                  <div class="slip-container">
-                    <!-- Header -->
-                    <div class="slip-header">
-                      <img src="https://upload.wikimedia.org/wikipedia/ms/b/ba/Sekolah_Menengah_Kebangsaan_Dato%27_Kamaruddin.jpg" alt="Logo">
-                      <p><b>SEKOLAH MENENGAH DATO` KAMARUDDIN<br>
-                          JALAN BESAR, 34500 BATU KURAU, PERAK.</b></p>
-                      <p class="slip-title">SLIP KEPUTUSAN PEPERIKSAAN PPSA SESI AKADEMIK TAHUN 2025</p>
-                    </div>
-            
-                    <!-- Maklumat Murid -->
-                    <table>
-                      <tr>
-                        <td colspan="3"><b>NAMA :</b> <span id="namaMurid"></span></td>
-                      </tr>
-                      <tr>
-                        <td><b>KELAS :</b> <span id="kelasMurid"></span></td>
-                        <td colspan="2"><b>NO K/P :</b> <span id="icMurid"></span></td>
-                      </tr>
-                    </table>
-            
-                    <!-- Jadual Subjek -->
-                    <table style="margin-top:10px;">
-                      <tr>
-                        <th style="width:30px">BIL</th>
-                        <th style="width:300px">MATA PELAJARAN</th>
-                        <th style="width:100px">MARKAH</th>
-                        <th style="width:100px">GRED</th>
-                        <th style="width:300px">ULASAN GURU</th>
-                      </tr>
-                      <tbody id="subjectBody"></tbody>
-                    </table>
-            
-                    <!-- Ringkasan -->
-                    <table style="margin-top:15px;">
-                      <tr>
-                        <td class="grey">JUMLAH MARKAH :</td>
-                        <td class="center" id="jumlahMarkah"></td>
-                      </tr>
-                      <tr>
-                        <td class="grey">PERATUS :</td>
-                        <td class="center" id="peratus"></td>
-                      </tr>
-                      <tr>
-                        <td class="grey">GRED PURATA :</td>
-                        <td class="center" id="gpk"></td>
-                      </tr>
-                      <tr>
-                        <td class="grey">KEDUDUKAN DALAM KELAS :</td>
-                        <td class="center" id="kedudukanKelas"></td>
-                      </tr>
-                      <tr>
-                        <td class="grey">KEDUDUKAN DALAM TINGKATAN :</td>
-                        <td class="center" id="kedudukanTingkatan"></td>
-                      </tr>
-                      <tr>
-                        <td class="grey">KEHADIRAN :</td>
-                        <td class="center" id="kehadiran"></td>
-                      </tr>
-                      <tr>
-                        <td class="grey">PENCAPAIAN GRED KESELURUHAN :</td>
-                        <td class="center" id="gredKeseluruhan"></td>
-                      </tr>
-                      <tr>
-                        <td class="grey">KEPUTUSAN :</td>
-                        <td class="center" id="keputusan"></td>
-                      </tr>
-                    </table>
-            
-                    <div class="print-btn" style="text-align:center; margin-top:20px;">
-                      <button onclick="window.print()">🖨️</button>
-                    </div>
-            
-                  </div>
-                </div>
-              </div>
             </section>
-            
-            <!-- 🎯 Global CSS -->
+
             <style>
-              /* Slip styling */
-              #slipIndividuSection .slip-container {
-                width: 1000px;
-                margin: 20px auto;
-                border: 1px solid #ddd;
-                border-radius: 12px;
-                padding: 20px;
-                background: #fff;
-                font-family: Arial, sans-serif;
-                font-size: 12pt;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-              }
-            
-              #slipIndividuSection .slip-wrapper {
-                overflow-x: auto; /* ✅ Tambah scroll kiri-kanan */
-                overflow-y: hidden;
-                max-width: 100%;
-                -webkit-overflow-scrolling: touch;
-              }
-            
-              #slipIndividuSection .slip-header {
-                text-align: center;
-              }
-            
-              #slipIndividuSection .slip-header img {
-                height: 100px;
-                display: block;
-                margin: 0 auto;
-              }
-            
-              #slipIndividuSection .slip-title {
-                font-weight: bold;
-                text-decoration: underline;
-                margin: 10px 0;
-              }
-            
-              #slipIndividuSection table {
-                border-collapse: collapse;
-                width: 100%;
-                table-layout: fixed;
-              }
-            
-              #slipIndividuSection td,
-              #slipIndividuSection th {
-                border: 1px solid black;
-                padding: 4px;
-                vertical-align: middle;
-              }
-            
-              #slipIndividuSection th {
-                background: #d9d9d9;
-              }
-            
-              #slipIndividuSection .grey {
-                background: #d9d9d9;
-                font-weight: bold;
-                text-align: left;
-              }
-            
-              #slipIndividuSection .center {
-                text-align: center;
-              }
-            
-              #slipIndividuSection .ulasan-container {
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-end;
-                height: 100%;
-              }
-            
-              #slipIndividuSection .ulasan-space {
-                flex: 1;
-              }
-            
-              #slipIndividuSection .label-row {
-                text-align: center;
-                font-weight: bold;
-                background: #d9d9d9;
-                padding: 2px;
-                font-size: 11pt;
-                border-top: 1px solid black;
-              }
-            
-              #slipIndividuSection .sign-space {
-                height: 85px;
-                border-bottom: 1px solid #000;
-                margin-bottom: 6px;
-              }
-            
-              #slipIndividuSection .subject-row td {
-                height: 28px;
-              }
-            
-              .btn-green {
-                background-color: #16a34a !important;
-                color: #fff !important;
-              }
-            
-              .btn-green:hover {
-                background-color: #15803d !important;
-                color: #fff !important;
-              }
-            
-              @media print {
-                .print-btn {
-                  display: none !important;
-                }
-            
-                #slipIndividuSection .slip-wrapper {
-                  overflow: visible !important; /* ✅ pastikan tiada scroll bila cetak */
-                }
-            
-                body * {
-                  visibility: hidden;
-                }
-            
-                #slipIndividuSection,
-                #slipIndividuSection * {
-                  visibility: visible;
-                }
-            
+                /* ============================== 🎯 KHAS UNTUK CETAK SLIP ============================== */
+                /* 🎯 Tambahan: Benarkan skrol mendatar untuk lihat slip seterusnya */
                 #slipIndividuSection {
-                  position: absolute;
-                  left: 0;
-                  top: 0;
-                  width: 100%;
-                  margin: 0;
-                  border: none;
-                  box-shadow: none;
+                    overflow-x: auto;
+                    /* Boleh skrol kiri-kanan */
+                    white-space: nowrap;
+                    /* Susunan slip dalam satu baris */
+                    scroll-snap-type: x mandatory;
+                    /* Snap effect semasa skrol */
                 }
-            
+
+                #slipIndividuSection .slip-wrapper {
+                    display: inline-block;
+                    /* Letak slip sebelah-menyebelah */
+                    vertical-align: top;
+                    margin-right: 20px;
+                    /* Jarak antara slip */
+                    scroll-snap-align: start;
+                }
+
+                /* ============================ 🎯 GAYA SKRIN (Paparan Web) ============================ */
                 #slipIndividuSection .slip-container {
-                  border: 1px solid #000 !important;
-                  border-radius: 0 !important;
-                  box-shadow: none !important;
+                    width: 1000px;
+                    margin: 20px auto;
+                    border: 1px solid #ddd;
+                    border-radius: 12px;
+                    padding: 20px;
+                    background: #fff;
+                    font-family: Arial, sans-serif;
+                    font-size: 12pt;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
                 }
-            
-                #slipIndividuSection table,
+
+                #slipIndividuSection .slip-header {
+                    text-align: center;
+                }
+
+                #slipIndividuSection .slip-header img {
+                    height: 100px;
+                    display: block;
+                    margin: 0 auto;
+                }
+
+                #slipIndividuSection .slip-title {
+                    font-weight: bold;
+                    text-decoration: underline;
+                    margin: 10px 0;
+                }
+
+                #slipIndividuSection table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    table-layout: fixed;
+                }
+
                 #slipIndividuSection td,
                 #slipIndividuSection th {
-                  border: 1px solid #000 !important;
+                    border: 1px solid black;
+                    padding: 4px;
+                    vertical-align: middle;
                 }
-              }
+
+                #slipIndividuSection th {
+                    background: #d9d9d9;
+                }
+
+                #slipIndividuSection .grey {
+                    background: #d9d9d9;
+                    font-weight: bold;
+                    text-align: left;
+                }
+
+                #slipIndividuSection .center {
+                    text-align: center;
+                }
+
+                #slipIndividuSection .ulasan-container {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-end;
+                    height: 100%;
+                }
+
+                #slipIndividuSection .ulasan-space {
+                    flex: 1;
+                }
+
+                #slipIndividuSection .label-row {
+                    text-align: center;
+                    font-weight: bold;
+                    background: #d9d9d9;
+                    padding: 2px;
+                    font-size: 11pt;
+                    border-top: 1px solid black;
+                }
+
+                #slipIndividuSection .sign-space {
+                    height: 85px;
+                    border-bottom: 1px solid #000;
+                    margin-bottom: 6px;
+                }
+
+                #slipIndividuSection .subject-row td {
+                    height: 28px;
+                }
+
+                .btn-green {
+                    background-color: #16a34a !important;
+                    color: #fff !important;
+                }
+
+                .btn-green:hover {
+                    background-color: #15803d !important;
+                    color: #fff !important;
+                }
             </style>
 
-         <script>
+            <style id="print-slip-individu-global-reset">
+                /* 🧭 CETAK SLIP INDIVIDU (vStabil)
+           - Tiada CSS @media print global di halaman utama.
+           - Semua gaya cetak akan disuntik dalam popup khas (fungsi cetakSlipIndividu).
+           - Elak gangguan terhadap tab lain seperti Combat Zone & Rumusan Subjek. */
+            </style>
+
+            <script>
+                function cetakSlipIndividu() {
+                    const slipSection = document.getElementById("slipIndividuSection");
+                    if (!slipSection) return alert("Slip tidak ditemui!");
+
+                    const slipHTML = slipSection.innerHTML;
+                    const w = window.open("", "_blank", "width=1000,height=800");
+                    w.document.open();
+                    w.document.write(`
+        <!DOCTYPE html>
+        <html lang="ms">
+        <head>
+        <meta charset="utf-8" />
+        <title>Cetak Slip Individu</title>
+        <style>
+          @page { size: A4 portrait; margin: 10mm; }
+        
+          html, body {
+            background: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            margin: 0;
+            padding: 0;
+            zoom: 0.97; /* ✅ Kunci skala supaya tak potong kanan */
+          }
+        
+          .slip-container {
+            width: 100%;
+            max-width: 187mm; /* ✅ dalam safe zone cetak */
+            margin: 0 auto;
+            border: 1px solid #000;
+            padding: 12px;
+            box-sizing: border-box;
+          }
+        
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            /* ✅ guna auto layout masa cetak */
+            table-layout: auto;
+          }
+        
+          td, th {
+            border: 1px solid #000;
+            padding: 4px;
+            vertical-align: middle;
+            box-sizing: border-box;
+          }
+        
+          th { background: #d9d9d9; }
+          .grey { background: #d9d9d9; font-weight: bold; text-align: left; }
+          .center { text-align: center; }
+        
+          /* ✍️ Ruang ulasan & tandatangan */
+          .ulasan-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+          }
+          .ulasan-space { flex: 1; padding: 10px; white-space: pre-line; }
+          .label-row {
+            text-align: center;
+            font-weight: bold;
+            background: #d9d9d9;
+            padding: 2px;
+            font-size: 11pt;
+            border-top: 1px solid #000;
+          }
+          .sign-space {
+            height: 85px;
+            border-bottom: 1px solid #000;
+            margin-bottom: 6px;
+          }
+        
+          .subject-row td { height: 28px; }
+        
+          /* 🏫 Header sekolah */
+          .slip-header { text-align:center; margin-bottom:10px; }
+          .slip-header img { height:80px; display:block; margin:0 auto; }
+        
+          /* ❌ Sembunyi butang interaktif */
+          button, .print-btn { display:none !important; }
+        
+          @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          }
+        </style>
+        </head>
+        <body>
+        ${slipHTML}
+        </body>
+        </html>`);
+                    w.document.close();
+
+                    w.onload = () => {
+                        w.focus();
+                        setTimeout(() => {
+                            w.print();
+                            w.onafterprint = () => w.close();
+                        }, 400);
+                    };
+                }
+            </script>
+
+            <script>
                 // ✅ Isi dropdown kelas bila CSV sudah dimuat
                 function autoIsiDropdownKelasIndividu(data) {
                     const kelasHeader = cariKolum("kelas");
@@ -1865,7 +1952,6 @@
                 }
 
                 // ✅ Papar slip individu direct dari CSV (ikut header sebenar)
-                // ✅ Papar slip individu direct dari CSV (dikemaskini BIL & baris kosong)
                 function paparSlipIndividu(namaMurid) {
                     const namaHeader = cariKolum("nama");
                     const kelasHeader = cariKolum("kelas");
@@ -1954,9 +2040,7 @@
                 }
             </script>
 
-            <!-- ====== SCRIPT KHAS (namespaced, tidak sentuh global lain) ====== -->
             <!-- =============== Tamat Kad Sticky Tab Analisis Layak Sijil =============== -->
-
             <!-- =================== FOOTER =================== -->
             <footer class="mt-10">
                 <div class="h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-70"></div>
@@ -1966,7 +2050,7 @@
             </footer>
 
             <script>
-        /* ===========================================================
+                /* ===========================================================
        📌 INDEX FUNGSI ANALISIS
        ===========================================================
        🔹 TAB 1 – Analisis Keseluruhan
@@ -2376,7 +2460,7 @@
                     }
                 }
 
-                /* ========= TAB 1: (kekal) ========= */
+                /* ========= TAB 1: ========= */
                 function generateOverallAnalysis() {
                     const kelasHeader = cariKolum("kelas"),
                         namaHeader = cariKolum("nama");
@@ -2442,7 +2526,7 @@
                     <td class="px-2.5 py-2 font-bold text-blue-600">${m.gp}</td>
                     ${topGradeLabels.map(g=>`<td class="px-2.5 py-2">${m.counts[g]||0}</td>`).join("")}
                   </tr>`;
-                            });
+                    });
 
                     // Carta
                     updateGradeChartBySubject(dataTapis);
@@ -2580,8 +2664,8 @@
                     <td class="px-2.5 py-2 text-red-600 font-medium">${s.peratusGagal}%</td>
                     <td class="px-2.5 py-2 text-purple-600 font-bold">${s.gpmp}</td>
                   </tr>`;
-                            });
-                        }
+                    });
+                }
 
                 // Toggle sort GPMP (subjek)
                 document.getElementById("gpmpSortBtn").addEventListener("click", () => {
@@ -2738,8 +2822,8 @@
                     <td class="px-2.5 py-2 text-red-600 font-medium">${pGagal}%</td>
                     <td class="px-2.5 py-2 text-purple-600 font-bold">${gpmpStr}</td>
                   </tr>`;
-                            });
-                        }
+                    });
+                }
 
                 // Toggle sort GPMP Kad Pecahan Kelas
                 document.addEventListener('click', (e) => {
@@ -2850,7 +2934,7 @@
                     <td class="px-3 py-2 text-center">${(r.markah==null||Number.isNaN(r.markah))? "-" : r.markah}</td>
                     <td class="px-3 py-2 text-center ${gradeCls(r.gred)} font-medium">${r.gred}</td>
                   </tr>`;
-                            });
+                    });
 
                     info.textContent = total ?
                         `Menunjukkan ${total ? (start+1) : 0} hingga ${end} daripada ${total} rekod` :
@@ -3106,7 +3190,7 @@
                 <td class="px-3 py-2">${c.sejTH} (${((c.sejTH/total)*100).toFixed(1)}%)</td>
                 <td class="px-3 py-2 font-bold text-blue-600 bg-yellow-50">${rowTotal} (${((rowTotal/total)*100).toFixed(1)}%)</td>
               </tr>`;
-                            }
+                    }
 
                     body.innerHTML += row("BM Lulus", counts.bmLulus);
                     body.innerHTML += row("BM Gagal", counts.bmGagal);
@@ -3125,8 +3209,8 @@
               <td class="px-3 py-2">${jTH} (${((jTH/total)*100).toFixed(1)}%)</td>
               <td class="px-3 py-2 text-blue-600">${total} (100.0%)</td>
             </tr>`;
-                        }
-        
+                }
+
                 // Render jadual BM & SEJ
                 function renderBmSejTable(data) {
                     const body = document.getElementById("bmSejBody");
@@ -3178,8 +3262,8 @@
                 <td class="px-3 py-2 text-red-600 font-medium">${pGagal}%</td>
                 <td class="px-3 py-2 text-purple-600 font-bold">${gpmp}</td>
               </tr>`;
-                            });
-                        }
+                    });
+                }
 
                 // ====== Senarai Murid Layak Sijil (Tab 3) ======
                 const layakState = {
@@ -3252,7 +3336,7 @@
                 <td class="px-3 py-2 text-center">${m.gredSEJ}</td>
                 <td class="px-3 py-2 text-center">${statusHtml}</td>
               </tr>`;
-                            });
+                    });
 
                     info.textContent = total ?
                         `Menunjukkan ${start+1} hingga ${end} daripada ${total} rekod` :
@@ -3376,7 +3460,7 @@
                     }
                 });
 
-                // ✅ Fungsi Combat Zone - Tab 4 100% BARU BARU BARU
+                // ✅ Fungsi Combat Zone - Tab 4 
                 function getCombatZoneCategory(grade, gps) {
                     if (gps !== null && gps !== undefined) {
                         const gpsValue = parseFloat(gps);
@@ -3541,7 +3625,7 @@
                 <td>${m.gp ?? "-"}</td>
                 ${subjekTerpilih !== "SEMUA SUBJEK" ? `<td>${markahSubjek}</td><td>${gredSubjek}</td>` : ""}
               </tr>`;
-                            });
+                    });
 
                     container.innerHTML = baris || `<tr><td colspan="6" class="p-4 text-gray-400 text-center">Tiada data</td></tr>`;
 
@@ -3596,7 +3680,7 @@
                     <td>${m.gp ?? "-"}</td>
                     ${subjekTerpilih !== "SEMUA SUBJEK" ? `<td>${markahSubjek}</td><td>${gredSubjek}</td>` : ""}
                   </tr>`;
-                                    });
+                            });
                         } else {
                             rows = `<tr><td colspan="6" class="text-gray-400">Tiada data</td></tr>`;
                         }
@@ -3617,7 +3701,7 @@
                   <tbody>${rows}</tbody>
                 </table>
               </div>`;
-                            });
+                    });
 
                     document.body.appendChild(container);
                 }
@@ -3676,30 +3760,37 @@
               <th class="px-4 py-2 text-center">Kelas</th>
               <th class="px-4 py-2 text-center">GP Murid</th>
               <th class="px-4 py-2 text-center">
-                Markah ${subjekTerpilih}
-                <span class="sort-btn asc" onclick="sortCombatZoneByMarkah('${subjekKey}', 'asc')">
-                  <svg class="up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
-                </span>
-                <span class="sort-btn desc" onclick="sortCombatZoneByMarkah('${subjekKey}', 'desc')">
-                  <svg class="down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-                </span>
-              </th>
-              <th class="px-4 py-2 text-center">Gred ${subjekTerpilih}</th>
-            `;
-                            } else {
-                                theadTr.innerHTML = `
+                  <div class="flex items-center justify-center gap-1">
+                    <span>Markah ${subjekTerpilih}</span>
+                    <span class="flex flex-col leading-none">
+                      <svg class="up cursor-pointer hover:fill-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="9" height="9"
+                        onclick="sortCombatZoneByMarkah('${subjekKey}', 'asc')">
+                        <path d="M7 14l5-5 5 5z"/>
+                      </svg>
+                      <svg class="down cursor-pointer hover:fill-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="9" height="9"
+                        onclick="sortCombatZoneByMarkah('${subjekKey}', 'desc')">
+                        <path d="M7 10l5 5 5-5z"/>
+                      </svg>
+                    </span>
+                  </div>
+                </th>
+                
+                <th class="px-4 py-2 text-center">Gred ${subjekTerpilih}</th>
+                `;
+                    } else {
+                        theadTr.innerHTML = `
               <th class="px-4 py-2 text-left">Bil</th>
               <th class="px-4 py-2 text-left">Nama</th>
               <th class="px-4 py-2 text-center">Kelas</th>
               <th class="px-4 py-2 text-center">GP Murid</th>
             `;
-                            }
-        
-                            // 🔹 Ambil data ikut kategori
-                            let dataTapis = muridDataCZ.filter(m => m.kategori === katKey || m.kategori === kategori);
-        
-                            if (dataTapis.length === 0) {
-                                tbody.innerHTML = `
+                    }
+
+                    // 🔹 Ambil data ikut kategori
+                    let dataTapis = muridDataCZ.filter(m => m.kategori === katKey || m.kategori === kategori);
+
+                    if (dataTapis.length === 0) {
+                        tbody.innerHTML = `
               <tr>
                 <td colspan="6" class="p-4 text-gray-400 text-center">Tiada data</td>
               </tr>`;
@@ -3736,7 +3827,7 @@
                   ${gredVal}
                 </td>
               `;
-                                }
+                        }
 
                         const row = `
               <tr class="border-b text-sm">
@@ -3849,61 +3940,61 @@
                 }
 
 
-            function cetakCombatZone() {
-              if (!muridDataCZ || muridDataCZ.length === 0) {
-                alert("Tiada data untuk dicetak. Sila klik 'Jana Analisis Combat Zone' terlebih dahulu.");
-                return;
-              }
-            
-              const subjek = document.getElementById("cz-subjekFilter")?.value || "SEMUA SUBJEK";
-              const kelas = document.getElementById("cz-kelasFilter")?.value || "SEMUA KELAS";
-              const tarikhCetak = new Date().toLocaleDateString('ms-MY', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-              });
-            
-              // ✅ Ambil nama penuh subjek dari mapping global (subjectNameMap)
-              let subjekPaparan = "SEMUA SUBJEK";
-              if (subjek !== "SEMUA SUBJEK" && typeof subjectNameMap === "object") {
-                subjekPaparan = subjectNameMap[subjek] || subjek;
-              }
-            
-              const kategoriLabel = {
-                kualiti1: "🏆 Kualiti 1",
-                kualiti2: "🥈 Kualiti 2",
-                pertahanan1: "🛡️ Pertahanan 1",
-                pertahanan2: "⚠️ Pertahanan 2",
-                kuantiti: "📊 Kuantiti"
-              };
-            
-              // 🔹 Bina semua jadual dari data semasa
-              let semuaJadualHTML = "";
-              Object.keys(kategoriLabel).forEach(kat => {
-                const list = muridDataCZ
-                  .filter(m => m.kategori === kat)
-                  .sort((a, b) => {
-                    if (subjek === "SEMUA SUBJEK") {
-                      const gpA = parseFloat(a.gp) || 0;
-                      const gpB = parseFloat(b.gp) || 0;
-                      if (gpA !== gpB) return gpA - gpB; // GP kecil lebih baik
-                      return a.nama.localeCompare(b.nama);
+                function cetakCombatZone() {
+                    if (!muridDataCZ || muridDataCZ.length === 0) {
+                        alert("Tiada data untuk dicetak. Sila klik 'Jana Analisis Combat Zone' terlebih dahulu.");
+                        return;
                     }
-            
-                    // Susun ikut markah subjek jika ada
-                    const markA = parseFloat(a.markah[subjek]) || 0;
-                    const markB = parseFloat(b.markah[subjek]) || 0;
-                    if (markB !== markA) return markB - markA;
-                    return a.nama.localeCompare(b.nama);
-                  });
-            
-                if (list.length === 0) return;
-            
-                let rows = "";
-                list.forEach((m, i) => {
-                  const gredSubjek = (subjek !== "SEMUA SUBJEK") ? (m.gred[subjek] || "-") : "-";
-                  const markahSubjek = (subjek !== "SEMUA SUBJEK") ? (m.markah[subjek] || "-") : "-";
-                  rows += `
+
+                    const subjek = document.getElementById("cz-subjekFilter")?.value || "SEMUA SUBJEK";
+                    const kelas = document.getElementById("cz-kelasFilter")?.value || "SEMUA KELAS";
+                    const tarikhCetak = new Date().toLocaleDateString('ms-MY', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+
+                    // ✅ Ambil nama penuh subjek dari mapping global (subjectNameMap)
+                    let subjekPaparan = "SEMUA SUBJEK";
+                    if (subjek !== "SEMUA SUBJEK" && typeof subjectNameMap === "object") {
+                        subjekPaparan = subjectNameMap[subjek] || subjek;
+                    }
+
+                    const kategoriLabel = {
+                        kualiti1: "🏆 Kualiti 1",
+                        kualiti2: "🥈 Kualiti 2",
+                        pertahanan1: "🛡️ Pertahanan 1",
+                        pertahanan2: "⚠️ Pertahanan 2",
+                        kuantiti: "📊 Kuantiti"
+                    };
+
+                    // 🔹 Bina semua jadual dari data semasa
+                    let semuaJadualHTML = "";
+                    Object.keys(kategoriLabel).forEach(kat => {
+                        const list = muridDataCZ
+                            .filter(m => m.kategori === kat)
+                            .sort((a, b) => {
+                                if (subjek === "SEMUA SUBJEK") {
+                                    const gpA = parseFloat(a.gp) || 0;
+                                    const gpB = parseFloat(b.gp) || 0;
+                                    if (gpA !== gpB) return gpA - gpB; // GP kecil lebih baik
+                                    return a.nama.localeCompare(b.nama);
+                                }
+
+                                // Susun ikut markah subjek jika ada
+                                const markA = parseFloat(a.markah[subjek]) || 0;
+                                const markB = parseFloat(b.markah[subjek]) || 0;
+                                if (markB !== markA) return markB - markA;
+                                return a.nama.localeCompare(b.nama);
+                            });
+
+                        if (list.length === 0) return;
+
+                        let rows = "";
+                        list.forEach((m, i) => {
+                            const gredSubjek = (subjek !== "SEMUA SUBJEK") ? (m.gred[subjek] || "-") : "-";
+                            const markahSubjek = (subjek !== "SEMUA SUBJEK") ? (m.markah[subjek] || "-") : "-";
+                            rows += `
                     <tr>
                       <td>${i + 1}</td>
                       <td style="text-align:left;">${m.nama}</td>
@@ -3911,9 +4002,9 @@
                       <td>${m.gp ?? "-"}</td>
                       ${subjek !== "SEMUA SUBJEK" ? `<td>${markahSubjek}</td><td>${gredSubjek}</td>` : ""}
                     </tr>`;
-                });
-            
-                semuaJadualHTML += `
+                        });
+
+                        semuaJadualHTML += `
                   <h4 style="margin-top:25px;">${kategoriLabel[kat]} (${list.length})</h4>
                   <table style="width:100%; border-collapse:collapse; font-size:13px;">
                     <thead>
@@ -3928,15 +4019,15 @@
                     <tbody>${rows}</tbody>
                   </table>
                 `;
-              });
-            
-              if (!semuaJadualHTML) {
-                alert("Tiada murid ditemui untuk cetakan.");
-                return;
-              }
-            
-              // 🎨 Gaya cetakan rasmi
-              const style = `
+                    });
+
+                    if (!semuaJadualHTML) {
+                        alert("Tiada murid ditemui untuk cetakan.");
+                        return;
+                    }
+
+                    // 🎨 Gaya cetakan rasmi
+                    const style = `
                 <style>
                   body { font-family: Arial, sans-serif; padding: 25px; color: #000; }
                   h2, h3, h4 { text-align: center; margin: 0; }
@@ -3962,10 +4053,10 @@
                   @page { size: A4 landscape; margin: 12mm; }
                 </style>
               `;
-            
-              // 🖨️ Cetak laporan
-              const printWindow = window.open('', '_blank');
-              printWindow.document.write(`
+
+                    // 🖨️ Cetak laporan
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`
                 <html>
                   <head><title>Analisis Combat Zone</title>${style}</head>
                   <body>
@@ -3986,10 +4077,10 @@
                   </body>
                 </html>
               `);
-            
-              printWindow.document.close();
-              printWindow.print();
-            }                      
+
+                    printWindow.document.close();
+                    printWindow.print();
+                }
                 // ================== (TAMAT SCRIPT) ==================
             </script>
             <script>
@@ -4107,7 +4198,8 @@
                     }
                 }
             </script>
-          
+
         </div>
     </body>
+
 </html>
