@@ -527,7 +527,7 @@
                 </div>
             </section>
 
-            \ <!-- =================== TAB 1  =================== -->
+            <!-- =================== TAB 1  =================== -->
             <!-- 💾 PAPARAN KHAS UNTUK CETAK (A4 LANDSCAPE + FORMAT) -->
             <section id="rumusanCetak" style="display:none;">
                 <!-- ⚠️ Buang header sekolah di sini! Tajuk & logo dijana semasa print -->
@@ -1689,6 +1689,25 @@
                 }
 
                 /* ============================ 🎯 GAYA SKRIN (Paparan Web) ============================ */
+                 /* 🧭 Centerkan slip dalam paparan */
+                /* 🚫 Sembunyikan slip individu semasa mula */
+               /* 🚫 Sembunyi slip semasa mula */
+               #slipIndividuSection.hidden {
+                   display: none !important;
+               }
+            
+              /* 🎯 Bila muncul, kekalkan posisi tengah */
+               #slipIndividuSection {
+                   display: flex;
+                   justify-content: center;
+                   align-items: flex-start;
+                   overflow-x: auto;
+                   padding-bottom: 20px;
+                }
+            
+                #slipIndividuSection .slip-wrapper {
+                    flex: 0 0 auto;           /* Kekalkan lebar asal slip */
+                }
                 #slipIndividuSection .slip-container {
                     width: 1000px;
                     margin: 20px auto;
@@ -1935,14 +1954,27 @@
 
                 // ✅ Jana slip bila klik butang
                 function janaSlipIndividu() {
-                    const murid = document.getElementById("muridFilterIndividu").value;
-                    if (!murid) {
-                        alert("Sila Pilih Kelas & Nama Murid!");
-                        return;
-                    }
-                    paparSlipIndividu(murid);
-                    document.getElementById("slipIndividuSection").classList.remove("hidden");
+                  const murid = document.getElementById("muridFilterIndividu").value;
+                  const slipSection = document.getElementById("slipIndividuSection");
+                
+                  // 🚫 Sembunyikan slip setiap kali sebelum jana semula
+                  slipSection.classList.add("hidden");
+                
+                  if (!murid) {
+                    alert("Sila Pilih Kelas & Nama Murid!");
+                    return;
+                  }
+                
+                  // ⚙️ Jana slip murid seperti biasa
+                  paparSlipIndividu(murid);
+                
+                  // ✅ Paparkan semula selepas sedikit masa (bagi nampak smooth)
+                  setTimeout(() => {
+                    slipSection.classList.remove("hidden");
+                    slipSection.style.display = "flex";   // pastikan muncul di tengah (kalau guna gaya center)
+                  }, 300);
                 }
+
 
                 // ✅ Papar slip individu direct dari CSV (ikut header sebenar)
                 function paparSlipIndividu(namaMurid) {
