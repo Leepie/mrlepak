@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PPSA vs PraSPM – Analisis Lanjutan</title>
+  <title>PPSA vs PraSPM – Analisis Indeks</title>
 
   <!-- Tailwind & Chart.js -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-    // Legend bulat (global setting)
+    // Legend Chart bulat secara global
     if (window.Chart) {
       Chart.defaults.plugins.legend.labels.usePointStyle = true;
       Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
@@ -32,175 +32,182 @@
                     linear-gradient(180deg, #0b1020, #0a0f1d);
       }
     }
-    .glass {
-      backdrop-filter: saturate(140%) blur(10px);
-      -webkit-backdrop-filter: saturate(140%) blur(10px);
-      background: rgba(255,255,255,.72);
-    }
-    @media (prefers-color-scheme: dark) {
-      .glass {
-        background: rgba(13,17,23,.6);
-      }
-    }
-
-    /* Tab helpers */
-    .tab-active {
-      @apply bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900;
-    }
-    .tab-inactive {
-      @apply bg-slate-100 text-slate-700 hover:bg-slate-200
-             dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700;
-    }
   </style>
 </head>
 
 <body class="min-h-screen bg-hero text-slate-800 dark:text-slate-100">
 
   <div class="min-h-screen flex items-center justify-center p-4">
-    <main class="w-full max-w-5xl glass rounded-2xl shadow-xl border border-white/40 dark:border-white/10 p-6 sm:p-10">
+    <main class="w-full max-w-6xl bg-white/90 dark:bg-slate-950/90
+                 rounded-3xl shadow-xl border border-white/40 dark:border-white/10
+                 p-4 sm:p-6 lg:p-8">
 
-      <!-- Header -->
-      <header class="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-4">
+      <!-- HEADER ATAS (logo + tajuk + back) -->
+      <header class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
         <div class="flex items-center gap-4">
           <img
             src="https://raw.githubusercontent.com/Leepie/mrlepak/master/LOGO.jpg"
-            alt="Mr LePaK"
-            class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-white/60 dark:ring-white/20 object-cover"
+            alt="Lencana Sekolah"
+            class="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700"
           />
           <div>
             <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">
-              PPSA vs PraSPM – Analisis Lanjutan
+              Analisis PPSA vs PraSPM
             </h1>
-            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-              “Sistem Analisis Prestasi Akademik SMK"
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              SMK Dato' Kamaruddin · Indeks Analisis GP & LMS
             </p>
           </div>
         </div>
 
         <a href="index.html"
-           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs sm:text-sm
                   bg-slate-900 text-white hover:bg-slate-800
                   dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
           ← Kembali ke Laman Utama
         </a>
       </header>
 
-      <!-- Divider -->
-      <div class="my-6 border-t border-slate-200/70 dark:border-white/10"></div>
+      <!-- KAD BESAR (frame utama sama konsep macam TOVT4) -->
+      <section class="mt-2 bg-slate-50 dark:bg-slate-900/70 rounded-3xl p-4 sm:p-6 lg:p-7">
 
-      <!-- TAB BUTTONS -->
-      <section>
-        <div class="flex flex-wrap gap-2">
+        <!-- BAR TAB DALAM BENTUK KAD -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <!-- TAB 1 -->
           <button
-            class="tab-btn px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tab-active"
+            class="tab-btn group flex flex-col justify-center items-start gap-2
+                   rounded-2xl px-4 py-3 text-left
+                   bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg
+                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
+                   tab-active"
             data-tab="gp-sekolah">
-            1. Analisis GP Sekolah
+            <span class="text-2xl">📊</span>
+            <div>
+              <div class="text-xs font-semibold opacity-80">Tab 1</div>
+              <div class="text-sm sm:text-base font-semibold">GP Sekolah</div>
+            </div>
           </button>
 
+          <!-- TAB 2 -->
           <button
-            class="tab-btn px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tab-inactive"
+            class="tab-btn group flex flex-col justify-center items-start gap-2
+                   rounded-2xl px-4 py-3 text-left
+                   bg-white text-slate-700 border border-slate-200
+                   hover:bg-slate-50 shadow-sm
+                   dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700"
             data-tab="lms-sekolah">
-            2. Analisis % LMS Sekolah
+            <span class="text-2xl">📈</span>
+            <div>
+              <div class="text-xs font-semibold text-slate-400 dark:text-slate-500">Tab 2</div>
+              <div class="text-sm sm:text-base font-semibold">% LMS Sekolah</div>
+            </div>
           </button>
 
+          <!-- TAB 3 -->
           <button
-            class="tab-btn px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tab-inactive"
+            class="tab-btn group flex flex-col justify-center items-start gap-2
+                   rounded-2xl px-4 py-3 text-left
+                   bg-white text-slate-700 border border-slate-200
+                   hover:bg-slate-50 shadow-sm
+                   dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700"
             data-tab="subjek-teras">
-            3. Analisis Subjek Teras
+            <span class="text-2xl">📚</span>
+            <div>
+              <div class="text-xs font-semibold text-slate-400 dark:text-slate-500">Tab 3</div>
+              <div class="text-sm sm:text-base font-semibold">GP Subjek Teras</div>
+            </div>
           </button>
 
+          <!-- TAB 4 -->
           <button
-            class="tab-btn px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tab-inactive"
+            class="tab-btn group flex flex-col justify-center items-start gap-2
+                   rounded-2xl px-4 py-3 text-left
+                   bg-white text-slate-700 border border-slate-200
+                   hover:bg-slate-50 shadow-sm
+                   dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700"
             data-tab="mp-kritikal">
-            4. Analisis &amp; Intervensi MP Kritikal
+            <span class="text-2xl">⚠️</span>
+            <div>
+              <div class="text-xs font-semibold text-slate-400 dark:text-slate-500">Tab 4</div>
+              <div class="text-sm sm:text-base font-semibold">GP MP Kritikal</div>
+            </div>
           </button>
         </div>
-      </section>
 
-      <!-- TAB PANELS -->
-      <section class="mt-6 space-y-6">
+        <!-- RUANG KANDUNGAN TAB -->
+        <div class="mt-2">
 
-        <!-- TAB 1: GP Sekolah -->
-        <div class="tab-panel" id="tab-gp-sekolah">
-          <h2 class="text-lg sm:text-xl font-bold mb-2">
-            Analisis GP Sekolah
-          </h2>
-          <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
-            Ruang untuk memaparkan perbandingan GP (TOV, PPSA, PraSPM) mengikut tahun / peperiksaan.
-          </p>
-          <div class="bg-slate-900/5 dark:bg-slate-900/40 rounded-xl p-4">
-            <canvas id="chartGpSekolah" class="w-full h-64"></canvas>
-          </div>
-        </div>
-
-        <!-- TAB 2: % LMS Sekolah -->
-        <div class="tab-panel hidden" id="tab-lms-sekolah">
-          <h2 class="text-lg sm:text-xl font-bold mb-2">
-            Analisis % Layak Mendapat Sijil (LMS)
-          </h2>
-          <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
-            Paparan peratus LMS mengikut peperiksaan, kelas, atau kumpulan intervensi.
-          </p>
-          <div class="bg-slate-900/5 dark:bg-slate-900/40 rounded-xl p-4">
-            <canvas id="chartLmsSekolah" class="w-full h-64"></canvas>
-          </div>
-        </div>
-
-        <!-- TAB 3: Subjek Teras -->
-        <div class="tab-panel hidden" id="tab-subjek-teras">
-          <h2 class="text-lg sm:text-xl font-bold mb-2">
-            Analisis Subjek Teras
-          </h2>
-          <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
-            Fokus kepada BM, BI, Matematik, Sains, Sejarah (atau mengikut takrif sekolah).
-          </p>
-          <div class="bg-slate-900/5 dark:bg-slate-900/40 rounded-xl p-4">
-            <canvas id="chartSubjekTeras" class="w-full h-64"></canvas>
-          </div>
-        </div>
-
-        <!-- TAB 4: Mata Pelajaran Kritikal -->
-        <div class="tab-panel hidden" id="tab-mp-kritikal">
-          <h2 class="text-lg sm:text-xl font-bold mb-2">
-            Analisis &amp; Intervensi Mata Pelajaran Kritikal
-          </h2>
-          <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
-            Senarai MP kritikal (GP tinggi, LMS rendah), cadangan intervensi dan pemantauan.
-          </p>
-
-          <div class="grid gap-4 md:grid-cols-2">
-            <div class="bg-slate-900/5 dark:bg-slate-900/40 rounded-xl p-4">
-              <h3 class="font-semibold mb-2 text-sm">Carta Prestasi MP Kritikal</h3>
-              <canvas id="chartMpKritikal" class="w-full h-56"></canvas>
-            </div>
-
-            <div class="bg-slate-900/5 dark:bg-slate-900/40 rounded-xl p-4 text-xs sm:text-sm">
-              <h3 class="font-semibold mb-2">Ringkasan & Idea Intervensi</h3>
-              <ul class="list-disc list-inside space-y-1">
-                <li>Kenal pasti MP dengan GP &gt; 5.00 dan LMS &lt; 60%.</li>
-                <li>Cadang kelas tambahan berfokus standard pembelajaran lemah.</li>
-                <li>Profil pelajar berisiko (Gagal ≥ 3 MP) untuk intervensi individu.</li>
-                <li>Pantau impak sebelum & selepas intervensi (Pra–Pos).</li>
-              </ul>
+          <!-- PANEL TAB 1 -->
+          <div class="tab-panel" id="tab-gp-sekolah">
+            <h2 class="text-base sm:text-lg font-bold mb-1">
+              GP Sekolah – PPSA vs PraSPM
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-4">
+              Paparan perbandingan Gred Purata Sekolah (TOV / PPSA / PraSPM / SPM jika ada).
+            </p>
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100
+                        dark:bg-slate-950 dark:border-slate-800 p-4 sm:p-5">
+              <canvas id="chartGpSekolah" class="w-full h-64"></canvas>
             </div>
           </div>
-        </div>
 
+          <!-- PANEL TAB 2 -->
+          <div class="tab-panel hidden" id="tab-lms-sekolah">
+            <h2 class="text-base sm:text-lg font-bold mb-1">
+              % LMS Sekolah – PPSA vs PraSPM
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-4">
+              Perbandingan peratus Layak Mendapat Sijil mengikut peperiksaan.
+            </p>
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100
+                        dark:bg-slate-950 dark:border-slate-800 p-4 sm:p-5">
+              <canvas id="chartLmsSekolah" class="w-full h-64"></canvas>
+            </div>
+          </div>
+
+          <!-- PANEL TAB 3 -->
+          <div class="tab-panel hidden" id="tab-subjek-teras">
+            <h2 class="text-base sm:text-lg font-bold mb-1">
+              GP Subjek Teras – PPSA vs PraSPM
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-4">
+              Fokus kepada BM, BI, Matematik, Sains, Sejarah atau subjek teras lain yang ditakrifkan.
+            </p>
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100
+                        dark:bg-slate-950 dark:border-slate-800 p-4 sm:p-5">
+              <canvas id="chartSubjekTeras" class="w-full h-64"></canvas>
+            </div>
+          </div>
+
+          <!-- PANEL TAB 4 -->
+          <div class="tab-panel hidden" id="tab-mp-kritikal">
+            <h2 class="text-base sm:text-lg font-bold mb-1">
+              GP Mata Pelajaran Kritikal – PPSA vs PraSPM
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-4">
+              MP dengan GP tinggi / LMS rendah yang memerlukan intervensi khas.
+            </p>
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100
+                        dark:bg-slate-950 dark:border-slate-800 p-4 sm:p-5">
+              <canvas id="chartMpKritikal" class="w-full h-64"></canvas>
+            </div>
+          </div>
+
+        </div>
       </section>
 
-      <!-- Footer -->
-      <footer class="mt-8 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+      <!-- FOOTER -->
+      <footer class="mt-6 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
         &copy; <span id="yearNow"></span> Sistem Analisis Prestasi Akademik
       </footer>
-
     </main>
   </div>
 
   <script>
-    // Tahun semasa
+    // Tahun
     document.getElementById('yearNow').textContent = new Date().getFullYear();
 
-    // TAB LOGIC
+    // LOGIK TAB
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabPanels  = document.querySelectorAll('.tab-panel');
 
@@ -208,13 +215,27 @@
       btn.addEventListener('click', () => {
         const target = btn.getAttribute('data-tab');
 
-        // Tukar style button
+        // Reset semua button ke gaya "kad putih"
         tabButtons.forEach(b => {
-          b.classList.remove('tab-active');
-          b.classList.add('tab-inactive');
+          b.classList.remove(
+            'bg-gradient-to-r','from-indigo-500','to-blue-500','text-white','shadow-lg','tab-active'
+          );
+          b.classList.add(
+            'bg-white','text-slate-700','border','border-slate-200',
+            'hover:bg-slate-50','shadow-sm',
+            'dark:bg-slate-900','dark:text-slate-200','dark:border-slate-700'
+          );
         });
-        btn.classList.remove('tab-inactive');
-        btn.classList.add('tab-active');
+
+        // Jadikan butang aktif gaya gradient biru
+        btn.classList.remove(
+          'bg-white','text-slate-700','border','border-slate-200',
+          'hover:bg-slate-50','shadow-sm',
+          'dark:bg-slate-900','dark:text-slate-200','dark:border-slate-700'
+        );
+        btn.classList.add(
+          'bg-gradient-to-r','from-indigo-500','to-blue-500','text-white','shadow-lg','tab-active'
+        );
 
         // Tukar panel
         tabPanels.forEach(panel => {
@@ -227,18 +248,19 @@
       });
     });
 
-    // ====== Contoh Chart Dummy (boleh ganti dengan data sebenar) ======
-    function createDemoChart(id, label) {
-      const ctx = document.getElementById(id);
-      if (!ctx) return;
-      new Chart(ctx, {
+    // ===== Contoh chart dummy – senang nanti tukar kepada data sebenar =====
+    function makeLineChart(canvasId, label, data, reverseY=false, isPercent=false) {
+      const el = document.getElementById(canvasId);
+      if (!el) return;
+      new Chart(el, {
         type: 'line',
         data: {
-          labels: ['TOV', 'PPSA', 'PraSPM'],
+          labels: ['TOV','PPSA','PraSPM'],
           datasets: [{
             label,
-            data: [4.5, 4.0, 3.7], // contoh sahaja
-            tension: 0.35
+            data,
+            tension: 0.35,
+            fill: false
           }]
         },
         options: {
@@ -246,22 +268,21 @@
           plugins: { legend: { display: true } },
           scales: {
             y: {
-              beginAtZero: false,
-              reverse: true, // GP: lebih rendah lebih baik
-              suggestedMin: 1,
-              suggestedMax: 7
+              reverse: reverseY,
+              beginAtZero: !reverseY,
+              ticks: isPercent ? { callback: v => v + '%' } : {}
             }
           }
         }
       });
     }
 
-    createDemoChart('chartGpSekolah',   'GP Sekolah');
-    createDemoChart('chartLmsSekolah',  '% LMS Sekolah');
-    createDemoChart('chartSubjekTeras', 'GP Subjek Teras');
-    createDemoChart('chartMpKritikal',  'GP MP Kritikal');
+    // Demo data – ganti dengan data PPSA vs PraSPM sebenar kemudian
+    makeLineChart('chartGpSekolah',   'GP Sekolah',       [6.50, 6.20, 5.80], true,  false);
+    makeLineChart('chartLmsSekolah',  '% LMS Sekolah',    [60,   72,   80  ], false, true);
+    makeLineChart('chartSubjekTeras', 'GP Subjek Teras',  [6.80, 6.40, 6.00], true,  false);
+    makeLineChart('chartMpKritikal',  'GP MP Kritikal',   [8.00, 7.50, 7.20], true,  false);
   </script>
 
 </body>
 </html>
-
