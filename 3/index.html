@@ -389,175 +389,169 @@
     </footer>
 
     <script>
-/* =========================
-   URL CSV
-========================= */
-/* PPSA */
-const csvUrlPPSA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdnpPQ7vfOqMuuV-DzAmPtQjCEZBwVtXxLBpGFUguqC3ZqqouMN_Bey3AIzXSPBlziV1bNKSpGjfBY/pub?gid=1172655606&single=true&output=csv";
+/* =========================================================
+   KONFIGURASI ASAS
+   ========================================================= */
 
-/* PRASPM */
-const csvUrlPraSPM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRck15kwRkf75NPm1IouErXU_CDgHjMEGw1nm0FNCu1XAkIb3EF0XV36Mq66wui_0imgyC9OKzoVQl9/pub?gid=22937657&single=true&output=csv";
-
-
-/* =========================
-   TAB SWITCH (kekal)
-========================= */
-function switchTab(tabId) {
-  const tabs = ['gp-sekolah', 'lms-sekolah', 'subjek-teras', 'mp-kritikal'];
-
-  tabs.forEach(id => {
-    const btn = document.getElementById('tab-' + id);
-    const panel = document.getElementById('panel-' + id);
-
-    if (!btn || !panel) return;
-
-    if (id === tabId) {
-      btn.classList.add('tab-active');
-      panel.classList.remove('hidden');
-    } else {
-      btn.classList.remove('tab-active');
-      panel.classList.add('hidden');
-    }
-  });
-}
-
-
-/* =========================
-   UTIL NORMALIZE
-========================= */
-function norm(s) {
-  return (s || "")
-    .toString()
-    .replace(/\u00A0/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-function normUpper(s) {
-  return norm(s).toUpperCase();
-}
-
-
-/* =========================
-   GRADE VALUE MAPPING
-   (Jika Cikgu ada mapping asal lain, ganti di sini)
-========================= */
 const gradeValueMapping = {
-  "A+": 1, "A": 1, "A-": 2,
+  "A+": 0, "A": 1, "A-": 2,
   "B+": 3, "B": 4,
   "C+": 5, "C": 6,
   "D": 7, "E": 8,
   "G": 9
 };
 
+let headerMap = {};
+let subjectColumns = [];      // ⬅️ HANYA kolum GRED
+let subjectFlagMap = {};      // 1 = wajib, 0 = elektif
+let cachedData = null;
 
-/* =========================
-   PARSER CSV: baca flag (row 1),
-   cari header sebenar (row yang ada 'GRED PURATA'),
-   hasilkan:
-   - subjectFlagMap (BM->1/0, BI->1/0, ...)
-   - subjectColumns (senarai kod subjek yang wujud)
-   - rowsObj (array of object, row['BM'] = 'A', etc.)
-========================= */
-function parseCsvForKPI(text) {
-  const lines = text.trim().split(/\r?\n/).filter(l => l.trim() !== "");
-  if (lines.length < 2) {
-    return { subjectFlagMap: {}, subjectColumns: [], rows: [], headers: [] };
+
+/* =========================================================
+   UTILITI CARI KOLUM
+   ========================================================= */
+
+function cariKolum(keyword) {
+  const k = (keyword || "").toLowerCase().trim();
+  return Object.values(headerMap).find(h =>
+    (h || "").toLowerCase().trim() === k
+  );
+}
+
+function cariKolumGredSubjek(kod) {
+  const U = kod.toUpperCase();
+  return Object.values(headerMap).find(h => {
+    const H = (h || "").toUpperCase();
+    return H.startsWith(U + " ") && /\b(G|GRED|GRADE)\b/.test(H);
+  });
+}
+
+
+/* =========================================================
+   CSV PARSER (KONSISTEN DENGAN PRA-SPM & PPSA)
+   ========================================================= */
+
+function parseCSV(csv) {
+
+  const lines = csv
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l !== "");
+
+  if (lines.length < 4) {
+    console.error("❌ CSV tidak mencukupi baris.");
+    return [];
   }
 
-  // Row 1: flag (1/0/blank)
-  const flagRow = lines[0].split(",").map(c => norm(c));
+  const flagRow   = parseCSVLine(lines[0]); // 0 / 1
+  const subjekRow = parseCSVLine(lines[1]); // BM, , BI, , ...
+  const jenisRow  = parseCSVLine(lines[2]); // M / G
 
-  // Cari header sebenar: baris yang mengandungi "GRED PURATA"
-  let headerIndex = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const cols = lines[i].split(",").map(c => norm(c));
-    const upper = cols.map(c => normUpper(c));
-    if (upper.includes("GRED PURATA")) {
-      headerIndex = i;
-      break;
-    }
-  }
+  /* ---------- Bina header penuh ---------- */
+  let currentSubjek = "";
+  const headers = subjekRow.map((s, i) => {
+    if (s) currentSubjek = s;
+    return jenisRow[i]
+      ? `${currentSubjek} ${jenisRow[i]}`.trim()
+      : currentSubjek;
+  });
 
-  const headersRaw = lines[headerIndex].split(",").map(c => norm(c));
+  /* ---------- Header Map ---------- */
+  headerMap = {};
+  headers.forEach(h => {
+    if (h) headerMap[h.toLowerCase()] = h;
+  });
 
-  // Jadikan header unik jika ada yang kosong (""), supaya boleh map object dengan selamat
-  const headers = headersRaw.map((h, idx) => (h !== "" ? h : `__EMPTY_${idx}`));
-
-  // Bina subjectFlagMap dan subjectColumns
-  const subjectFlagMap = {};
-  const subjectColumns = [];
-
-  headers.forEach((h, idx) => {
-    const code = normUpper(h);
-
-    // Kod subjek ringkas (BM, BI, M, SEJ, SN, MT, PAI, PM, PSV, PJK, BIO, KIM, FIZ, SS, SK, SRT, PER, PNG, PA, TAS...)
-    // Abaikan header sistem seperti BIL, NAMA, dll.
-    if (/^[A-Z]{1,4}$/.test(code) && !["BIL", "TH", "G", "E", "D", "C", "C+", "B", "B+", "A-", "A", "A+"].includes(code)) {
-      const flag = norm(flagRow[idx] || "");
-      if (flag === "0" || flag === "1") subjectFlagMap[code] = flag;
-      subjectColumns.push(h); // simpan nama kolum asal (contoh "BM")
+  /* ---------- Subject Flag Map (ikut kolum MARKAH) ---------- */
+  subjectFlagMap = {};
+  subjekRow.forEach((kod, i) => {
+    const jenis = (jenisRow[i] || "").toUpperCase();
+    const flag  = (flagRow[i] || "").trim();
+    if (kod && jenis === "M" && (flag === "0" || flag === "1")) {
+      subjectFlagMap[kod.toUpperCase()] = flag;
     }
   });
 
-  // Data rows selepas header
-  const rowsLines = lines.slice(headerIndex + 1);
-  const rowsObj = rowsLines.map(line => {
-    const cols = line.split(",").map(c => norm(c));
+  /* =====================================================
+     🔥 INI PALING PENTING
+     subjectColumns = HANYA kolum GRED
+     ===================================================== */
+  subjectColumns = headers.filter(h => {
+    if (!h) return false;
+    const U = h.toUpperCase();
+    if (U.includes("PURATA") || U.includes("KESELURUHAN")) return false;
+    return /\b(G|GRED|GRADE)\b/.test(U);
+  });
+
+  console.log("✅ subjectColumns (GRED sahaja):", subjectColumns);
+  console.log("✅ subjectFlagMap:", subjectFlagMap);
+
+  /* ---------- Data Murid ---------- */
+  const dataRows = lines.slice(3).map(row => {
+    const vals = parseCSVLine(row);
     const obj = {};
-    headers.forEach((h, idx) => obj[h] = cols[idx] ?? "");
+    headers.forEach((h, i) => {
+      obj[h] = (vals[i] || "").trim();
+    });
     return obj;
   });
 
-  console.log("✅ Header CSV yang digunakan:", headersRaw);
-  console.log("✅ subjectFlagMap:", subjectFlagMap);
-  console.log("✅ subjectColumns:", subjectColumns);
-
-  return { subjectFlagMap, subjectColumns, rows: rowsObj, headers: headersRaw };
+  return dataRows;
 }
 
 
-/* =========================
-   Cari kolum subjek (contoh BM) dalam subjectColumns
-========================= */
-function cariKolumGredSubjek(subjCode, subjectColumns) {
-  const code = normUpper(subjCode);
-  return subjectColumns.find(col => normUpper(col) === code) || null;
+/* =========================================================
+   CSV LINE PARSER
+   ========================================================= */
+
+function parseCSVLine(line) {
+  const out = [];
+  let cur = "";
+  let q = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') q = !q;
+    else if (c === "," && !q) {
+      out.push(cur); cur = "";
+    } else cur += c;
+  }
+  out.push(cur);
+  return out.map(s => s.trim());
 }
 
 
-/* =========================
-   KPI HEADER (GPS + %LMS) - ikut kod asal Cikgu
-   GPS: subjek WAJIB sahaja (flag=1)
-   % LMS: BM & SEJ ≠ G
-========================= */
-function kiraHeaderKPI(rows, subjectColumns, subjectFlagMap) {
-  const gpsElHeader   = document.getElementById('gpsValue');
-  const sijilElHeader = document.getElementById('layakSijilValue');
+/* =========================================================
+   KPI HEADER (GPS & LAYAK SIJIL) – VERSION STABIL
+   ========================================================= */
 
-  let jumlahNilai = 0,
-      bilGred     = 0,
-      jumlahMurid = 0,
-      layak       = 0;
+function kiraHeaderKPI(data) {
 
-  const bmCol  = cariKolumGredSubjek("BM", subjectColumns);
-  const sejCol = cariKolumGredSubjek("SEJ", subjectColumns);
+  const gpsEl   = document.getElementById("gpsValue");
+  const sijilEl = document.getElementById("layakSijilValue");
 
-  // ✅ Kolum subjek WAJIB sahaja
-  const wajibColumns = subjectColumns.filter(colName => {
-    const subjCode = normUpper(colName);
-    const flag = subjectFlagMap[subjCode];
-    if (flag === "0") return false; // elektif → jangan kira
-    return true;                    // 1 atau tiada flag → kira
+  let jumlahNilai = 0;
+  let bilGred = 0;
+  let jumlahMurid = 0;
+  let layak = 0;
+
+  const bmCol  = cariKolumGredSubjek("BM");
+  const sejCol = cariKolumGredSubjek("SEJ");
+
+  /* ---------- Subjek WAJIB sahaja ---------- */
+  const wajibColumns = subjectColumns.filter(col => {
+    const kod = col.split(" ")[0].toUpperCase();
+    return subjectFlagMap[kod] !== "0";
   });
 
-  console.log("👉 Kolum GRED subjek wajib yang dikira GPS:", wajibColumns);
+  console.log("👉 Kolum wajib dikira GPS:", wajibColumns);
 
-  rows.forEach(row => {
+  data.forEach(row => {
+
     let adaGred = false;
 
-    // GPS: hanya subjek wajib
     wajibColumns.forEach(col => {
-      const g = normUpper(row[col]);
+      const g = (row[col] || "").toUpperCase();
       if (gradeValueMapping.hasOwnProperty(g)) {
         jumlahNilai += gradeValueMapping[g];
         bilGred++;
@@ -568,118 +562,43 @@ function kiraHeaderKPI(rows, subjectColumns, subjectFlagMap) {
     if (adaGred) {
       jumlahMurid++;
 
-      // Layak Sijil: BM & SEJ ≠ G
-      const bm  = normUpper(bmCol  ? row[bmCol]  : "");
-      const sej = normUpper(sejCol ? row[sejCol] : "");
-      if (bm && sej && bm !== "G" && sej !== "G") layak++;
-    }
-  });
+      const bm  = bmCol  ? (row[bmCol]  || "").toUpperCase() : "";
+      const sej = sejCol ? (row[sejCol] || "").toUpperCase() : "";
 
-  console.log("👉 jumlahNilai:", jumlahNilai, "bilGred:", bilGred, "jumlahMurid:", jumlahMurid, "layak:", layak);
-
-  const gps = bilGred ? (jumlahNilai / bilGred).toFixed(2) : "-";
-  const peratusLayak = jumlahMurid ? ((layak / jumlahMurid) * 100).toFixed(1) + "%" : "-";
-
-  gpsElHeader.textContent   = gps;
-  sijilElHeader.textContent = peratusLayak;
-
-  return {
-    gps: (gps === "-" ? null : parseFloat(gps)),
-    peratusLayak
-  };
-}
-
-
-/* =========================
-   Carta GP Sekolah (PPSA vs PraSPM)
-   - elak chart bertindih: destroy instance lama
-========================= */
-let chartGpSekolahInstance = null;
-
-function binaCartaGpSekolah(gpPPSA, gpPra) {
-  const canvas = document.getElementById('chartGpSekolah');
-  if (!canvas) return;
-
-  if (chartGpSekolahInstance) chartGpSekolahInstance.destroy();
-
-  chartGpSekolahInstance = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: ['PPSA', 'PraSPM'],
-      datasets: [{
-        label: 'GPS (subjek wajib)',
-        data: [gpPPSA, gpPra],
-        tension: 0.35,
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: true } },
-      scales: {
-        y: { reverse: true, suggestedMin: 1, suggestedMax: 9 }
+      if (bm && sej && bm !== "G" && sej !== "G" && bm !== "TH" && sej !== "TH") {
+        layak++;
       }
     }
   });
+
+  const gps = bilGred ? (jumlahNilai / bilGred).toFixed(2) : "-";
+  const peratusLayak = jumlahMurid
+    ? ((layak / jumlahMurid) * 100).toFixed(1) + "%"
+    : "-";
+
+  gpsEl.textContent   = gps;
+  sijilEl.textContent = peratusLayak;
+
+  console.log("✅ GPS:", gps, "Layak:", peratusLayak);
 }
 
 
-/* =========================
-   LOAD 2 CSV & KEMASKINI TAB 1 + KPI HEADER
-   - KPI header guna PraSPM (terkini)
-========================= */
-async function loadAllData() {
-  try {
-    const [ppsText, praText] = await Promise.all([
-      fetch(csvUrlPPSA).then(r => r.text()),
-      fetch(csvUrlPraSPM).then(r => r.text())
-    ]);
-
-    const pps = parseCsvForKPI(ppsText);
-    const pra = parseCsvForKPI(praText);
-
-    // KPI untuk PPSA & PraSPM (untuk kad bawah carta)
-    const kpiPPSA = kiraHeaderKPI(pps.rows, pps.subjectColumns, pps.subjectFlagMap);
-    const kpiPra  = kiraHeaderKPI(pra.rows, pra.subjectColumns, pra.subjectFlagMap);
-
-    console.log("GP PPSA =", kpiPPSA.gps);
-    console.log("GP PraSPM =", kpiPra.gps);
-
-    // Kad ringkas Tab 1
-    if (kpiPPSA.gps != null) {
-      document.getElementById('gpsPPSAValue').textContent = kpiPPSA.gps.toFixed(2);
-    }
-    if (kpiPra.gps != null) {
-      document.getElementById('gpsPraSpmValue').textContent = kpiPra.gps.toFixed(2);
-    }
-
-    // KPI header ikut PraSPM (terkini)
-    document.getElementById('gpsValue').textContent = (kpiPra.gps != null ? kpiPra.gps.toFixed(2) : "-");
-    document.getElementById('layakSijilValue').textContent = (kpiPra.peratusLayak || "-");
-
-    // Perubahan + Carta
-    if (kpiPPSA.gps != null && kpiPra.gps != null) {
-      const diff = (kpiPra.gps - kpiPPSA.gps);
-      document.getElementById('perubahanGpsValue').textContent = diff.toFixed(2);
-      binaCartaGpSekolah(kpiPPSA.gps, kpiPra.gps);
-    }
-
-  } catch (err) {
-    console.error("Ralat memuat CSV:", err);
-  }
-}
-
-
-/* =========================
+/* =========================================================
    INIT
-========================= */
-// Tahun footer
-document.getElementById('yearNow').textContent = new Date().getFullYear();
+   ========================================================= */
 
-// Inisialisasi awal
-switchTab('gp-sekolah');
-loadAllData();
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch(csvUrl);
+    const csv = await res.text();
+    cachedData = parseCSV(csv);
+    kiraHeaderKPI(cachedData);
+  } catch (e) {
+    console.error("❌ Ralat CSV:", e);
+  }
+});
 </script>
+
 
 
 </body>
