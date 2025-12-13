@@ -587,6 +587,10 @@ function kiraGpSekolah(data) {
                 const gpPPSA = kiraGpSekolah(dataPPSA);
                 const gpPra = kiraGpSekolah(dataPra);
 
+                console.log("GP PPSA =", gpPPSA);
+                console.log("GP PraSPM =", gpPra);
+
+
                 // Kemaskini paparan jika berjaya kira
                 if (gpPPSA != null) {
                     document.getElementById('gpsPPSAValue').textContent = gpPPSA.toFixed(2);
