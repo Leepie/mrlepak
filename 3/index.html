@@ -417,15 +417,47 @@
         }
 
         // Parser CSV ringkas -> { headers, rows }
-        function parseCsvToArray(text) {
-            const lines = text.trim().split(/\r?\n/).filter(l => l.trim() !== "");
-            if (lines.length === 0) return { headers: [], rows: [] };
-            const headers = lines[0].split(',').map(h => h.trim());
-            const rows = lines.slice(1).map(line =>
-                line.split(',').map(v => v.trim())
-            );
-            return { headers, rows };
+        // Parser CSV: cari sendiri baris header yang ada "GRED PURATA"
+function parseCsvToArray(text) {
+    const lines = text.trim().split(/\r?\n/).filter(l => l.trim() !== "");
+    if (lines.length === 0) return { headers: [], rows: [] };
+
+    let headerIndex = 0;
+    let headers = [];
+
+    // Cari baris yang mengandungi "GRED PURATA" atau nama GP lain
+    for (let i = 0; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim());
+        const upper = cols.map(c => c.toUpperCase());
+
+        if (
+            upper.includes("GRED PURATA") ||
+            upper.includes("GRED PURATA SEKOLAH") ||
+            upper.includes("GP SEKOLAH") ||
+            upper.includes("GPS SEKOLAH")
+        ) {
+            headerIndex = i;
+            headers = cols;
+            break;
         }
+    }
+
+    // Jika tak jumpa langsung, fallback ke baris pertama
+    if (!headers.length) {
+        headers = lines[0].split(',').map(c => c.trim());
+        headerIndex = 0;
+    }
+
+    // Semua baris selepas header dianggap data
+    const rows = lines.slice(headerIndex + 1).map(line =>
+        line.split(',').map(v => v.trim())
+    );
+
+    console.log("Header CSV yang digunakan:", headers); // debug
+
+    return { headers, rows };
+}
+
 
         // Cari indeks kolum GP (cuba beberapa nama biasa)
         // Cari indeks kolum GP (lebih fleksibel, ikut header Cikgu)
