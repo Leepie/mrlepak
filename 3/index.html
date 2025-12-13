@@ -428,43 +428,87 @@
         }
 
         // Cari indeks kolum GP (cuba beberapa nama biasa)
-        function cariIndeksKolumGp(headers) {
-            const upper = headers.map(h => h.toUpperCase());
-            const possibleNames = [
-                "GP SEKOLAH",
-                "GPS SEKOLAH",
-                "GP SEK",
-                "GPS",
-                "GP"
-            ];
-            for (const name of possibleNames) {
-                const idx = upper.indexOf(name);
-                if (idx !== -1) return idx;
-            }
-            return -1;
+        // Cari indeks kolum GP (lebih fleksibel, ikut header Cikgu)
+function cariIndeksKolumGp(headers) {
+    const upper = headers.map(h => (h || "").toString().trim().toUpperCase());
+
+    // 1. Cuba padanan tepat dulu (priority tinggi)
+    const exactOrder = [
+        "GRED PURATA",          // ✅ kolum dalam CSV Cikgu
+        "GRED PURATA SEKOLAH",
+        "GP SEKOLAH",
+        "GPS SEKOLAH",
+        "GP SEK",
+        "GPS",
+        "GP"
+    ];
+    for (const name of exactOrder) {
+        const idx = upper.indexOf(name);
+        if (idx !== -1) return idx;
+    }
+
+    // 2. Cuba padanan "contains" yang lebih longgar
+    let candidate = -1;
+    for (let i = 0; i < upper.length; i++) {
+        const h = upper[i];
+
+        // contoh: "GRED PURATA SEKOLAH (GPS)"
+        if (h.includes("GRED PURATA") && h.includes("SEKOLAH")) {
+            return i;
         }
 
-        // Kira GP Sekolah = purata nilai GP semua murid
-        function kiraGpSekolah(data) {
-            const { headers, rows } = data;
-            const idxGp = cariIndeksKolumGp(headers);
-            if (idxGp === -1) {
-                console.warn("Kolum GP tidak ditemui dalam CSV:", headers);
-                return null;
-            }
-            let sum = 0;
-            let count = 0;
-            rows.forEach(r => {
-                const raw = (r[idxGp] || "").replace(",", "."); // tukar koma ke titik
-                const val = parseFloat(raw);
-                if (!isNaN(val)) {
-                    sum += val;
-                    count++;
-                }
-            });
-            if (!count) return null;
-            return +(sum / count).toFixed(2);
+        // contoh: "GPS_SEK" / "GPS SEKOLAH"
+        if (h.includes("GPS") && h.includes("SEK")) {
+            if (candidate === -1) candidate = i;
         }
+
+        // contoh: "GP_SEK" / "GP SEKOLAH"
+        if (h.includes("GP") && h.includes("SEK")) {
+            if (candidate === -1) candidate = i;
+        }
+    }
+    if (candidate !== -1) return candidate;
+
+    // 3. Last resort: ambil mana-mana header yang ada "GP"
+    const anyGp = upper.findIndex(h => h.includes("GP"));
+    if (anyGp !== -1) return anyGp;
+
+    // 4. Kalau betul-betul tak jumpa
+    console.warn("Masih tak jumpa kolum GP. Header:", headers);
+    return -1;
+}
+
+
+        // Kira GP Sekolah = purata nilai GP semua murid
+      // Kira GP Sekolah = purata nilai GRED PURATA semua murid
+function kiraGpSekolah(data) {
+    const { headers, rows } = data;
+
+    const idxGp = cariIndeksKolumGp(headers);
+    if (idxGp === -1) {
+        console.warn("Kolum GP tidak ditemui dalam CSV:", headers);
+        return null;
+    }
+
+    // Debug: tunjuk kolum mana yang digunakan
+    console.log("Kolum GP yang digunakan:", headers[idxGp]);
+
+    let sum = 0;
+    let count = 0;
+
+    rows.forEach(r => {
+        const raw = (r[idxGp] || "").replace(",", "."); // tukar koma ke titik perpuluhan
+        const val = parseFloat(raw);
+        if (!isNaN(val)) {
+            sum += val;
+            count++;
+        }
+    });
+
+    if (!count) return null;
+    return +(sum / count).toFixed(2);
+}
+
 
         // Bina carta GP Sekolah PPSA vs PraSPM
         function binaCartaGpSekolah(gpPPSA, gpPra) {
