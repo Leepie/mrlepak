@@ -201,7 +201,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <img src="https://raw.githubusercontent.com/Leepie/mrlepak/master/LOGO.jpg"
-                            alt="XCODE Mr LePaKo"
+                            alt="XCODE Mr LePaK"
                             class="h-16 w-16 object-contain rounded-full border" />
                         <div>
                             <h1 class="text-2xl font-bold text-gray-900">Analisis PPSA vs PraSPM</h1>
@@ -273,12 +273,12 @@
                     </span>
                 </div>
                 <span class="text-[11px] sm:text-xs text-gray-400">
-                    (Data sebenar akan digabung kemudian)
+                    (Data sebenar diambil terus dari CSV PPSA &amp; PraSPM)
                 </span>
             </div>
         </div>
 
-        <!-- =================== RUANG KANDUNGAN TAB (REKA BENTUK SAHAJA) =================== -->
+        <!-- =================== RUANG KANDUNGAN TAB =================== -->
         <main class="container-max px-4 pb-10 space-y-6">
 
             <!-- Panel GP Sekolah -->
@@ -288,7 +288,7 @@
                         <div>
                             <h2 class="text-lg font-semibold">GP Sekolah – PPSA vs PraSPM</h2>
                             <p class="text-sm text-gray-500">
-                                Carta GP Sekolah akan dipaparkan di sini (TOV / PPSA / PraSPM / SPM jika perlu).
+                                Carta GP Sekolah akan dipaparkan di sini (PPSA berbanding PraSPM).
                             </p>
                         </div>
                         <div class="flex gap-2 text-xs">
@@ -307,28 +307,28 @@
                         <canvas id="chartGpSekolah"></canvas>
                     </div>
 
-                    <!-- Ringkasan kecil (placeholder) -->
+                    <!-- Ringkasan kecil -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                         <div class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
                             <div
                                 class="text-[11px] text-gray-500 uppercase tracking-wide">
                                 GPS PPSA
                             </div>
-                            <div class="text-lg font-bold text-blue-600">--</div>
+                            <div class="text-lg font-bold text-blue-600" id="gpsPPSAValue">--</div>
                         </div>
                         <div class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
                             <div
                                 class="text-[11px] text-gray-500 uppercase tracking-wide">
                                 GPS PraSPM
                             </div>
-                            <div class="text-lg font-bold text-blue-600">--</div>
+                            <div class="text-lg font-bold text-blue-600" id="gpsPraSpmValue">--</div>
                         </div>
                         <div class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
                             <div
                                 class="text-[11px] text-gray-500 uppercase tracking-wide">
                                 Perubahan (PraSPM – PPSA)
                             </div>
-                            <div class="text-lg font-bold text-emerald-600">--</div>
+                            <div class="text-lg font-bold text-emerald-600" id="perubahanGpsValue">--</div>
                         </div>
                     </div>
                 </div>
@@ -389,6 +389,13 @@
     </footer>
 
     <script>
+        // URL CSV
+        /* PPSA */
+        const csvUrlPPSA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdnpPQ7vfOqMuuV-DzAmPtQjCEZBwVtXxLBpGFUguqC3ZqqouMN_Bey3AIzXSPBlziV1bNKSpGjfBY/pub?gid=1172655606&single=true&output=csv";
+
+        /* PRASPM */
+        const csvUrlPraSPM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRck15kwRkf75NPm1IouErXU_CDgHjMEGw1nm0FNCu1XAkIb3EF0XV36Mq66wui_0imgyC9OKzoVQl9/pub?gid=22937657&single=true&output=csv";
+
         // Fungsi tukar tab (4 tab sahaja)
         function switchTab(tabId) {
             const tabs = ['gp-sekolah', 'lms-sekolah', 'subjek-teras', 'mp-kritikal'];
@@ -409,10 +416,127 @@
             });
         }
 
+        // Parser CSV ringkas -> { headers, rows }
+        function parseCsvToArray(text) {
+            const lines = text.trim().split(/\r?\n/).filter(l => l.trim() !== "");
+            if (lines.length === 0) return { headers: [], rows: [] };
+            const headers = lines[0].split(',').map(h => h.trim());
+            const rows = lines.slice(1).map(line =>
+                line.split(',').map(v => v.trim())
+            );
+            return { headers, rows };
+        }
+
+        // Cari indeks kolum GP (cuba beberapa nama biasa)
+        function cariIndeksKolumGp(headers) {
+            const upper = headers.map(h => h.toUpperCase());
+            const possibleNames = [
+                "GP SEKOLAH",
+                "GPS SEKOLAH",
+                "GP SEK",
+                "GPS",
+                "GP"
+            ];
+            for (const name of possibleNames) {
+                const idx = upper.indexOf(name);
+                if (idx !== -1) return idx;
+            }
+            return -1;
+        }
+
+        // Kira GP Sekolah = purata nilai GP semua murid
+        function kiraGpSekolah(data) {
+            const { headers, rows } = data;
+            const idxGp = cariIndeksKolumGp(headers);
+            if (idxGp === -1) {
+                console.warn("Kolum GP tidak ditemui dalam CSV:", headers);
+                return null;
+            }
+            let sum = 0;
+            let count = 0;
+            rows.forEach(r => {
+                const raw = (r[idxGp] || "").replace(",", "."); // tukar koma ke titik
+                const val = parseFloat(raw);
+                if (!isNaN(val)) {
+                    sum += val;
+                    count++;
+                }
+            });
+            if (!count) return null;
+            return +(sum / count).toFixed(2);
+        }
+
+        // Bina carta GP Sekolah PPSA vs PraSPM
+        function binaCartaGpSekolah(gpPPSA, gpPra) {
+            const ctx = document.getElementById('chartGpSekolah');
+            if (!ctx) return;
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['PPSA', 'PraSPM'],
+                    datasets: [{
+                        label: 'GP Sekolah',
+                        data: [gpPPSA, gpPra],
+                        tension: 0.35,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: {
+                            reverse: true,          // GP rendah = lebih baik
+                            suggestedMin: 1,
+                            suggestedMax: 9
+                        }
+                    }
+                }
+            });
+        }
+
+        // Muatkan kedua-dua CSV dan kemaskini Tab 1
+        async function loadAllData() {
+            try {
+                const [ppsText, praText] = await Promise.all([
+                    fetch(csvUrlPPSA).then(r => r.text()),
+                    fetch(csvUrlPraSPM).then(r => r.text())
+                ]);
+
+                const dataPPSA = parseCsvToArray(ppsText);
+                const dataPra = parseCsvToArray(praText);
+
+                const gpPPSA = kiraGpSekolah(dataPPSA);
+                const gpPra = kiraGpSekolah(dataPra);
+
+                // Kemaskini paparan jika berjaya kira
+                if (gpPPSA != null) {
+                    document.getElementById('gpsPPSAValue').textContent = gpPPSA.toFixed(2);
+                }
+                if (gpPra != null) {
+                    document.getElementById('gpsPraSpmValue').textContent = gpPra.toFixed(2);
+                    // KPI atas: guna GP peperiksaan terkini (PraSPM)
+                    document.getElementById('gpsValue').textContent = gpPra.toFixed(2);
+                }
+
+                if (gpPPSA != null && gpPra != null) {
+                    const diff = gpPra - gpPPSA; // Pra - PPSA
+                    document.getElementById('perubahanGpsValue').textContent = diff.toFixed(2);
+                    binaCartaGpSekolah(gpPPSA, gpPra);
+                }
+            } catch (err) {
+                console.error("Ralat memuat CSV:", err);
+            }
+        }
+
         // Tahun footer
         document.getElementById('yearNow').textContent = new Date().getFullYear();
 
-        // Buat masa ini tiada carta / data – hanya layout.
+        // Inisialisasi awal
+        switchTab('gp-sekolah');
+        loadAllData();
     </script>
 
 </body>
