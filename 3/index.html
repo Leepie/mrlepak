@@ -261,18 +261,75 @@
             </div>
         </div>
 
+        <!-- ========== BAR KAWALAN RINGKAS (MOD & TAHUN) ========== -->
+        <div class="container-max px-4 pb-2">
+            <div class="flex flex-wrap items-center gap-2 justify-between">
+                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                        Mod: PPSA vs PraSPM
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700">
+                        Tahun: 2025
+                    </span>
+                </div>
+                <span class="text-[11px] sm:text-xs text-gray-400">
+                    (Data sebenar akan digabung kemudian)
+                </span>
+            </div>
+        </div>
+
         <!-- =================== RUANG KANDUNGAN TAB (REKA BENTUK SAHAJA) =================== -->
         <main class="container-max px-4 pb-10 space-y-6">
 
             <!-- Panel GP Sekolah -->
             <section id="panel-gp-sekolah">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
-                    <h2 class="text-lg font-semibold mb-1">GP Sekolah – PPSA vs PraSPM</h2>
-                    <p class="text-sm text-gray-500 mb-4">
-                        Carta GP Sekolah akan dipaparkan di sini (TOV / PPSA / PraSPM / SPM jika perlu).
-                    </p>
-                    <div class="chart-fixed">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                        <div>
+                            <h2 class="text-lg font-semibold">GP Sekolah – PPSA vs PraSPM</h2>
+                            <p class="text-sm text-gray-500">
+                                Carta GP Sekolah akan dipaparkan di sini (TOV / PPSA / PraSPM / SPM jika perlu).
+                            </p>
+                        </div>
+                        <div class="flex gap-2 text-xs">
+                            <span
+                                class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                GP rendah = lebih baik
+                            </span>
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">
+                                Skala 1.00 – 9.00
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Carta -->
+                    <div class="chart-fixed mb-4">
                         <canvas id="chartGpSekolah"></canvas>
+                    </div>
+
+                    <!-- Ringkasan kecil (placeholder) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                        <div class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
+                            <div
+                                class="text-[11px] text-gray-500 uppercase tracking-wide">
+                                GPS PPSA
+                            </div>
+                            <div class="text-lg font-bold text-blue-600">--</div>
+                        </div>
+                        <div class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
+                            <div
+                                class="text-[11px] text-gray-500 uppercase tracking-wide">
+                                GPS PraSPM
+                            </div>
+                            <div class="text-lg font-bold text-blue-600">--</div>
+                        </div>
+                        <div class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
+                            <div
+                                class="text-[11px] text-gray-500 uppercase tracking-wide">
+                                Perubahan (PraSPM – PPSA)
+                            </div>
+                            <div class="text-lg font-bold text-emerald-600">--</div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -295,7 +352,8 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
                     <h2 class="text-lg font-semibold mb-1">GP Subjek Teras – PPSA vs PraSPM</h2>
                     <p class="text-sm text-gray-500 mb-4">
-                        Carta GP untuk subjek teras (BM, BI, Matematik, Sains, Sejarah dan lain-lain) akan dipaparkan di sini.
+                        Carta GP untuk subjek teras (BM, BI, Matematik, Sains, Sejarah dan lain-lain) akan dipaparkan
+                        di sini.
                     </p>
                     <div class="chart-fixed">
                         <canvas id="chartSubjekTeras"></canvas>
@@ -319,12 +377,18 @@
 
         </main>
 
-        <!-- FOOTER RINGKAS -->
+    </div>
+
+    <!-- =================== FOOTER =================== -->
+    <footer class="mt-10">
+        <div class="w-full h-[1.5px] bg-gradient-to-r from-blue-400 to-purple-400 opacity-80"></div>
+
+        <p class="text-center text-[11.5px] text-gray-500 py-4">
+            © <span id="yearNow"></span> XCode Mr LePaK – Analisis PPSA vs PraSPM
+        </p>
+    </footer>
 
     <script>
-        // Tahun footer
-        document.getElementById('yearNow').textContent = new Date().getFullYear();
-
         // Fungsi tukar tab (4 tab sahaja)
         function switchTab(tabId) {
             const tabs = ['gp-sekolah', 'lms-sekolah', 'subjek-teras', 'mp-kritikal'];
@@ -345,21 +409,11 @@
             });
         }
 
+        // Tahun footer
+        document.getElementById('yearNow').textContent = new Date().getFullYear();
+
         // Buat masa ini tiada carta / data – hanya layout.
     </script>
-
-    <footer class="mt-10">
-    <div class="w-full h-[1.5px] bg-gradient-to-r from-blue-400 to-purple-400 opacity-80"></div>
-
-    <p class="text-center text-[11.5px] text-gray-500 py-4">
-        © <span id="yearNow"></span> XCode Mr LePaK – Analisis PPSA vs PraSPM
-    </p>
-</footer>
-
-<script>
-    document.getElementById('yearNow').textContent = new Date().getFullYear();
-</script>
-
 
 </body>
 
