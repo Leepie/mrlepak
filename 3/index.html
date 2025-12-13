@@ -513,6 +513,7 @@ function cariIndeksKolumGp(headers) {
 
         // Kira GP Sekolah = purata nilai GP semua murid
       // Kira GP Sekolah = purata nilai GRED PURATA semua murid
+// Kira GP Sekolah = purata GRED PURATA semua murid (ikut BIL)
 function kiraGpSekolah(data) {
     const { headers, rows } = data;
 
@@ -522,24 +523,47 @@ function kiraGpSekolah(data) {
         return null;
     }
 
-    // Debug: tunjuk kolum mana yang digunakan
-    console.log("Kolum GP yang digunakan:", headers[idxGp]);
+    // Cari kolum BIL supaya kita hanya kira baris pelajar
+    const upper = headers.map(h =>
+        (h || "")
+            .toString()
+            .replace(/\u00A0/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toUpperCase()
+    );
+    const idxBil = upper.indexOf("BIL");
+
+    console.log("Kolum GP yang digunakan:", headers[idxGp], " | idxGp =", idxGp, " | idxBil =", idxBil);
 
     let sum = 0;
     let count = 0;
 
     rows.forEach(r => {
-        const raw = (r[idxGp] || "").replace(",", "."); // tukar koma ke titik perpuluhan
+        // Jika ada kolum BIL, pastikan ini baris pelajar (BIL nombor > 0)
+        if (idxBil !== -1) {
+            const bilRaw = (r[idxBil] || "").toString().trim();
+            const bilVal = parseInt(bilRaw, 10);
+            if (isNaN(bilVal) || bilVal <= 0) {
+                // Bukan pelajar → skip
+                return;
+            }
+        }
+
+        const raw = (r[idxGp] || "").toString().replace(",", "."); // tukar koma ke titik
         const val = parseFloat(raw);
-        if (!isNaN(val)) {
+        if (!isNaN(val) && val > 0) { // GP takkan 0, jadi 0 pun kita abaikan
             sum += val;
             count++;
         }
     });
 
+    console.log("Bilangan murid dikira:", count, " | Jumlah GP:", sum);
+
     if (!count) return null;
     return +(sum / count).toFixed(2);
 }
+
 
 
         // Bina carta GP Sekolah PPSA vs PraSPM
