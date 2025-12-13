@@ -7,11 +7,9 @@
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js CDN (diminta tersedia) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-  // Jadikan legend semua carta berbentuk bulat secara lalai
   if (window.Chart) {
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
@@ -35,7 +33,6 @@
     }
     .glass {
       backdrop-filter: saturate(140%) blur(10px);
-      -webkit-backdrop-filter: saturate(140%) blur(10px);
       background: rgba(255,255,255,.72);
     }
     @media (prefers-color-scheme: dark) {
@@ -55,13 +52,10 @@
       <header class="flex flex-col items-center text-center gap-4">
         <img
           src="https://raw.githubusercontent.com/Leepie/mrlepak/master/LOGO.jpg"
-          alt="Mr LePaK"
-          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full ring-2 ring-white/60 dark:ring-white/20 object-cover"
+          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover"
         />
         <div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Analisis PPSA vs PraSPM
-          </h1>
+          <h1 class="text-2xl sm:text-3xl font-extrabold">Analisis PPSA vs PraSPM</h1>
           <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-1">
             “Sistem Analisis Prestasi Akademik SMK"
           </p>
@@ -70,38 +64,33 @@
 
       <div class="my-8 border-t border-slate-200/70 dark:border-white/10"></div>
 
-      <!-- Butang PPSA & PraSPM -->
+      <!-- PPSA + PraSPM Buttons -->
       <section class="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4">
         <a href="https://leepie.github.io/mrlepak/1/index.html"
-           class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 text-base sm:text-lg font-semibold
-                  bg-blue-600 hover:bg-blue-700 active:scale-[.99] text-white shadow-lg shadow-blue-600/20
-                  transition-transform">
+           class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 
+                  text-base sm:text-lg font-semibold bg-blue-600 hover:bg-blue-700
+                  text-white shadow-lg shadow-blue-600/20 transition">
           <span class="mr-2">PPSA</span>
-          <svg class="w-5 h-5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
-          </svg>
         </a>
 
         <a href="https://leepie.github.io/mrlepak/2/index.html"
-           class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 text-base sm:text-lg font-semibold
-                  bg-violet-600 hover:bg-violet-700 active:scale-[.99] text-white shadow-lg shadow-violet-600/20
-                  transition-transform">
+           class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 
+                  text-base sm:text-lg font-semibold bg-violet-600 hover:bg-violet-700
+                  text-white shadow-lg shadow-violet-600/20 transition">
           <span class="mr-2">PraSPM</span>
-          <svg class="w-5 h-5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
-          </svg>
         </a>
       </section>
 
-      <!-- 🔥 BUTANG TAMBAHAN DI KOTAK MERAH -->
-      <section class="mt-5 text-center">
+      <!-- RED FULL-WIDTH BUTTON (NEW) -->
+      <section class="mt-6">
         <a href="#"
-           class="px-5 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-md inline-block">
-           PPSA vs PraSPM
+           class="block w-full text-center px-5 py-4 rounded-xl 
+                  bg-red-600 hover:bg-red-700 active:scale-[.99]
+                  text-white font-semibold shadow-lg shadow-red-600/30 transition">
+          PPSA vs PraSPM
         </a>
       </section>
 
-      <!-- Footer -->
       <footer class="mt-10 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
         &copy; <span id="yearNow"></span> Sistem Analisis Prestasi Akademik
       </footer>
