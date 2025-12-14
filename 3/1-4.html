@@ -60,9 +60,15 @@
     .kpi-card:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(16,24,40,.12)}
 
     /* chart height */
-    .chart-wrap{height:310px}
-    @media (max-width:1024px){.chart-wrap{height:280px}}
-    @media (max-width:640px){.chart-wrap{height:250px}}
+    .chart-wrap{height:280px}
+    @media (max-width:1024px){.chart-wrap{height:250px}}
+    @media (max-width:640px){.chart-wrap{height:220px}}
+
+    options: {
+  responsive: true,
+  maintainAspectRatio: false,
+}
+
   </style>
 
   <script>
