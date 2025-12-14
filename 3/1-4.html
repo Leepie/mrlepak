@@ -417,12 +417,21 @@ const TARGET_GPS = {
    ========================== */
 
 // Julat pilihan nilai (boleh ubah ikut kehendak Cikgu)
-const TARGET_OPTIONS = (() => {
+/*const TARGET_OPTIONS = (() => {
   const arr = [];
   // contoh 1.00 hingga 9.00 setiap 0.05
   for (let v = 1.00; v <= 9.0001; v += 0.05) arr.push(+v.toFixed(2));
   return arr;
 })();
+*/
+  const TARGET_OPTIONS = (() => {
+  const arr = [];
+  for (let i = 1; i <= 900; i++) {
+    arr.push((i / 100).toFixed(2));
+  }
+  return arr.map(Number);
+})();
+
 
 function fillSelect(selectEl, options) {
   if (!selectEl) return;
