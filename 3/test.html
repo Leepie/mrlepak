@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XCode - Analisis PPSA vs PraSPM</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    if (window.Chart) {
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+      Chart.defaults.plugins.legend.labels.boxWidth = 12;
+      Chart.defaults.plugins.legend.labels.boxHeight = 12;
+    }
+  </script>
+
+  <style>
+    body{background:#f8fafc;color:#111827;font-family:system-ui}
+    .container-max{max-width:1200px;margin:0 auto}
+    .chart-wrap{height:260px}
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+<div id="content">
+
+<!-- ================= HEADER (KEKAL) ================= -->
+<header class="bg-white shadow-sm border-b">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between">
+    <div class="flex items-center gap-4">
+      <img src="https://raw.githubusercontent.com/Leepie/mrlepak/master/LOGO.jpg"
+           class="h-14 w-14 rounded-full border" />
+      <div>
+        <h1 class="text-xl font-bold">Analisis PPSA vs PraSPM</h1>
+        <p class="text-sm text-gray-500">Indeks GP & % LMS Sekolah</p>
+      </div>
+    </div>
+    <div class="text-right">
+      <div class="text-3xl font-bold text-blue-600" id="gpsValue">--</div>
+      <div class="text-sm text-gray-500">GPS Sekolah</div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= MAIN ================= -->
+<main class="container-max px-4 pb-10 space-y-6">
+
+<section id="panel-gp-sekolah">
+<div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+
+<!-- ================= GRAF (KEKAL) ================= -->
+<div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <div class="border rounded-xl p-4">
+    <h3 class="font-semibold mb-2">Pencapaian GPS</h3>
+    <div class="chart-wrap"><canvas id="chartGpsLine"></canvas></div>
+  </div>
+  <div class="border rounded-xl p-4">
+    <h3 class="font-semibold mb-2">Perbandingan GPS</h3>
+    <div class="chart-wrap"><canvas id="chartGpsBar"></canvas></div>
+  </div>
+</div>
+
+<!-- ================= JADUAL RINGKAS GPS ================= -->
+<div class="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden mx-6 mb-6">
+
+  <!-- ★ DIUBAH: HEADER IKUT PAPARAN 2 -->
+  <div class="flex items-center justify-between px-5 py-4">
+    <div class="text-lg font-semibold">Jadual Ringkas GPS</div>
+
+    <div class="flex items-center gap-2">
+      <select id="pilihAnalisis"
+        class="w-40 px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm">
+        <option value="OTI1">OTI 1</option>
+        <option value="OTI2">OTI 2</option>
+        <option value="AR2">AR2</option>
+        <option value="ETR">ETR</option>
+      </select>
+
+      <button id="btnReset"
+        class="px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm shadow-sm hover:bg-gray-100">
+        RESET
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= TABLE (KEKAL) ================= -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-700 text-white">
+        <tr>
+          <th class="px-4 py-3 text-center">TOV</th>
+          <th class="px-4 py-3 text-center">OTI 1</th>
+          <th class="px-4 py-3 text-center">AR 1</th>
+          <th class="px-4 py-3 text-center">OTI 2</th>
+          <th class="px-4 py-3 text-center">ETR</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-t">
+          <td class="px-4 py-3 text-center font-semibold" id="tblTov">--</td>
+          <td class="px-4 py-3 text-center">
+            <select id="selOti1" class="w-32 px-2 py-1 border rounded"></select>
+          </td>
+          <td class="px-4 py-3 text-center font-semibold" id="tblAr1">--</td>
+          <td class="px-4 py-3 text-center">
+            <select id="selOti2" class="w-32 px-2 py-1 border rounded"></select>
+          </td>
+          <td class="px-4 py-3 text-center">
+            <select id="selEtr" class="w-32 px-2 py-1 border rounded"></select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</div>
+</section>
+</main>
+
+<footer class="text-center text-xs text-gray-500 py-4">
+  © <span id="yearNow"></span> XCode Mr LePaK
+</footer>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+/* ================= STATE + STORAGE ================= */
+const LS_KEY = "XCODE_GPS_FULLPAGE_V1";
+const state = {
+  pilih: "OTI1",
+  oti1: null,
+  oti2: null,
+  etr: null
+};
+
+const saved = localStorage.getItem(LS_KEY);
+if (saved) Object.assign(state, JSON.parse(saved));
+
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+/* ================= DROPDOWN BUILDER ================= */
+function buildSelect(el, val) {
+  el.innerHTML = "<option value=''>—</option>";
+  for (let v=9.0; v>=1.0; v-=0.01) {
+    const o=document.createElement("option");
+    o.value=v.toFixed(2);
+    o.textContent=v.toFixed(2);
+    el.appendChild(o);
+  }
+  if (val) el.value=val;
+}
+
+/* ================= INIT ================= */
+document.getElementById("yearNow").textContent = new Date().getFullYear();
+
+const selOti1=document.getElementById("selOti1");
+const selOti2=document.getElementById("selOti2");
+const selEtr =document.getElementById("selEtr");
+const pilih  =document.getElementById("pilihAnalisis");
+
+buildSelect(selOti1,state.oti1);
+buildSelect(selOti2,state.oti2);
+buildSelect(selEtr ,state.etr);
+pilih.value = state.pilih;
+
+/* ================= EVENTS ================= */
+selOti1.onchange=()=>{state.oti1=selOti1.value;saveState();}
+selOti2.onchange=()=>{state.oti2=selOti2.value;saveState();}
+selEtr .onchange=()=>{state.etr =selEtr.value; saveState();}
+
+pilih.onchange=()=>{state.pilih=pilih.value;saveState();}
+
+document.getElementById("btnReset").onclick=()=>{
+  Object.assign(state,{pilih:"OTI1",oti1:null,oti2:null,etr:null});
+  saveState();
+  location.reload();
+};
+</script>
+
+</body>
+</html>
