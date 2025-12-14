@@ -3,58 +3,113 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XCode - Analisis PPSA vs PraSPM (GP Sekolah)</title>
+  <title>XCode - Analisis PPSA vs PraSPM</title>
 
-  <!-- Tailwind (OK utk dev) -->
+  <!-- Tailwind (dev) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body{background:#f8fafc;color:#111827;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    .container-max{max-width:1200px;margin:0 auto}
+
+    /* pulse dot */
     .pulse-dot{position:relative}
     .pulse-dot::after{content:"";position:absolute;inset:-6px;border-radius:9999px;border:2px solid rgba(34,197,94,.4);animation:pulse 1.6s cubic-bezier(.4,0,.2,1) infinite}
     @keyframes pulse{0%{transform:scale(.6);opacity:.9}70%{transform:scale(1.4);opacity:0}100%{transform:scale(1.4);opacity:0}}
-    /* Kad nipis + rasa sama macam tab */
-    .kpi-card{border:1px solid #e5e7eb;border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.06);transition:transform .15s ease, box-shadow .15s ease}
-    .kpi-card:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(16,24,40,.12)}
+
+    /* container */
+    .container-max{max-width:1200px;margin-left:auto;margin-right:auto}
+
+    /* tab cards */
+    .analysis-tabs .card-hover{
+      height:5.5rem;
+      border:1px solid #e5e7eb;
+      border-radius:16px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      box-shadow:0 1px 2px rgba(16,24,40,.08);
+      transition:transform .10s ease, box-shadow .15s ease;
+    }
+    .analysis-tabs .card-hover:hover{
+      transform:translateY(-3px);
+      box-shadow:0 12px 24px rgba(16,24,40,.12);
+    }
+    .analysis-tabs .tab-active{
+      background:linear-gradient(135deg,#3b82f6 0%,#4f46e5 100%) !important;
+      color:#fff !important;
+      border-color:transparent !important;
+      box-shadow:0 14px 28px rgba(79,70,229,.28);
+    }
+    .analysis-tabs .tab-active .tab-title{color:#fff}
+    .analysis-tabs .tab-active .tab-emoji{filter:drop-shadow(0 6px 12px rgba(0,0,0,.18))}
+    .tab-emoji{font-size:28px;line-height:1}
+    .tab-title{font-size:18px;font-weight:700;color:#111827}
+    .tab-sub{font-size:13px;color:#6b7280}
+
+    /* cards */
     .soft-card{border:1px solid #e5e7eb;border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.06)}
-    .chart-wrap{height:330px}
-    @media (max-width:1024px){.chart-wrap{height:300px}}
-    @media (max-width:640px){.chart-wrap{height:260px}}
+    .kpi-card{
+      border:1px solid #e5e7eb;border-radius:16px;background:#fff;
+      box-shadow:0 1px 2px rgba(16,24,40,.06);
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .kpi-card:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(16,24,40,.12)}
+
+    /* chart height */
+    .chart-wrap{height:310px}
+    @media (max-width:1024px){.chart-wrap{height:280px}}
+    @media (max-width:640px){.chart-wrap{height:250px}}
   </style>
+
+  <script>
+    // Jadikan legend semua carta berbentuk bulat secara lalai
+    if (window.Chart) {
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+      Chart.defaults.plugins.legend.labels.boxWidth = 12;
+      Chart.defaults.plugins.legend.labels.boxHeight = 12;
+    }
+  </script>
 </head>
 
-<body>
+<body class="bg-gray-50 text-gray-800">
+
 <div id="content">
 
-  <!-- HEADER -->
-  <header class="bg-white border-b">
+  <!-- =================== HEADER (KEMUDAHAN ATAS) =================== -->
+  <header class="bg-white shadow-sm border-b">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex items-center justify-between gap-6">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center space-x-4">
           <img src="https://raw.githubusercontent.com/Leepie/mrlepak/master/LOGO.jpg"
                alt="XCODE Mr LePaK"
-               class="h-14 w-14 object-contain rounded-full border" />
+               class="h-16 w-16 object-contain rounded-full border" />
           <div>
-            <h1 class="text-2xl font-extrabold text-gray-900">Pencapaian Gred Purata Sekolah</h1>
-            <p class="text-sm text-gray-600">Analisis GPS berasaskan CSV PPSA &amp; PraSPM</p>
-            <div class="flex items-center gap-2 mt-1">
+            <h1 class="text-2xl font-bold text-gray-900">Analisis PPSA vs PraSPM</h1>
+            <p class="text-sm text-gray-600">Indeks GP &amp; % LMS Sekolah</p>
+            <p class="text-sm font-medium text-gray-800">SMK</p>
+            <div class="flex items-center space-x-2 mt-1">
               <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
-              <span class="text-xs text-gray-600">Kemaskini automatik</span>
+              <span class="text-xs text-gray-600">Analisis PPSA &amp; PraSPM / 2025</span>
             </div>
           </div>
         </div>
 
-        <!-- KPI Header -->
-        <div class="hidden sm:flex items-center gap-6">
+        <!-- KPI kanan (GPS + %LMS) -->
+        <div class="flex items-center gap-8">
           <div class="text-center">
-            <div class="flex items-center justify-center gap-1">
-              <div class="text-3xl font-extrabold text-blue-600" id="gpsValue">--</div>
+            <div class="flex items-center justify-center gap-2">
+              <div class="text-4xl font-extrabold text-blue-600" id="gpsValue">--</div>
+
               <!-- tooltip -->
               <div class="relative group">
-                <div class="w-4 h-4 rounded-full border border-gray-300 text-gray-500 flex items-center justify-center text-[10px] cursor-help select-none">i</div>
+                <div class="w-5 h-5 rounded-full border border-gray-300 text-gray-500 flex items-center justify-center text-[11px] cursor-help select-none">
+                  i
+                </div>
                 <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block
                             w-64 px-3 py-2 rounded-lg bg-gray-900 text-white text-[11px] shadow-lg">
                   GPS dikira berdasarkan subjek wajib sahaja<br>
@@ -65,7 +120,12 @@
                 </div>
               </div>
             </div>
-            <div class="text-sm text-gray-600">GPS (PraSPM)</div>
+            <div class="text-sm text-gray-600">Gred Purata Sekolah</div>
+          </div>
+
+          <div class="text-center">
+            <div class="text-4xl font-extrabold text-green-600" id="layakSijilValue">--%</div>
+            <div class="text-sm text-gray-600">Peratus Layak Sijil</div>
           </div>
         </div>
 
@@ -73,9 +133,38 @@
     </div>
   </header>
 
-  <!-- BAR INFO -->
-  <div class="container-max px-4 pt-5 pb-3">
-    <div class="flex flex-wrap items-center justify-between gap-2">
+  <!-- =================== MENU TAB (KEMUDAHAN ATAS) =================== -->
+  <div class="analysis-tabs max-w-[1200px] mx-auto px-4 pt-6 pb-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <button onclick="switchTab('gp-sekolah')" id="tab-gp-sekolah" class="tab-active card-hover p-4">
+        <div class="tab-emoji mb-1">📊</div>
+        <div class="tab-title">GP Sekolah</div>
+        <div class="tab-sub">PPSA vs PraSPM</div>
+      </button>
+
+      <button onclick="switchTab('lms-sekolah')" id="tab-lms-sekolah" class="card-hover p-4">
+        <div class="tab-emoji mb-1">📈</div>
+        <div class="tab-title">% LMS Sekolah</div>
+        <div class="tab-sub">Layak Sijil</div>
+      </button>
+
+      <button onclick="switchTab('subjek-teras')" id="tab-subjek-teras" class="card-hover p-4">
+        <div class="tab-emoji mb-1">📚</div>
+        <div class="tab-title">GP Subjek Teras</div>
+        <div class="tab-sub">Subjek utama</div>
+      </button>
+
+      <button onclick="switchTab('mp-kritikal')" id="tab-mp-kritikal" class="card-hover p-4">
+        <div class="tab-emoji mb-1">⚠️</div>
+        <div class="tab-title">GP MP Kritikal</div>
+        <div class="tab-sub">Tumpuan intervensi</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== BAR INFO ========== -->
+  <div class="container-max px-4 pb-2">
+    <div class="flex flex-wrap items-center gap-2 justify-between">
       <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-600">
         <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Mod: PPSA vs PraSPM</span>
         <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700">Tahun: 2025</span>
@@ -84,128 +173,154 @@
     </div>
   </div>
 
-  <!-- TAB 1: GP SEKOLAH -->
-  <main class="container-max px-4 pb-10">
-    <section class="soft-card overflow-hidden">
+  <!-- =================== RUANG KANDUNGAN TAB =================== -->
+  <main class="container-max px-4 pb-10 space-y-6">
 
-      <!-- tajuk kecil -->
-      <div class="px-5 py-4 border-b bg-gradient-to-r from-indigo-50 via-white to-sky-50">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
-          <div>
-            <h2 class="text-xl font-extrabold text-gray-900">Pencapaian GPS</h2>
-            <p class="text-sm text-gray-500">Paparan seperti contoh: Line + Bar + Jadual ringkas</p>
-          </div>
-          <div class="flex flex-wrap gap-2 text-xs">
-            <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">GP rendah = lebih baik</span>
-            <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Skala 1.00 – 9.00</span>
-          </div>
-        </div>
-      </div>
+    <!-- ================= TAB 1: GP SEKOLAH (CARTA CONTOH) ================= -->
+    <section id="panel-gp-sekolah">
+      <div class="soft-card overflow-hidden">
 
-      <div class="p-5 space-y-5">
-
-        <!-- 2 carta side-by-side -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <!-- LINE -->
-          <div class="soft-card p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="font-bold text-gray-800">Pencapaian GPS</div>
-              <div class="text-xs text-gray-400">Line</div>
+        <div class="px-5 py-4 border-b bg-gradient-to-r from-indigo-50 via-white to-sky-50">
+          <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
+            <div>
+              <h2 class="text-xl font-extrabold text-gray-900">Pencapaian Gred Purata Sekolah</h2>
+              <p class="text-sm text-gray-500">Line + Bar + Jadual ringkas (seperti contoh)</p>
             </div>
-            <div class="chart-wrap">
-              <canvas id="chartGpsLine"></canvas>
-            </div>
-          </div>
-
-          <!-- BAR -->
-          <div class="soft-card p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="font-bold text-gray-800">Perbandingan GPS</div>
-              <div class="text-xs text-gray-400">Bar</div>
-            </div>
-            <div class="chart-wrap">
-              <canvas id="chartGpsBar"></canvas>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">GP rendah = lebih baik</span>
+              <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Skala 1.00 – 9.00</span>
             </div>
           </div>
         </div>
 
-        <!-- KPI cards nipis (rasa sama macam tab) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div class="kpi-card px-4 py-3">
-            <div class="flex items-start justify-between">
-              <div>
-                <div class="text-[11px] text-gray-500 uppercase tracking-wide">TOV (PPSA)</div>
-                <div class="mt-1 text-2xl font-extrabold text-blue-600" id="gpsPPSAValue">--</div>
-                <div class="mt-1 text-sm text-gray-500">GPS sebenar</div>
+        <div class="p-5 space-y-5">
+
+          <!-- 2 carta -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="soft-card p-4">
+              <div class="flex items-center justify-between mb-2">
+                <div class="font-bold text-gray-800">Pencapaian GPS</div>
+                <div class="text-xs text-gray-400">Line</div>
               </div>
-              <div class="h-10 w-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700">🧾</div>
-            </div>
-          </div>
-
-          <div class="kpi-card px-4 py-3">
-            <div class="flex items-start justify-between">
-              <div>
-                <div class="text-[11px] text-gray-500 uppercase tracking-wide">AR 1 (PraSPM)</div>
-                <div class="mt-1 text-2xl font-extrabold text-indigo-600" id="gpsPraSpmValue">--</div>
-                <div class="mt-1 text-sm text-gray-500">GPS sebenar</div>
+              <div class="chart-wrap">
+                <canvas id="chartGpsLine"></canvas>
               </div>
-              <div class="h-10 w-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700">🎯</div>
             </div>
-          </div>
 
-          <div class="kpi-card px-4 py-3">
-            <div class="flex items-start justify-between">
-              <div>
-                <div class="text-[11px] text-gray-500 uppercase tracking-wide">Perubahan (AR1 – TOV)</div>
-                <div class="mt-1 text-2xl font-extrabold text-emerald-600" id="perubahanGpsValue">--</div>
-                <div class="mt-1 text-sm text-gray-500">Negatif = semakin baik</div>
+            <div class="soft-card p-4">
+              <div class="flex items-center justify-between mb-2">
+                <div class="font-bold text-gray-800">Perbandingan GPS</div>
+                <div class="text-xs text-gray-400">Bar</div>
               </div>
-              <div class="h-10 w-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700">📉</div>
+              <div class="chart-wrap">
+                <canvas id="chartGpsBar"></canvas>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Jadual ringkas macam contoh -->
-        <div class="soft-card overflow-hidden">
-          <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
-            <div class="font-bold text-gray-800">Jadual Ringkas GPS</div>
-            <div class="text-xs text-gray-400">Auto isi dari CSV + Sasaran</div>
+          <!-- KPI -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="kpi-card px-4 py-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[11px] text-gray-500 uppercase tracking-wide">TOV (PPSA)</div>
+                  <div class="mt-1 text-2xl font-extrabold text-blue-600" id="gpsPPSAValue">--</div>
+                  <div class="mt-1 text-sm text-gray-500">GPS sebenar</div>
+                </div>
+                <div class="h-10 w-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700">🧾</div>
+              </div>
+            </div>
+
+            <div class="kpi-card px-4 py-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[11px] text-gray-500 uppercase tracking-wide">AR 1 (PraSPM)</div>
+                  <div class="mt-1 text-2xl font-extrabold text-indigo-600" id="gpsPraSpmValue">--</div>
+                  <div class="mt-1 text-sm text-gray-500">GPS sebenar</div>
+                </div>
+                <div class="h-10 w-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700">🎯</div>
+              </div>
+            </div>
+
+            <div class="kpi-card px-4 py-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[11px] text-gray-500 uppercase tracking-wide">Perubahan (AR1 – TOV)</div>
+                  <div class="mt-1 text-2xl font-extrabold text-emerald-600" id="perubahanGpsValue">--</div>
+                  <div class="mt-1 text-sm text-gray-500">Negatif = semakin baik</div>
+                </div>
+                <div class="h-10 w-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700">📉</div>
+              </div>
+            </div>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-700 text-white">
-                <tr>
-                  <th class="px-4 py-3 text-center font-extrabold">TOV<br>(PPSA)</th>
-                  <th class="px-4 py-3 text-center font-extrabold">OTI 1</th>
-                  <th class="px-4 py-3 text-center font-extrabold">AR 1<br>(PraSPM)</th>
-                  <th class="px-4 py-3 text-center font-extrabold">OTI 2</th>
-                  <th class="px-4 py-3 text-center font-extrabold">ETR</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white">
-                <tr class="border-t">
-                  <td class="px-4 py-3 text-center text-gray-800 font-semibold" id="tblTOV">--</td>
-                  <td class="px-4 py-3 text-center text-gray-800 font-semibold" id="tblOTI1">--</td>
-                  <td class="px-4 py-3 text-center text-gray-800 font-semibold" id="tblAR1">--</td>
-                  <td class="px-4 py-3 text-center text-gray-800 font-semibold" id="tblOTI2">--</td>
-                  <td class="px-4 py-3 text-center text-gray-800 font-semibold" id="tblETR">--</td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- jadual -->
+          <div class="soft-card overflow-hidden">
+            <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+              <div class="font-bold text-gray-800">Jadual Ringkas GPS</div>
+              <div class="text-xs text-gray-400">CSV + Sasaran</div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-700 text-white">
+                  <tr>
+                    <th class="px-4 py-3 text-center font-extrabold">TOV<br>(PPSA)</th>
+                    <th class="px-4 py-3 text-center font-extrabold">OTI 1</th>
+                    <th class="px-4 py-3 text-center font-extrabold">AR 1<br>(PraSPM)</th>
+                    <th class="px-4 py-3 text-center font-extrabold">OTI 2</th>
+                    <th class="px-4 py-3 text-center font-extrabold">ETR</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr class="border-t">
+                    <td class="px-4 py-3 text-center font-semibold" id="tblTOV">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblOTI1">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblAR1">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblOTI2">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblETR">--</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
 
-        <div class="text-xs text-gray-400 flex items-center gap-2">
-          <span class="inline-block h-2 w-2 rounded-full bg-emerald-400"></span>
-          Paparan dikemaskini automatik berdasarkan CSV semasa.
-        </div>
+          <div class="text-xs text-gray-400 flex items-center gap-2">
+            <span class="inline-block h-2 w-2 rounded-full bg-emerald-400"></span>
+            Paparan dikemaskini automatik berdasarkan CSV semasa.
+          </div>
 
+        </div>
       </div>
     </section>
+
+    <!-- TAB 2 -->
+    <section id="panel-lms-sekolah" class="hidden">
+      <div class="soft-card p-5">
+        <h2 class="text-lg font-bold"> % LMS Sekolah – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder. (Kita sambung selepas Tab 1 siap)</p>
+      </div>
+    </section>
+
+    <!-- TAB 3 -->
+    <section id="panel-subjek-teras" class="hidden">
+      <div class="soft-card p-5">
+        <h2 class="text-lg font-bold"> GP Subjek Teras – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
+      </div>
+    </section>
+
+    <!-- TAB 4 -->
+    <section id="panel-mp-kritikal" class="hidden">
+      <div class="soft-card p-5">
+        <h2 class="text-lg font-bold"> GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
+      </div>
+    </section>
+
   </main>
 
-  <footer class="mt-6">
+  <footer class="mt-10">
     <div class="w-full h-[1.5px] bg-gradient-to-r from-blue-400 to-purple-400 opacity-80"></div>
     <p class="text-center text-[11.5px] text-gray-500 py-4">
       © <span id="yearNow"></span> XCode Mr LePaK – Analisis PPSA vs PraSPM
@@ -216,36 +331,50 @@
 
 <script>
 /* ==========================
-   A) CSV URL (2 fail)
+   0) SWITCH TAB
+   ========================== */
+function switchTab(tabName) {
+  const panels = [
+    "gp-sekolah",
+    "lms-sekolah",
+    "subjek-teras",
+    "mp-kritikal"
+  ];
+
+  panels.forEach(name => {
+    const panel = document.getElementById("panel-" + name);
+    const tabBtn = document.getElementById("tab-" + name);
+    if (panel) panel.classList.toggle("hidden", name !== tabName);
+
+    if (tabBtn) {
+      if (name === tabName) tabBtn.classList.add("tab-active");
+      else tabBtn.classList.remove("tab-active");
+    }
+  });
+}
+
+/* ==========================
+   1) SUMBER CSV (2 URL)
    ========================== */
 const csvUrlPPSA   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdnpPQ7vfOqMuuV-DzAmPtQjCEZBwVtXxLBpGFUguqC3ZqqouMN_Bey3AIzXSPBlziV1bNKSpGjfBY/pub?gid=1172655606&single=true&output=csv";
 const csvUrlPraSPM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRck15kwRkf75NPm1IouErXU_CDgHjMEGw1nm0FNCu1XAkIb3EF0XV36Mq66wui_0imgyC9OKzoVQl9/pub?gid=22937657&single=true&output=csv";
 
 /* ==========================
-   B) SASARAN (ISI NILAI)
-   - Ini yang akan jadi "Series 2"
-   - Kalau belum ada, biar null
+   2) SASARAN (Series 2)
    ========================== */
-/*const TARGET_GPS = {
-  OTI1: null,   // contoh: 5.40
-  OTI2: null,   // contoh: 5.10
-  ETR : null    // contoh: 4.80
+const TARGET_GPS = {
+  OTI1: null,  // contoh: 5.40
+  OTI2: null,  // contoh: 5.10
+  ETR : null   // contoh: 4.80
 };
-*/
-  const TARGET_GPS = {
-  OTI1: 5.40,
-  OTI2: 5.10,
-  ETR : 4.80
-};
-
 
 /* ==========================
-   C) PEMETAAN NILAI GRED
+   3) PEMETAAN NILAI GRED
    ========================== */
 const gradeValueMapping = {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
 
 /* ==========================
-   D) CSV PARSER (quote)
+   4) CSV PARSER (quote)
    ========================== */
 function parseCSVLine(line){
   const result=[]; let current=""; let inside=false;
@@ -260,7 +389,7 @@ function parseCSVLine(line){
 }
 
 /* ==========================
-   E) PARSE CSV FORMAT XCODE
+   5) PARSE CSV FORMAT XCODE
    ========================== */
 function parseCsvXCode(csvText){
   const lines = csvText.split(/\r?\n/).map(l=>l.trim()).filter(l=>l!=="");
@@ -305,7 +434,7 @@ function parseCsvXCode(csvText){
 }
 
 /* ==========================
-   F) KIRA GPS (SUBJEK WAJIB)
+   6) KIRA GPS (SUBJEK WAJIB)
    ========================== */
 function kiraGPS_Wajib(parsed){
   const { headerMap, subjectFlagMap, subjectColumns, rows } = parsed;
@@ -316,8 +445,8 @@ function kiraGPS_Wajib(parsed){
   const wajibColumns = subjectColumns.filter(colName=>{
     const subjCode=(colName.split(" ")[0]||"").toUpperCase();
     const flag=subjectFlagMap[subjCode];
-    if(flag==="0") return false;   // elektif
-    return true;                   // wajib / tiada flag
+    if(flag==="0") return false; // elektif
+    return true;
   });
 
   let jumlahNilai=0, bilGred=0;
@@ -341,7 +470,8 @@ function kiraGPS_Wajib(parsed){
 }
 
 /* ==========================
-   G) PLUGIN LABEL NILAI (titik & bar)
+   7) PLUGIN LABEL NILAI (titik & bar)
+   (PASTIKAN hanya 1 kali define)
    ========================== */
 const valueLabelPlugin = {
   id: "valueLabelPlugin",
@@ -375,12 +505,10 @@ const valueLabelPlugin = {
 
 if(window.Chart && Chart.register){
   Chart.register(valueLabelPlugin);
-  Chart.defaults.plugins.legend.labels.usePointStyle = true;
-  Chart.defaults.plugins.legend.labels.pointStyle = "circle";
 }
 
 /* ==========================
-   H) BINA CARTA (LINE + BAR)
+   8) BINA CARTA (LINE + BAR)
    ========================== */
 let chartLine=null, chartBar=null;
 
@@ -392,10 +520,10 @@ function buildCharts(seriesReal, seriesTarget){
     chartLine = new Chart(ctxL, {
       type:"line",
       data:{
-        labels:["TOV (PPSA)","OTI 1","AR 1 (PraSPM)","OTI 2","ETR"],
+        labels:["TOV","OTI 1","AR 1","OTI 2","ETR"],
         datasets:[
           { label:"GPS Sebenar", data:seriesReal, tension:.35, spanGaps:true, pointRadius:5, pointHoverRadius:6 },
-          { label:"Sasaran",     data:seriesTarget, tension:.35, spanGaps:true, borderDash:[6,6], pointRadius:4, pointHoverRadius:5 }
+          { label:"Sasaran", data:seriesTarget, tension:.35, spanGaps:true, borderDash:[6,6], pointRadius:4, pointHoverRadius:5 }
         ]
       },
       options:{
@@ -405,14 +533,12 @@ function buildCharts(seriesReal, seriesTarget){
           valueLabelPlugin:{ decimals:2, offsetY:-14 },
           tooltip:{ callbacks:{ label:(c)=>` ${c.dataset.label}: ${Number(c.parsed.y).toFixed(2)}` } }
         },
-        scales:{
-          y:{ reverse:true, suggestedMin:1, suggestedMax:9, ticks:{ callback:(v)=>Number(v).toFixed(0) } }
-        }
+        scales:{ y:{ reverse:true, suggestedMin:1, suggestedMax:9 } }
       }
     });
   }
 
-  // BAR (GPS sebenar sahaja)
+  // BAR
   const ctxB = document.getElementById("chartGpsBar")?.getContext("2d");
   if(ctxB){
     if(chartBar) chartBar.destroy();
@@ -420,9 +546,7 @@ function buildCharts(seriesReal, seriesTarget){
       type:"bar",
       data:{
         labels:["TOV","OTI 1","AR 1","OTI 2","ETR"],
-        datasets:[
-          { label:"GPS Sebenar", data:seriesReal }
-        ]
+        datasets:[ { label:"GPS Sebenar", data:seriesReal } ]
       },
       options:{
         responsive:true,
@@ -431,16 +555,14 @@ function buildCharts(seriesReal, seriesTarget){
           valueLabelPlugin:{ decimals:2, offsetY:-10 },
           tooltip:{ callbacks:{ label:(c)=>` ${c.dataset.label}: ${Number(c.parsed.y).toFixed(2)}` } }
         },
-        scales:{
-          y:{ reverse:true, suggestedMin:1, suggestedMax:9 }
-        }
+        scales:{ y:{ reverse:true, suggestedMin:1, suggestedMax:9 } }
       }
     });
   }
 }
 
 /* ==========================
-   I) LOAD + UPDATE UI/TABLE
+   9) LOAD + UPDATE UI
    ========================== */
 async function loadAndRender(){
   try{
@@ -450,15 +572,12 @@ async function loadAndRender(){
     const ppsParsed = parseCsvXCode(ppsText);
     const praParsed = parseCsvXCode(praText);
 
-    if(!ppsParsed || !praParsed){
-      console.error("❌ Parse gagal (PPSA/PraSPM).");
-      return;
-    }
+    if(!ppsParsed || !praParsed){ console.error("❌ Parse gagal."); return; }
 
-    const gpPPSA = kiraGPS_Wajib(ppsParsed);   // TOV
-    const gpPra  = kiraGPS_Wajib(praParsed);   // AR1
+    const gpPPSA = kiraGPS_Wajib(ppsParsed); // TOV
+    const gpPra  = kiraGPS_Wajib(praParsed); // AR1
 
-    // KPI
+    // KPI top & tab 1
     const elPPSA = document.getElementById("gpsPPSAValue");
     const elPra  = document.getElementById("gpsPraSpmValue");
     const elDiff = document.getElementById("perubahanGpsValue");
@@ -491,12 +610,19 @@ async function loadAndRender(){
     setCell("tblOTI2", TARGET_GPS.OTI2);
     setCell("tblETR",  TARGET_GPS.ETR);
 
+    // %LMS masih placeholder (nanti kita sambung)
+    // document.getElementById("layakSijilValue").textContent = "—%";
+
   }catch(err){
     console.error("❌ Ralat CSV:", err);
   }
 }
 
+/* ==========================
+   10) INIT
+   ========================== */
 document.getElementById("yearNow").textContent = new Date().getFullYear();
+switchTab("gp-sekolah");
 loadAndRender();
 </script>
 
