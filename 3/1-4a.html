@@ -63,12 +63,6 @@
     .chart-wrap{height:280px}
     @media (max-width:1024px){.chart-wrap{height:250px}}
     @media (max-width:640px){.chart-wrap{height:220px}}
-
-    options: {
-  responsive: true,
-  maintainAspectRatio: false,
-}
-
   </style>
 
   <script>
@@ -86,7 +80,7 @@
 
 <div id="content">
 
-  <!-- =================== HEADER (KEMUDAHAN ATAS) =================== -->
+  <!-- =================== HEADER =================== -->
   <header class="bg-white shadow-sm border-b">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex items-center justify-between gap-6">
@@ -105,7 +99,7 @@
           </div>
         </div>
 
-        <!-- KPI kanan (GPS + %LMS) -->
+        <!-- KPI kanan -->
         <div class="flex items-center gap-8">
           <div class="text-center">
             <div class="flex items-center justify-center gap-2">
@@ -139,7 +133,7 @@
     </div>
   </header>
 
-  <!-- =================== MENU TAB (KEMUDAHAN ATAS) =================== -->
+  <!-- =================== MENU TAB =================== -->
   <div class="analysis-tabs max-w-[1200px] mx-auto px-4 pt-6 pb-4">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <button onclick="switchTab('gp-sekolah')" id="tab-gp-sekolah" class="tab-active card-hover p-4">
@@ -182,7 +176,7 @@
   <!-- =================== RUANG KANDUNGAN TAB =================== -->
   <main class="container-max px-4 pb-10 space-y-6">
 
-    <!-- ================= TAB 1: GP SEKOLAH (CARTA CONTOH) ================= -->
+    <!-- ================= TAB 1 ================= -->
     <section id="panel-gp-sekolah">
       <div class="soft-card overflow-hidden">
 
@@ -190,7 +184,7 @@
           <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
             <div>
               <h2 class="text-xl font-extrabold text-gray-900">Pencapaian Gred Purata Sekolah</h2>
-              <p class="text-sm text-gray-500">Line + Bar + Jadual ringkas (seperti contoh)</p>
+              <p class="text-sm text-gray-500">Line + Bar + Jadual ringkas</p>
             </div>
             <div class="flex flex-wrap gap-2 text-xs">
               <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">GP rendah = lebih baik</span>
@@ -266,59 +260,58 @@
               <div class="font-bold text-gray-800">Jadual Ringkas GPS</div>
               <div class="text-xs text-gray-400">CSV + Sasaran</div>
             </div>
-<!-- ====== Sasaran (Dropdown) ====== -->
-<div class="px-4 py-3 border-b bg-white">
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
 
-    <div class="text-sm font-semibold text-gray-800">
-      Tetapan Sasaran (OTI / ETR)
-      <div class="text-xs font-normal text-gray-500">Pilih nilai → graf & jadual akan auto-kemas kini</div>
-    </div>
+            <!-- ====== Sasaran (Dropdown) ====== -->
+            <div class="px-4 py-3 border-b bg-white">
+              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
 
-    <div class="flex flex-wrap gap-2">
+                <div class="text-sm font-semibold text-gray-800">
+                  Tetapan Sasaran (OTI / ETR) + AR2
+                  <div class="text-xs font-normal text-gray-500">Pilih nilai → graf & jadual auto-kemas kini</div>
+                </div>
 
-      <!-- OTI 1 -->
-      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
-        <span class="text-xs font-semibold text-gray-600">OTI 1</span>
-        <select id="selOTI1" class="text-sm bg-transparent outline-none font-bold text-gray-900">
-          <option value="">—</option>
-        </select>
-      </label>
+                <div class="flex flex-wrap gap-2">
 
-      <!-- OTI 2 -->
-      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
-        <span class="text-xs font-semibold text-gray-600">OTI 2</span>
-        <select id="selOTI2" class="text-sm bg-transparent outline-none font-bold text-gray-900">
-          <option value="">—</option>
-        </select>
-      </label>
+                  <!-- OTI 1 -->
+                  <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+                    <span class="text-xs font-semibold text-gray-600">OTI 1</span>
+                    <select id="selOTI1" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+                      <option value="">—</option>
+                    </select>
+                  </label>
 
-       <!-- OTI 2 -->
-      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
-        <span class="text-xs font-semibold text-gray-600">AR 2</span>
-        <select id="selOTI2" class="text-sm bg-transparent outline-none font-bold text-gray-900">
-          <option value="">—</option>
-        </select>
-      </label>
+                  <!-- OTI 2 -->
+                  <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+                    <span class="text-xs font-semibold text-gray-600">OTI 2</span>
+                    <select id="selOTI2" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+                      <option value="">—</option>
+                    </select>
+                  </label>
 
-      <!-- ETR -->
-      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
-        <span class="text-xs font-semibold text-gray-600">ETR</span>
-        <select id="selETR" class="text-sm bg-transparent outline-none font-bold text-gray-900">
-          <option value="">—</option>
-        </select>
-      </label>
+                  <!-- AR 2 (GPS sebenar - manual) -->
+                  <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+                    <span class="text-xs font-semibold text-gray-600">AR 2</span>
+                    <select id="selAR2" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+                      <option value="">—</option>
+                    </select>
+                  </label>
 
-      <button id="btnResetTarget"
-        class="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold hover:shadow-md transition">
-        Reset
-      </button>
-    </div>
-  </div>
-</div>
+                  <!-- ETR -->
+                  <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+                    <span class="text-xs font-semibold text-gray-600">ETR</span>
+                    <select id="selETR" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+                      <option value="">—</option>
+                    </select>
+                  </label>
 
+                  <button id="btnResetTarget"
+                    class="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold hover:shadow-md transition">
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
 
-           
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm">
                 <thead class="bg-slate-700 text-white">
@@ -358,7 +351,7 @@
     <section id="panel-lms-sekolah" class="hidden">
       <div class="soft-card p-5">
         <h2 class="text-lg font-bold"> % LMS Sekolah – PPSA vs PraSPM</h2>
-        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder. (Kita sambung selepas Tab 1 siap)</p>
+        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
       </div>
     </section>
 
@@ -394,22 +387,12 @@
    0) SWITCH TAB
    ========================== */
 function switchTab(tabName) {
-  const panels = [
-    "gp-sekolah",
-    "lms-sekolah",
-    "subjek-teras",
-    "mp-kritikal"
-  ];
-
+  const panels = ["gp-sekolah","lms-sekolah","subjek-teras","mp-kritikal"];
   panels.forEach(name => {
     const panel = document.getElementById("panel-" + name);
     const tabBtn = document.getElementById("tab-" + name);
     if (panel) panel.classList.toggle("hidden", name !== tabName);
-
-    if (tabBtn) {
-      if (name === tabName) tabBtn.classList.add("tab-active");
-      else tabBtn.classList.remove("tab-active");
-    }
+    if (tabBtn) tabBtn.classList.toggle("tab-active", name === tabName);
   });
 }
 
@@ -420,40 +403,31 @@ const csvUrlPPSA   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdnpPQ7vf
 const csvUrlPraSPM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRck15kwRkf75NPm1IouErXU_CDgHjMEGw1nm0FNCu1XAkIb3EF0XV36Mq66wui_0imgyC9OKzoVQl9/pub?gid=22937657&single=true&output=csv";
 
 /* ==========================
-   2) SASARAN (Series 2)
+   2) STATE: SASARAN + AR2 (manual)
    ========================== */
 const TARGET_GPS = {
-  OTI1: null,  // contoh: 5.40
-  OTI2: null,  // contoh: 5.10
-  ETR : null   // contoh: 4.80
+  OTI1: null,
+  OTI2: null,
+  ETR : null
+};
+
+// AR2 = GPS sebenar (manual dropdown)
+const REAL_GPS = {
+  AR2: null
 };
 
 /* ==========================
-   SASARAN: DROPDOWN + UPDATE LIVE
+   OPTIONS dropdown (1.00 - 9.00)
    ========================== */
-
-// Julat pilihan nilai (boleh ubah ikut kehendak Cikgu)
-/*const TARGET_OPTIONS = (() => {
+const TARGET_OPTIONS = (() => {
   const arr = [];
-  // contoh 1.00 hingga 9.00 setiap 0.05
-  for (let v = 1.00; v <= 9.0001; v += 0.05) arr.push(+v.toFixed(2));
+  for (let i = 1; i <= 900; i++) arr.push(Number((i / 100).toFixed(2)));
   return arr;
 })();
-*/
-  const TARGET_OPTIONS = (() => {
-  const arr = [];
-  for (let i = 1; i <= 900; i++) {
-    arr.push((i / 100).toFixed(2));
-  }
-  return arr.map(Number);
-})();
-
 
 function fillSelect(selectEl, options) {
   if (!selectEl) return;
-  // buang semua kecuali option pertama (—)
   while (selectEl.options.length > 1) selectEl.remove(1);
-
   options.forEach(val => {
     const opt = document.createElement("option");
     opt.value = val.toFixed(2);
@@ -481,80 +455,22 @@ function updateTargetsFromUI() {
   TARGET_GPS.OTI1 = getSelValue("selOTI1");
   TARGET_GPS.OTI2 = getSelValue("selOTI2");
   TARGET_GPS.ETR  = getSelValue("selETR");
+  REAL_GPS.AR2     = getSelValue("selAR2");
 }
 
-function updateTableTargetsOnly() {
-  const setCell = (id, val) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = (val == null || Number.isNaN(val)) ? "—" : Number(val).toFixed(2);
-  };
+function setCell(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = (val == null || Number.isNaN(val)) ? "—" : Number(val).toFixed(2);
+}
+
+function updateTableOnly(gpPPSA, gpAR1){
+  setCell("tblTOV",  gpPPSA);
   setCell("tblOTI1", TARGET_GPS.OTI1);
+  setCell("tblAR1",  gpAR1);
   setCell("tblOTI2", TARGET_GPS.OTI2);
+  setCell("tblAR2",  REAL_GPS.AR2);
   setCell("tblETR",  TARGET_GPS.ETR);
-}
-
-// Update dua-dua graf tanpa destroy (lebih laju & stabil)
-function updateChartsTargetsOnly() {
-  const targetArr = [null, TARGET_GPS.OTI1, null, TARGET_GPS.OTI2, TARGET_GPS.ETR];
-
-  // LINE: dataset[1] = "Sasaran"
-  if (chartLine && chartLine.data?.datasets?.[1]) {
-    chartLine.data.datasets[1].data = targetArr;
-    chartLine.update();
-  }
-
-  // BAR: tambah dataset sasaran jika belum ada
-  if (chartBar) {
-    if (!chartBar.data.datasets[1]) {
-      chartBar.data.datasets.push({
-        label: "Sasaran",
-        data: targetArr
-      });
-    } else {
-      chartBar.data.datasets[1].data = targetArr;
-    }
-    chartBar.update();
-  }
-}
-
-function applyTargetChanges() {
-  updateTargetsFromUI();
-  updateTableTargetsOnly();
-  updateChartsTargetsOnly();
-}
-
-function initTargetDropdowns() {
-  const sel1 = document.getElementById("selOTI1");
-  const sel2 = document.getElementById("selOTI2");
-  const sel3 = document.getElementById("selETR");
-  const btnR = document.getElementById("btnResetTarget");
-
-  fillSelect(sel1, TARGET_OPTIONS);
-  fillSelect(sel2, TARGET_OPTIONS);
-  fillSelect(sel3, TARGET_OPTIONS);
-
-  // Default kosong (—)
-  setSelValue("selOTI1", TARGET_GPS.OTI1);
-  setSelValue("selOTI2", TARGET_GPS.OTI2);
-  setSelValue("selETR",  TARGET_GPS.ETR);
-
-  [sel1, sel2, sel3].forEach(el => {
-    if (!el) return;
-    el.addEventListener("change", applyTargetChanges);
-  });
-
-  if (btnR) {
-    btnR.addEventListener("click", () => {
-      TARGET_GPS.OTI1 = null;
-      TARGET_GPS.OTI2 = null;
-      TARGET_GPS.ETR  = null;
-      setSelValue("selOTI1", null);
-      setSelValue("selOTI2", null);
-      setSelValue("selETR",  null);
-      applyTargetChanges();
-    });
-  }
 }
 
 /* ==========================
@@ -627,7 +543,6 @@ function parseCsvXCode(csvText){
    ========================== */
 function kiraGPS_Wajib(parsed){
   const { headerMap, subjectFlagMap, subjectColumns, rows } = parsed;
-
   const namaCol  = headerMap["nama"]  || "NAMA";
   const kelasCol = headerMap["kelas"] || "KELAS";
 
@@ -659,8 +574,7 @@ function kiraGPS_Wajib(parsed){
 }
 
 /* ==========================
-   7) PLUGIN LABEL NILAI (titik & bar)
-   (PASTIKAN hanya 1 kali define)
+   7) PLUGIN LABEL NILAI
    ========================== */
 const valueLabelPlugin = {
   id: "valueLabelPlugin",
@@ -691,15 +605,20 @@ const valueLabelPlugin = {
     ctx.restore();
   }
 };
-
-if(window.Chart && Chart.register){
-  Chart.register(valueLabelPlugin);
-}
+if(window.Chart && Chart.register) Chart.register(valueLabelPlugin);
 
 /* ==========================
    8) BINA CARTA (LINE + BAR)
+   ikut imej: 4 label bawah
    ========================== */
 let chartLine=null, chartBar=null;
+
+const CHART_LABELS = [
+  ["TOV","(PPSA)"],
+  ["OTI 1","AR 1"],
+  ["OTI 2","AR 2"],
+  ["ETR","(Sasaran)"]
+];
 
 function buildCharts(seriesReal, seriesTarget){
   // LINE
@@ -709,14 +628,15 @@ function buildCharts(seriesReal, seriesTarget){
     chartLine = new Chart(ctxL, {
       type:"line",
       data:{
-        labels:["TOV","OTI 1","AR 1","OTI 2","ETR"],
+        labels: CHART_LABELS,
         datasets:[
-          { label:"GPS Sebenar", data:seriesReal, tension:.35, spanGaps:true, pointRadius:5, pointHoverRadius:6 },
-          { label:"Sasaran", data:seriesTarget, tension:.35, spanGaps:true, borderDash:[6,6], pointRadius:4, pointHoverRadius:5 }
+          { label:"GPS Sebenar", data:seriesReal, tension:.35, spanGaps:true, pointRadius:6, pointHoverRadius:7 },
+          { label:"Sasaran", data:seriesTarget, tension:.35, spanGaps:true, borderDash:[6,6], pointRadius:6, pointHoverRadius:7 }
         ]
       },
       options:{
         responsive:true,
+        maintainAspectRatio:false,
         plugins:{
           legend:{ display:true },
           valueLabelPlugin:{ decimals:2, offsetY:-14 },
@@ -734,11 +654,15 @@ function buildCharts(seriesReal, seriesTarget){
     chartBar = new Chart(ctxB, {
       type:"bar",
       data:{
-        labels:["TOV","OTI 1","AR 1","OTI 2","ETR"],
-        datasets:[ { label:"GPS Sebenar", data:seriesReal } ]
+        labels: CHART_LABELS,
+        datasets:[
+          { label:"GPS Sebenar", data:seriesReal },
+          { label:"Sasaran", data:seriesTarget }
+        ]
       },
       options:{
         responsive:true,
+        maintainAspectRatio:false,
         plugins:{
           legend:{ display:true },
           valueLabelPlugin:{ decimals:2, offsetY:-10 },
@@ -750,8 +674,69 @@ function buildCharts(seriesReal, seriesTarget){
   }
 }
 
+function updateChartsOnly(gpPPSA, gpAR1){
+  const seriesReal   = [gpPPSA, gpAR1, REAL_GPS.AR2, null];
+  const seriesTarget = [null, TARGET_GPS.OTI1, TARGET_GPS.OTI2, TARGET_GPS.ETR];
+
+  if (chartLine){
+    chartLine.data.datasets[0].data = seriesReal;
+    chartLine.data.datasets[1].data = seriesTarget;
+    chartLine.update();
+  }
+  if (chartBar){
+    chartBar.data.datasets[0].data = seriesReal;
+    chartBar.data.datasets[1].data = seriesTarget;
+    chartBar.update();
+  }
+}
+
 /* ==========================
-   9) LOAD + UPDATE UI
+   9) INIT DROPDOWNS
+   ========================== */
+function initDropdowns(){
+  const selOTI1 = document.getElementById("selOTI1");
+  const selOTI2 = document.getElementById("selOTI2");
+  const selAR2  = document.getElementById("selAR2");
+  const selETR  = document.getElementById("selETR");
+  const btnR    = document.getElementById("btnResetTarget");
+
+  fillSelect(selOTI1, TARGET_OPTIONS);
+  fillSelect(selOTI2, TARGET_OPTIONS);
+  fillSelect(selAR2,  TARGET_OPTIONS);
+  fillSelect(selETR,  TARGET_OPTIONS);
+
+  setSelValue("selOTI1", TARGET_GPS.OTI1);
+  setSelValue("selOTI2", TARGET_GPS.OTI2);
+  setSelValue("selAR2",  REAL_GPS.AR2);
+  setSelValue("selETR",  TARGET_GPS.ETR);
+
+  const onChange = () => {
+    updateTargetsFromUI();
+    updateTableOnly(window.__gpTOV ?? null, window.__gpAR1 ?? null);
+    updateChartsOnly(window.__gpTOV ?? null, window.__gpAR1 ?? null);
+  };
+
+  [selOTI1, selOTI2, selAR2, selETR].forEach(el => el && el.addEventListener("change", onChange));
+
+  if (btnR){
+    btnR.addEventListener("click", () => {
+      TARGET_GPS.OTI1 = null;
+      TARGET_GPS.OTI2 = null;
+      TARGET_GPS.ETR  = null;
+      REAL_GPS.AR2     = null;
+
+      setSelValue("selOTI1", null);
+      setSelValue("selOTI2", null);
+      setSelValue("selAR2",  null);
+      setSelValue("selETR",  null);
+
+      onChange();
+    });
+  }
+}
+
+/* ==========================
+   10) LOAD + RENDER
    ========================== */
 async function loadAndRender(){
   try{
@@ -760,49 +745,32 @@ async function loadAndRender(){
 
     const ppsParsed = parseCsvXCode(ppsText);
     const praParsed = parseCsvXCode(praText);
-
     if(!ppsParsed || !praParsed){ console.error("❌ Parse gagal."); return; }
 
-    const gpPPSA = kiraGPS_Wajib(ppsParsed); // TOV
-    const gpPra  = kiraGPS_Wajib(praParsed); // AR1
+    const gpTOV = kiraGPS_Wajib(ppsParsed); // TOV
+    const gpAR1 = kiraGPS_Wajib(praParsed); // AR1
+
+    // simpan global (untuk update bila dropdown berubah)
+    window.__gpTOV = gpTOV;
+    window.__gpAR1 = gpAR1;
 
     // KPI top & tab 1
-    const elPPSA = document.getElementById("gpsPPSAValue");
-    const elPra  = document.getElementById("gpsPraSpmValue");
-    const elDiff = document.getElementById("perubahanGpsValue");
-    const elHead = document.getElementById("gpsValue");
+    if(gpTOV!=null) document.getElementById("gpsPPSAValue").textContent = gpTOV.toFixed(2);
+    if(gpAR1!=null) document.getElementById("gpsPraSpmValue").textContent = gpAR1.toFixed(2);
+    if(gpAR1!=null) document.getElementById("gpsValue").textContent = gpAR1.toFixed(2);
 
-    if(gpPPSA!=null && elPPSA) elPPSA.textContent = gpPPSA.toFixed(2);
-    if(gpPra !=null && elPra)  elPra.textContent  = gpPra.toFixed(2);
-    if(gpPra !=null && elHead) elHead.textContent = gpPra.toFixed(2);
-
-    if(gpPPSA!=null && gpPra!=null && elDiff){
-      const diff = +(gpPra - gpPPSA).toFixed(2);
-      elDiff.textContent = diff.toFixed(2);
+    if(gpTOV!=null && gpAR1!=null){
+      const diff = +(gpAR1 - gpTOV).toFixed(2);
+      document.getElementById("perubahanGpsValue").textContent = diff.toFixed(2);
     }
 
-    // Series untuk carta contoh
-    const seriesReal   = [gpPPSA, null, gpPra, null, null];
-    const seriesTarget = [null, TARGET_GPS.OTI1, null, TARGET_GPS.OTI2, TARGET_GPS.ETR];
+    // data awal chart
+    const seriesReal   = [gpTOV, gpAR1, REAL_GPS.AR2, null];
+    const seriesTarget = [null, TARGET_GPS.OTI1, TARGET_GPS.OTI2, TARGET_GPS.ETR];
 
     buildCharts(seriesReal, seriesTarget);
-    initTargetDropdowns();
-
-
-    // Jadual
-    const setCell = (id, val) => {
-      const el=document.getElementById(id);
-      if(!el) return;
-      el.textContent = (val==null || Number.isNaN(val)) ? "—" : Number(val).toFixed(2);
-    };
-    setCell("tblTOV", gpPPSA);
-    setCell("tblOTI1", TARGET_GPS.OTI1);
-    setCell("tblAR1", gpPra);
-    setCell("tblOTI2", TARGET_GPS.OTI2);
-    setCell("tblETR",  TARGET_GPS.ETR);
-
-    // %LMS masih placeholder (nanti kita sambung)
-    // document.getElementById("layakSijilValue").textContent = "—%";
+    initDropdowns();
+    updateTableOnly(gpTOV, gpAR1);
 
   }catch(err){
     console.error("❌ Ralat CSV:", err);
@@ -810,7 +778,7 @@ async function loadAndRender(){
 }
 
 /* ==========================
-   10) INIT
+   INIT
    ========================== */
 document.getElementById("yearNow").textContent = new Date().getFullYear();
 switchTab("gp-sekolah");
