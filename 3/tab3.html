@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XCode - TAB Layak Sijil (PPSA vs PraSPM)</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* Tema cerah (ikut tab sebelum ini - bukan latar hitam) */
+    .card { border-radius: 16px; }
+    .chip { border-radius: 9999px; padding: 2px 10px; font-size: 12px; }
+    .stickybar { position: sticky; top: 0; z-index: 30; backdrop-filter: blur(10px); }
+    .table-wrap { overflow: auto; }
+    .mono { font-variant-numeric: tabular-nums; }
+  </style>
+
+  <script>
+    // Legend bulat (kekal)
+    if (window.Chart) {
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+      Chart.defaults.plugins.legend.labels.boxWidth = 12;
+      Chart.defaults.plugins.legend.labels.boxHeight = 12;
+      Chart.defaults.responsive = true;
+      Chart.defaults.maintainAspectRatio = false;
+    }
+  </script>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Layak Sijil</h1>
+        <p class="text-slate-600 mt-1">Perbandingan <b>PPSA</b> vs <b>PraSPM</b> • KPI • Kelas • Perubahan Status Murid</p>
+      </div>
+
+      <div class="flex flex-wrap gap-2 items-center">
+        <button id="btnReload" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:opacity-90">
+          Muat Semula Data
+        </button>
+        <button id="btnPrint" class="px-4 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-100">
+          Cetak
+        </button>
+      </div>
+    </div>
+
+    <!-- Sticky Filters -->
+    <div class="stickybar mt-6 bg-white/80 border border-slate-200 rounded-2xl p-4">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+        <div class="md:col-span-3">
+          <label class="text-xs text-slate-600">Kelas</label>
+          <select id="selClass" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2">
+            <option value="ALL">Semua Kelas</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="text-xs text-slate-600">Senarai Murid</label>
+          <select id="selMove" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2">
+            <option value="NAIK">✅ Naik (Tidak Layak → Layak)</option>
+            <option value="JATUH">❌ Jatuh (Layak → Tidak Layak)</option>
+            <option value="KEKAL_LAYAK">➖ Kekal Layak</option>
+            <option value="KEKAL_TAK">➖ Kekal Tidak Layak</option>
+            <option value="SEMUA">Semua</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="text-xs text-slate-600">Carian Nama / ID</label>
+          <input id="inpSearch" type="text" placeholder="Contoh: AHMAD / 5xxxxxxxxxxx"
+                 class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2" />
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="text-xs text-slate-600">Ambil Kunci Padanan</label>
+          <select id="selKey" class="mt-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2">
+            <option value="AUTO">Auto (ID→KP→Nama+Kelas)</option>
+            <option value="ID">ID Pelajar</option>
+            <option value="KP">No KP</option>
+            <option value="NAMECLASS">Nama+Kelas</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-12">
+          <div class="flex flex-wrap gap-2 pt-1 items-center">
+            <button class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-sm"
+                    id="btnOnlyTak">Toggle: Hanya Tidak Layak (PraSPM)</button>
+
+            <button class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-sm"
+                    id="btnReset">Reset</button>
+
+            <div class="ml-auto text-xs text-slate-500 flex items-center gap-2">
+              <span class="chip bg-slate-100 border border-slate-200 text-slate-700">BM &amp; SEJ wajib lulus</span>
+              <span id="statusMsg" class="text-slate-600"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4">
+      <div class="card bg-white border border-slate-200 p-4 lg:col-span-2">
+        <div class="text-xs text-slate-500">% Layak PPSA</div>
+        <div id="kpiPctPPSA" class="mono text-3xl font-bold mt-2">—</div>
+        <div id="kpiBilPPSA" class="text-sm text-slate-600 mt-2">—</div>
+      </div>
+
+      <div class="card bg-white border border-slate-200 p-4 lg:col-span-2">
+        <div class="text-xs text-slate-500">% Layak PraSPM</div>
+        <div id="kpiPctPra" class="mono text-3xl font-bold mt-2">—</div>
+        <div id="kpiBilPra" class="text-sm text-slate-600 mt-2">—</div>
+      </div>
+
+      <div class="card bg-white border border-slate-200 p-4">
+        <div class="text-xs text-slate-500">Δ Perubahan</div>
+        <div id="kpiDelta" class="mono text-3xl font-bold mt-2">—</div>
+        <div class="text-sm text-slate-600 mt-2">PraSPM − PPSA</div>
+      </div>
+
+      <div class="card bg-white border border-slate-200 p-4">
+        <div class="text-xs text-slate-500">✅ Naik</div>
+        <div id="kpiNaik" class="mono text-3xl font-bold mt-2">—</div>
+        <div class="text-sm text-slate-600 mt-2">Tidak Layak → Layak</div>
+      </div>
+
+      <div class="card bg-white border border-slate-200 p-4">
+        <div class="text-xs text-slate-500">❌ Jatuh</div>
+        <div id="kpiJatuh" class="mono text-3xl font-bold mt-2">—</div>
+        <div class="text-sm text-slate-600 mt-2">Layak → Tidak Layak</div>
+      </div>
+
+      <div class="card bg-white border border-slate-200 p-4">
+        <div class="text-xs text-slate-500">➖ Kekal Layak</div>
+        <div id="kpiKekalLayak" class="mono text-3xl font-bold mt-2">—</div>
+        <div class="text-sm text-slate-600 mt-2">Layak → Layak</div>
+      </div>
+
+      <div class="card bg-white border border-slate-200 p-4">
+        <div class="text-xs text-slate-500">➖ Kekal Tidak Layak</div>
+        <div id="kpiKekalTak" class="mono text-3xl font-bold mt-2">—</div>
+        <div class="text-sm text-slate-600 mt-2">Tidak → Tidak</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="card bg-white border border-slate-200 p-4 lg:col-span-8">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="font-semibold">% Layak Sijil Mengikut Kelas</div>
+            <div class="text-xs text-slate-500">Bar berkembar: PPSA vs PraSPM • klik bar untuk tapis kelas</div>
+          </div>
+        </div>
+        <div class="h-80 mt-4">
+          <canvas id="chartGrouped"></canvas>
+        </div>
+      </div>
+
+      <div class="card bg-white border border-slate-200 p-4 lg:col-span-4">
+        <div class="font-semibold">Ringkasan Punca Tidak Layak (PraSPM)</div>
+        <div class="text-xs text-slate-500 mt-1">Top 3 subjek gagal + BM/SEJ</div>
+
+        <div id="panelPunca" class="mt-4 space-y-3">
+          <!-- auto -->
+        </div>
+
+        <div class="mt-5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700" id="autoInsight">
+          — insight —
+        </div>
+      </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="card bg-white border border-slate-200 p-4 lg:col-span-5">
+        <div class="flex items-end justify-between gap-2">
+          <div>
+            <div class="font-semibold">Ringkasan Kelas</div>
+            <div class="text-xs text-slate-500">% Layak PPSA vs PraSPM + Δ + Naik/Jatuh</div>
+          </div>
+        </div>
+
+        <div class="table-wrap mt-4 border border-slate-200 rounded-2xl">
+          <table class="min-w-[760px] w-full text-sm">
+            <thead class="bg-slate-50 text-slate-700">
+              <tr>
+                <th class="text-left px-3 py-2 border-b border-slate-200">Kelas</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200">% PPSA</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200">% PraSPM</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200">Δ</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200">Naik</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200">Jatuh</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyClass" class="divide-y divide-slate-200 bg-white">
+              <tr><td colspan="6" class="px-3 py-4 text-slate-500">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card bg-white border border-slate-200 p-4 lg:col-span-7">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
+          <div>
+            <div class="font-semibold">Senarai Murid (Perubahan Status)</div>
+            <div class="text-xs text-slate-500">ikut penapis semasa</div>
+          </div>
+          <div class="text-xs text-slate-500">Sort ringkas: klik tajuk kolum</div>
+        </div>
+
+        <div class="table-wrap mt-4 border border-slate-200 rounded-2xl">
+          <table class="min-w-[980px] w-full text-sm">
+            <thead class="bg-slate-50 text-slate-700">
+              <tr>
+                <th class="text-left px-3 py-2 border-b border-slate-200 cursor-pointer" data-sort="name">Nama</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200 cursor-pointer" data-sort="cls">Kelas</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200 cursor-pointer" data-sort="move">Perubahan</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200 cursor-pointer" data-sort="ppsa">PPSA</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200 cursor-pointer" data-sort="pra">PraSPM</th>
+                <th class="text-left px-3 py-2 border-b border-slate-200">Subjek Gagal (PPSA → PraSPM)</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyStud" class="divide-y divide-slate-200 bg-white">
+              <tr><td colspan="6" class="px-3 py-4 text-slate-500">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-3 text-xs text-slate-500">
+          Nota: Jika padanan murid PPSA↔PraSPM tidak tepat, tukar pilihan <b>Ambil Kunci Padanan</b> (ID/KP/Nama+Kelas).
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 text-xs text-slate-400">
+      © XCode • Layak Sijil (PPSA vs PraSPM) • Cache localStorage (optional)
+    </div>
+  </div>
+
+  <script>
+    /***********************
+     * CONFIG (WAJIB ISI)
+     ***********************/
+    const CSV_URL_PPSA   = "";  // letak URL publish CSV PPSA
+    const CSV_URL_PRASPM = "";  // letak URL publish CSV PraSPM
+
+    // Gred dianggap GAGAL (ubah ikut sekolah)
+    const FAIL_GRADES = new Set(["G", "TH", "TI", "X", "F"]);
+
+    // Subjek wajib untuk Layak Sijil (default BM & SEJ)
+    const WAJIB_SUBJECT_KEYS = [
+      { key: "BM",  alias: ["BM", "BAHASA MELAYU", "BAHASA MELAYU (BM)"] },
+      { key: "SEJ", alias: ["SEJ", "SEJARAH"] }
+    ];
+
+    // Cache
+    const ENABLE_CACHE = true;
+    const CACHE_TTL_MINUTES = 180; // 3 jam
+
+    /***********************
+     * UTIL
+     ***********************/
+    const $ = (id) => document.getElementById(id);
+    const nowMs = () => Date.now();
+    const cacheKey = (x) => `XCODE_LAYAKSIJIL_${x}`;
+    const toUpperSafe = (v) => (v ?? "").toString().trim().toUpperCase();
+    const setStatus = (msg) => $("statusMsg").textContent = msg || "";
+    const pct = (n, d) => d ? Math.round((n/d)*1000)/10 : 0; // 1 decimal
+    const fmtPct = (x) => (x === null || x === undefined || Number.isNaN(x)) ? "—" : `${x.toFixed(1)}%`;
+    const fmtInt = (x) => (x === null || x === undefined || Number.isNaN(x)) ? "—" : `${x}`;
+
+    function safeParseCSV(text){
+      const lines = text.replace(/\r/g, "").split("\n").filter(l => l.trim() !== "");
+      if (!lines.length) return { headers: [], rows: [] };
+
+      const parseLine = (line) => {
+        const out = [];
+        let cur = "", inQ = false;
+        for (let i=0; i<line.length; i++){
+          const ch = line[i];
+          if (ch === '"'){
+            if (inQ && line[i+1] === '"'){ cur += '"'; i++; }
+            else inQ = !inQ;
+          } else if (ch === "," && !inQ){
+            out.push(cur); cur = "";
+          } else cur += ch;
+        }
+        out.push(cur);
+        return out.map(s => s.trim());
+      };
+
+      const headers = parseLine(lines[0]).map(h => h.trim());
+      const rows = [];
+      for (let i=1; i<lines.length; i++){
+        const cols = parseLine(lines[i]);
+        const obj = {};
+        headers.forEach((h, idx) => obj[h] = (cols[idx] ?? "").trim());
+        rows.push(obj);
+      }
+      return { headers, rows };
+    }
+
+    function findColumn(headers, patterns){
+      const H = headers.map(h => toUpperSafe(h));
+      for (const p of patterns){
+        const up = toUpperSafe(p);
+        const idx = H.findIndex(h => h === up || h.includes(up));
+        if (idx >= 0) return headers[idx];
+      }
+      return null;
+    }
+
+    function detectNameCol(headers){ return findColumn(headers, ["NAMA", "NAMA MURID", "NAME"]); }
+    function detectClassCol(headers){ return findColumn(headers, ["KELAS", "INSTITUSI / KELAS", "INSTITUSI / KELAS SEMASA", "KEDUDUKAN (KELAS)"]); }
+    function detectIdCol(headers){ return findColumn(headers, ["ID PELAJAR", "ID", "NO ID", "ID MURID"]); }
+    function detectKPCol(headers){ return findColumn(headers, ["NO. KAD PENGENALAN", "NO KAD PENGENALAN", "NO KP", "KP", "IC"]); }
+
+    function looksLikeGrade(v){
+      const x = toUpperSafe(v);
+      if (!x) return false;
+      return /^[A-G][+-]?$/.test(x) || x === "TH" || x === "TI" || x === "X";
+    }
+
+    function detectSubjectCols(headers, sampleRow){
+      const ignore = new Set([
+        "BIL","NO","NO.","ID","ID PELAJAR","NO. KP","NO KAD PENGENALAN","KP","NAMA","KELAS",
+        "JANTINA","STATUS","KEDUDUKAN","GPS","GPMP","JUMLAH","CATATAN","TINGKATAN"
+      ]);
+      const cols = [];
+      headers.forEach(h => {
+        const up = toUpperSafe(h);
+        if ([...ignore].some(k => up === k || up.includes(k))) return;
+        const v = sampleRow ? sampleRow[h] : "";
+        if (looksLikeGrade(v)) cols.push(h);
+      });
+      return cols;
+    }
+
+    function isFailGrade(v){
+      const g = toUpperSafe(v);
+      return FAIL_GRADES.has(g);
+    }
+
+    function findWajibCol(headers, wajibKeyObj){
+      return findColumn(headers, wajibKeyObj.alias);
+    }
+
+    async function loadCSV(label, url){
+      if (!url) return null;
+
+      if (ENABLE_CACHE){
+        const raw = localStorage.getItem(cacheKey(label));
+        if (raw){
+          try{
+            const obj = JSON.parse(raw);
+            const ageMin = (nowMs() - obj.savedAt) / 60000;
+            if (ageMin <= CACHE_TTL_MINUTES && obj.data?.rows?.length){
+              return obj.data;
+            }
+          }catch(e){}
+        }
+      }
+
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`${label}: fetch gagal (${res.status})`);
+      const text = await res.text();
+      const parsed = safeParseCSV(text);
+
+      if (ENABLE_CACHE){
+        try{
+          localStorage.setItem(cacheKey(label), JSON.stringify({ savedAt: nowMs(), data: parsed }));
+        }catch(e){}
+      }
+      return parsed;
+    }
+
+    /***********************
+     * STATE
+     ***********************/
+    const state = {
+      ppsa: null,
+      pra: null,
+      filter: {
+        cls: "ALL",
+        move: "NAIK",
+        q: "",
+        onlyTakPra: false,
+        keyMode: "AUTO"
+      },
+      sort: { key: "move", dir: "asc" }
+    };
+
+    /***********************
+     * LMS COMPUTE (per dataset)
+     ***********************/
+    function computeStudents(datasetLabel, data){
+      const { headers, rows } = data;
+      const nameCol  = detectNameCol(headers) || headers[0];
+      const classCol = detectClassCol(headers);
+      const idCol = detectIdCol(headers);
+      const kpCol = detectKPCol(headers);
+
+      const sampleRow = rows[0] || {};
+      const subjectCols = detectSubjectCols(headers, sampleRow);
+
+      const wajibCols = {};
+      WAJIB_SUBJECT_KEYS.forEach(w => {
+        const col = findWajibCol(headers, w);
+        if (col) wajibCols[w.key] = col;
+      });
+
+      const students = rows.map(r => {
+        const name = (r[nameCol] || "").trim();
+        if (!name) return null;
+
+        const cls = classCol ? (r[classCol] || "").trim() : "";
+        const id  = idCol ? (r[idCol] || "").trim() : "";
+        const kp  = kpCol ? (r[kpCol] || "").trim() : "";
+
+        const failedSubjects = [];
+        let failCount = 0;
+
+        subjectCols.forEach(col => {
+          const g = r[col];
+          if (isFailGrade(g)){
+            failCount++;
+            failedSubjects.push(col);
+          }
+        });
+
+        // wajib lulus (jika kolum wujud)
+        let wajibFail = [];
+        for (const w of WAJIB_SUBJECT_KEYS){
+          const col = wajibCols[w.key];
+          if (!col) continue;
+          if (isFailGrade(r[col])) wajibFail.push(w.key);
+        }
+
+        const layak = (wajibFail.length === 0);
+
+        return {
+          dataset: datasetLabel,
+          name, cls, id, kp,
+          layak,
+          failCount,
+          failedSubjects,
+          wajibFail
+        };
+      }).filter(Boolean);
+
+      return { headers, nameCol, classCol, idCol, kpCol, subjectCols, wajibCols, students };
+    }
+
+    function makeKey(s){
+      const mode = state.filter.keyMode;
+
+      const auto = () => {
+        if (s.id) return `ID:${s.id}`;
+        if (s.kp) return `KP:${s.kp}`;
+        return `NC:${toUpperSafe(s.name)}|${toUpperSafe(s.cls)}`;
+      };
+
+      if (mode === "AUTO") return auto();
+      if (mode === "ID") return `ID:${s.id || ""}`.trim();
+      if (mode === "KP") return `KP:${s.kp || ""}`.trim();
+      return `NC:${toUpperSafe(s.name)}|${toUpperSafe(s.cls)}`;
+    }
+
+    function joinByKey(ppsaStudents, praStudents){
+      const mapP = new Map();
+      ppsaStudents.forEach(s => {
+        const k = makeKey(s);
+        if (!k || k.endsWith(":")) return;
+        if (!mapP.has(k)) mapP.set(k, s);
+      });
+
+      const mapR = new Map();
+      praStudents.forEach(s => {
+        const k = makeKey(s);
+        if (!k || k.endsWith(":")) return;
+        if (!mapR.has(k)) mapR.set(k, s);
+      });
+
+      // gabung semua key
+      const keys = new Set([...mapP.keys(), ...mapR.keys()]);
+      const merged = [];
+
+      keys.forEach(k => {
+        const a = mapP.get(k) || null;   // PPSA
+        const b = mapR.get(k) || null;   // PraSPM
+        if (!a && !b) return;
+
+        const name = (b?.name || a?.name || "").trim();
+        const cls  = (b?.cls  || a?.cls  || "").trim();
+
+        const pLayak = a ? a.layak : null;
+        const rLayak = b ? b.layak : null;
+
+        // Jika salah satu tiada, kita labelkan “Tiada data”
+        let move = "TIADA";
+        if (pLayak === null || rLayak === null) move = "TIADA";
+        else if (!pLayak && rLayak) move = "NAIK";
+        else if (pLayak && !rLayak) move = "JATUH";
+        else if (pLayak && rLayak) move = "KEKAL_LAYAK";
+        else move = "KEKAL_TAK";
+
+        merged.push({
+          key: k,
+          name, cls,
+          ppsa: a,
+          pra: b,
+          move
+        });
+      });
+
+      return merged;
+    }
+
+    /***********************
+     * AGGREGATION
+     ***********************/
+    function aggOverall(merged){
+      // kira KPI berdasarkan penapis kelas (tetapi KPI overall ikut filter kelas)
+      const clsSel = state.filter.cls;
+
+      const arr = (clsSel === "ALL") ? merged : merged.filter(x => x.cls === clsSel);
+
+      // KPI hanya kira rekod yang ada data kedua-dua (untuk movement)
+      const both = arr.filter(x => x.ppsa && x.pra);
+
+      const totalP = arr.filter(x => x.ppsa).length;
+      const layakP = arr.filter(x => x.ppsa && x.ppsa.layak).length;
+
+      const totalR = arr.filter(x => x.pra).length;
+      const layakR = arr.filter(x => x.pra && x.pra.layak).length;
+
+      const naik = both.filter(x => x.move === "NAIK").length;
+      const jatuh = both.filter(x => x.move === "JATUH").length;
+      const kekalLayak = both.filter(x => x.move === "KEKAL_LAYAK").length;
+      const kekalTak = both.filter(x => x.move === "KEKAL_TAK").length;
+
+      return {
+        totalP, layakP, pctP: pct(layakP, totalP),
+        totalR, layakR, pctR: pct(layakR, totalR),
+        delta: (totalP && totalR) ? Math.round((pct(layakR,totalR) - pct(layakP,totalP))*10)/10 : 0,
+        naik, jatuh, kekalLayak, kekalTak,
+        arr, both
+      };
+    }
+
+    function aggByClass(merged){
+      const map = new Map();
+
+      merged.forEach(x => {
+        const cls = x.cls || "-";
+        if (!map.has(cls)) map.set(cls, { cls, pTot:0,pLay:0,rTot:0,rLay:0, naik:0, jatuh:0 });
+        const o = map.get(cls);
+
+        if (x.ppsa){ o.pTot++; if (x.ppsa.layak) o.pLay++; }
+        if (x.pra){ o.rTot++; if (x.pra.layak) o.rLay++; }
+
+        if (x.ppsa && x.pra){
+          if (x.move === "NAIK") o.naik++;
+          if (x.move === "JATUH") o.jatuh++;
+        }
+      });
+
+      const arr = [...map.values()].map(o => ({
+        ...o,
+        pPct: pct(o.pLay, o.pTot),
+        rPct: pct(o.rLay, o.rTot),
+        delta: Math.round((pct(o.rLay,o.rTot) - pct(o.pLay,o.pTot))*10)/10
+      })).sort((a,b) => (b.rPct - a.rPct));
+
+      return arr;
+    }
+
+    function aggPuncaPra(merged){
+      // fokus punca dari PraSPM: ambil yang pra tidak layak
+      const clsSel = state.filter.cls;
+      const arr = (clsSel === "ALL") ? merged : merged.filter(x => x.cls === clsSel);
+
+      const tak = arr.filter(x => x.pra && !x.pra.layak).map(x => x.pra);
+
+      const bmFail = tak.filter(s => s.wajibFail.includes("BM")).length;
+      const sejFail = tak.filter(s => s.wajibFail.includes("SEJ")).length;
+
+      const subjCount = {};
+      tak.forEach(s => {
+        (s.failedSubjects || []).forEach(sub => subjCount[sub] = (subjCount[sub]||0)+1);
+      });
+
+      const top3 = Object.entries(subjCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
+      return { bmFail, sejFail, top3, totalTak: tak.length };
+    }
+
+    /***********************
+     * FILTERED LIST
+     ***********************/
+    function getFilteredStudents(merged){
+      const clsSel = state.filter.cls;
+      const moveSel = state.filter.move;
+      const q = toUpperSafe(state.filter.q);
+      const onlyTakPra = state.filter.onlyTakPra;
+
+      let arr = merged;
+
+      if (clsSel !== "ALL") arr = arr.filter(x => x.cls === clsSel);
+
+      if (moveSel !== "SEMUA") arr = arr.filter(x => x.move === moveSel);
+
+      if (onlyTakPra) arr = arr.filter(x => x.pra && !x.pra.layak);
+
+      if (q){
+        arr = arr.filter(x =>
+          toUpperSafe(x.name).includes(q) ||
+          toUpperSafe(x.ppsa?.id || x.pra?.id || "").includes(q) ||
+          toUpperSafe(x.ppsa?.kp || x.pra?.kp || "").includes(q)
+        );
+      }
+
+      return arr;
+    }
+
+    /***********************
+     * UI RENDER
+     ***********************/
+    let chartGrouped = null;
+
+    function renderKPI(over){
+      $("kpiPctPPSA").textContent = fmtPct(over.pctP);
+      $("kpiBilPPSA").textContent = `${fmtInt(over.layakP)} / ${fmtInt(over.totalP)} layak`;
+
+      $("kpiPctPra").textContent = fmtPct(over.pctR);
+      $("kpiBilPra").textContent = `${fmtInt(over.layakR)} / ${fmtInt(over.totalR)} layak`;
+
+      const d = over.delta;
+      const sign = d > 0 ? "+" : (d < 0 ? "" : "");
+      $("kpiDelta").textContent = `${sign}${d.toFixed(1)}%`;
+
+      $("kpiNaik").textContent = fmtInt(over.naik);
+      $("kpiJatuh").textContent = fmtInt(over.jatuh);
+      $("kpiKekalLayak").textContent = fmtInt(over.kekalLayak);
+      $("kpiKekalTak").textContent = fmtInt(over.kekalTak);
+    }
+
+    function renderPuncaPanel(p){
+      const top = p.top3 || [];
+      const topHtml = top.length
+        ? top.map(([sub,c],i)=>`
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-slate-800 truncate">${i+1}. ${sub}</div>
+              <div class="mono text-slate-700">${c}</div>
+            </div>
+          `).join("")
+        : `<div class="text-slate-500 text-sm">— tiada data punca —</div>`;
+
+      $("panelPunca").innerHTML = `
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="text-xs text-slate-500">BM gagal (PraSPM)</div>
+          <div class="mono text-2xl font-bold mt-1">${p.bmFail}</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="text-xs text-slate-500">SEJ gagal (PraSPM)</div>
+          <div class="mono text-2xl font-bold mt-1">${p.sejFail}</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="text-xs text-slate-500">Top 3 subjek gagal (PraSPM)</div>
+          <div class="mt-2 space-y-1 text-sm">${topHtml}</div>
+        </div>
+      `;
+
+      const clsTxt = (state.filter.cls === "ALL") ? "Semua kelas" : `Kelas ${state.filter.cls}`;
+      $("autoInsight").textContent =
+        `${clsTxt}: Tidak layak PraSPM = ${p.totalTak} murid. Punca wajib dominan: BM gagal = ${p.bmFail}, SEJ gagal = ${p.sejFail}.`;
+    }
+
+    function renderClassTable(byClass){
+      const tbody = $("tbodyClass");
+      if (!byClass.length){
+        tbody.innerHTML = `<tr><td colspan="6" class="px-3 py-4 text-slate-500">Tiada data kelas.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = byClass.map(o => {
+        const d = o.delta;
+        const sign = d > 0 ? "+" : (d < 0 ? "" : "");
+        return `
+          <tr class="hover:bg-slate-50 cursor-pointer" data-cls="${o.cls}">
+            <td class="px-3 py-3 font-semibold">${o.cls}</td>
+            <td class="px-3 py-3 mono">${o.pPct.toFixed(1)}%</td>
+            <td class="px-3 py-3 mono">${o.rPct.toFixed(1)}%</td>
+            <td class="px-3 py-3 mono">${sign}${d.toFixed(1)}%</td>
+            <td class="px-3 py-3 mono">${o.naik}</td>
+            <td class="px-3 py-3 mono">${o.jatuh}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // klik row untuk tapis kelas
+      tbody.querySelectorAll("tr[data-cls]").forEach(tr => {
+        tr.addEventListener("click", () => {
+          const cls = tr.getAttribute("data-cls");
+          $("selClass").value = cls;
+          state.filter.cls = cls;
+          renderAll();
+        });
+      });
+    }
+
+    function moveChip(move){
+      if (move === "NAIK") return `<span class="chip bg-emerald-50 border border-emerald-200 text-emerald-700">✅ NAIK</span>`;
+      if (move === "JATUH") return `<span class="chip bg-rose-50 border border-rose-200 text-rose-700">❌ JATUH</span>`;
+      if (move === "KEKAL_LAYAK") return `<span class="chip bg-sky-50 border border-sky-200 text-sky-700">➖ KEKAL LAYAK</span>`;
+      if (move === "KEKAL_TAK") return `<span class="chip bg-amber-50 border border-amber-200 text-amber-800">➖ KEKAL TIDAK</span>`;
+      return `<span class="chip bg-slate-50 border border-slate-200 text-slate-700">TIADA DATA</span>`;
+    }
+
+    function statusChip(layak){
+      if (layak === null) return `<span class="chip bg-slate-50 border border-slate-200 text-slate-700">—</span>`;
+      return layak
+        ? `<span class="chip bg-emerald-50 border border-emerald-200 text-emerald-700">LAYAK</span>`
+        : `<span class="chip bg-rose-50 border border-rose-200 text-rose-700">TIDAK</span>`;
+    }
+
+    function tagsFail(ppsa, pra){
+      const a = (ppsa?.failedSubjects || []).slice(0,6);
+      const b = (pra?.failedSubjects || []).slice(0,6);
+
+      const make = (sub, tone) => `<span class="chip ${tone}">${sub}</span>`;
+
+      const aHtml = a.map(s => make(s, "bg-slate-50 border border-slate-200 text-slate-700")).join(" ");
+      const bHtml = b.map(s => make(s, "bg-slate-100 border border-slate-200 text-slate-800")).join(" ");
+
+      return `
+        <div class="flex flex-wrap gap-1">
+          <span class="chip bg-white border border-slate-200 text-slate-600">PPSA</span>${aHtml || `<span class="text-slate-400">—</span>`}
+          <span class="chip bg-white border border-slate-200 text-slate-600">PraSPM</span>${bHtml || `<span class="text-slate-400">—</span>`}
+        </div>
+      `;
+    }
+
+    function renderStudentTable(list){
+      const tbody = $("tbodyStud");
+
+      // sort
+      const { key, dir } = state.sort;
+      const mul = dir === "asc" ? 1 : -1;
+
+      list.sort((x,y) => {
+        if (key === "name") return mul * x.name.localeCompare(y.name, "ms");
+        if (key === "cls") return mul * (x.cls||"").localeCompare(y.cls||"", "ms");
+        if (key === "move") return mul * (x.move||"").localeCompare(y.move||"", "ms");
+        if (key === "ppsa") return mul * ((x.ppsa?.layak?1:0) - (y.ppsa?.layak?1:0));
+        if (key === "pra") return mul * ((x.pra?.layak?1:0) - (y.pra?.layak?1:0));
+        return 0;
+      });
+
+      if (!list.length){
+        tbody.innerHTML = `<tr><td colspan="6" class="px-3 py-4 text-slate-500">Tiada rekod untuk penapis semasa.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.slice(0, 800).map(x => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-3 py-3 align-top">
+            <div class="font-semibold">${x.name}</div>
+            <div class="text-xs text-slate-500">${x.ppsa?.id || x.pra?.id || x.ppsa?.kp || x.pra?.kp || ""}</div>
+          </td>
+          <td class="px-3 py-3 align-top">${x.cls || "-"}</td>
+          <td class="px-3 py-3 align-top">${moveChip(x.move)}</td>
+          <td class="px-3 py-3 align-top">${statusChip(x.ppsa ? x.ppsa.layak : null)}</td>
+          <td class="px-3 py-3 align-top">${statusChip(x.pra ? x.pra.layak : null)}</td>
+          <td class="px-3 py-3 align-top">${tagsFail(x.ppsa, x.pra)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function upsertGroupedChart(byClass){
+      // gunakan semua kelas jika filter ALL; jika pilih kelas tertentu, plot kelas itu sahaja
+      const clsSel = state.filter.cls;
+      const arr = (clsSel === "ALL") ? byClass : byClass.filter(o => o.cls === clsSel);
+
+      const labels = arr.map(o => o.cls);
+      const dataP = arr.map(o => o.pPct);
+      const dataR = arr.map(o => o.rPct);
+
+      const ctx = $("chartGrouped").getContext("2d");
+      if (chartGrouped) chartGrouped.destroy();
+
+      chartGrouped = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            { label: "PPSA (% layak)", data: dataP, borderWidth: 1 },
+            { label: "PraSPM (% layak)", data: dataR, borderWidth: 1 }
+          ]
+        },
+        options: {
+          plugins: { legend: { position: "bottom" } },
+          scales: {
+            y: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + "%" } }
+          },
+          onClick: (evt, elements) => {
+            if (!elements?.length) return;
+            const idx = elements[0].index;
+            const cls = labels[idx];
+            if (cls){
+              $("selClass").value = cls;
+              state.filter.cls = cls;
+              renderAll();
+            }
+          }
+        }
+      });
+    }
+
+    function rebuildClassSelector(merged){
+      const classes = new Set();
+      merged.forEach(x => { if (x.cls) classes.add(x.cls); });
+
+      const sel = $("selClass");
+      const current = sel.value || "ALL";
+      sel.innerHTML = `<option value="ALL">Semua Kelas</option>`;
+      [...classes].sort().forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+      sel.value = [...sel.options].some(o => o.value === current) ? current : "ALL";
+      state.filter.cls = sel.value;
+    }
+
+    /***********************
+     * MAIN RENDER
+     ***********************/
+    function renderAll(){
+      if (!state.ppsa || !state.pra) return;
+
+      const compP = computeStudents("PPSA", state.ppsa);
+      const compR = computeStudents("PraSPM", state.pra);
+
+      const merged = joinByKey(compP.students, compR.students);
+
+      rebuildClassSelector(merged);
+
+      const overall = aggOverall(merged);
+      renderKPI(overall);
+
+      const byClass = aggByClass(merged);
+      upsertGroupedChart(byClass);
+      renderClassTable(byClass);
+
+      const punca = aggPuncaPra(merged);
+      renderPuncaPanel(punca);
+
+      const list = getFilteredStudents(merged);
+      renderStudentTable(list);
+    }
+
+    /***********************
+     * EVENTS
+     ***********************/
+    function wire(){
+      $("selClass").addEventListener("change", (e) => {
+        state.filter.cls = e.target.value;
+        renderAll();
+      });
+
+      $("selMove").addEventListener("change", (e) => {
+        state.filter.move = e.target.value;
+        renderAll();
+      });
+
+      $("inpSearch").addEventListener("input", (e) => {
+        state.filter.q = e.target.value;
+        renderAll();
+      });
+
+      $("selKey").addEventListener("change", (e) => {
+        state.filter.keyMode = e.target.value;
+        renderAll();
+      });
+
+      $("btnOnlyTak").addEventListener("click", () => {
+        state.filter.onlyTakPra = !state.filter.onlyTakPra;
+        $("btnOnlyTak").classList.toggle("bg-emerald-600", state.filter.onlyTakPra);
+        $("btnOnlyTak").classList.toggle("text-white", state.filter.onlyTakPra);
+        $("btnOnlyTak").classList.toggle("border-emerald-600", state.filter.onlyTakPra);
+        renderAll();
+      });
+
+      $("btnReset").addEventListener("click", () => {
+        state.filter.cls = "ALL";
+        state.filter.move = "NAIK";
+        state.filter.q = "";
+        state.filter.onlyTakPra = false;
+        state.filter.keyMode = "AUTO";
+
+        $("selClass").value = "ALL";
+        $("selMove").value = "NAIK";
+        $("inpSearch").value = "";
+        $("selKey").value = "AUTO";
+
+        // reset button style
+        $("btnOnlyTak").classList.remove("bg-emerald-600", "text-white", "border-emerald-600");
+        renderAll();
+      });
+
+      $("btnPrint").addEventListener("click", () => window.print());
+
+      $("btnReload").addEventListener("click", async () => {
+        if (ENABLE_CACHE){
+          localStorage.removeItem(cacheKey("PPSA"));
+          localStorage.removeItem(cacheKey("PraSPM"));
+        }
+        await initLoad();
+      });
+
+      // sort header
+      document.querySelectorAll("th[data-sort]").forEach(th => {
+        th.addEventListener("click", () => {
+          const k = th.getAttribute("data-sort");
+          if (state.sort.key === k){
+            state.sort.dir = (state.sort.dir === "asc") ? "desc" : "asc";
+          } else {
+            state.sort.key = k;
+            state.sort.dir = (k === "name" || k === "cls") ? "asc" : "asc";
+          }
+          renderAll();
+        });
+      });
+    }
+
+    /***********************
+     * INIT LOAD
+     ***********************/
+    async function initLoad(){
+      try{
+        setStatus("Memuat data PPSA & PraSPM...");
+        if (!CSV_URL_PPSA || !CSV_URL_PRASPM){
+          setStatus("Sila isi URL CSV PPSA & PraSPM dalam CONFIG.");
+          return;
+        }
+
+        const [ppsa, pra] = await Promise.all([
+          loadCSV("PPSA", CSV_URL_PPSA),
+          loadCSV("PraSPM", CSV_URL_PRASPM)
+        ]);
+
+        if (!ppsa?.rows?.length || !pra?.rows?.length){
+          setStatus("Data kosong / gagal dibaca (semak publish CSV).");
+          return;
+        }
+
+        state.ppsa = ppsa;
+        state.pra = pra;
+        setStatus("OK");
+        renderAll();
+      }catch(err){
+        console.warn(err);
+        setStatus("Gagal memuat data. Semak URL CSV / CORS / publish settings.");
+      }
+    }
+
+    wire();
+    initLoad();
+  </script>
+</body>
+</html>
