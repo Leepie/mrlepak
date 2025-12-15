@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XCode - Analisis PPSA vs PraSPM</title>
+
+  <!-- Tailwind (dev) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body{background:#f8fafc;color:#111827;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+
+    /* pulse dot */
+    .pulse-dot{position:relative}
+    .pulse-dot::after{content:"";position:absolute;inset:-6px;border-radius:9999px;border:2px solid rgba(34,197,94,.4);animation:pulse 1.6s cubic-bezier(.4,0,.2,1) infinite}
+    @keyframes pulse{0%{transform:scale(.6);opacity:.9}70%{transform:scale(1.4);opacity:0}100%{transform:scale(1.4);opacity:0}}
+
+    /* container */
+    .container-max{max-width:1200px;margin-left:auto;margin-right:auto}
+
+    /* tab cards */
+    .analysis-tabs .card-hover{
+      height:5.5rem;
+      border:1px solid #e5e7eb;
+      border-radius:16px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      box-shadow:0 1px 2px rgba(16,24,40,.08);
+      transition:transform .10s ease, box-shadow .15s ease;
+    }
+    .analysis-tabs .card-hover:hover{
+      transform:translateY(-3px);
+      box-shadow:0 12px 24px rgba(16,24,40,.12);
+    }
+    .analysis-tabs .tab-active{
+      background:linear-gradient(135deg,#3b82f6 0%,#4f46e5 100%) !important;
+      color:#fff !important;
+      border-color:transparent !important;
+      box-shadow:0 14px 28px rgba(79,70,229,.28);
+    }
+    .analysis-tabs .tab-active .tab-title{color:#fff}
+    .analysis-tabs .tab-active .tab-emoji{filter:drop-shadow(0 6px 12px rgba(0,0,0,.18))}
+    .tab-emoji{font-size:28px;line-height:1}
+    .tab-title{font-size:18px;font-weight:700;color:#111827}
+    .tab-sub{font-size:13px;color:#6b7280}
+
+    /* cards */
+    .soft-card{border:1px solid #e5e7eb;border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.06)}
+    .kpi-card{
+      border:1px solid #e5e7eb;border-radius:16px;background:#fff;
+      box-shadow:0 1px 2px rgba(16,24,40,.06);
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .kpi-card:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(16,24,40,.12)}
+
+    /* chart height */
+    .chart-wrap{height:280px}
+    @media (max-width:1024px){.chart-wrap{height:250px}}
+    @media (max-width:640px){.chart-wrap{height:220px}}
+
+    options: {
+  responsive: true,
+  maintainAspectRatio: false,
+}
+
+  </style>
+
+  <script>
+    // Jadikan legend semua carta berbentuk bulat secara lalai
+    if (window.Chart) {
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+      Chart.defaults.plugins.legend.labels.boxWidth = 12;
+      Chart.defaults.plugins.legend.labels.boxHeight = 12;
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+<div id="content">
+
+  <!-- =================== HEADER (KEMUDAHAN ATAS) =================== -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between gap-6">
+        <div class="flex items-center space-x-4">
+          <img src="https://raw.githubusercontent.com/Leepie/mrlepak/master/LOGO.jpg"
+               alt="XCODE Mr LePaK"
+               class="h-16 w-16 object-contain rounded-full border" />
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Analisis PPSA vs PraSPM</h1>
+            <p class="text-sm text-gray-600">Indeks GP &amp; % LMS Sekolah</p>
+            <p class="text-sm font-medium text-gray-800">SMK</p>
+            <div class="flex items-center space-x-2 mt-1">
+              <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+              <span class="text-xs text-gray-600">Analisis PPSA &amp; PraSPM / 2025</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI kanan (GPS + %LMS) -->
+        <div class="flex items-center gap-8">
+          <div class="text-center">
+            <div class="flex items-center justify-center gap-2">
+              <div class="text-4xl font-extrabold text-blue-600" id="gpsValue">--</div>
+
+              <!-- tooltip -->
+              <div class="relative group">
+                <div class="w-5 h-5 rounded-full border border-gray-300 text-gray-500 flex items-center justify-center text-[11px] cursor-help select-none">
+                  i
+                </div>
+                <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block
+                            w-64 px-3 py-2 rounded-lg bg-gray-900 text-white text-[11px] shadow-lg">
+                  GPS dikira berdasarkan subjek wajib sahaja<br>
+                  <span class="text-gray-200">(Mengikut tetapan peperiksaan)</span>
+                  <div class="absolute left-1/2 -translate-x-1/2 top-full
+                              w-0 h-0 border-l-8 border-r-8 border-t-8
+                              border-l-transparent border-r-transparent border-t-gray-900"></div>
+                </div>
+              </div>
+            </div>
+            <div class="text-sm text-gray-600">Gred Purata Sekolah</div>
+          </div>
+
+          <div class="text-center">
+            <div class="text-4xl font-extrabold text-green-600" id="layakSijilValue">--%</div>
+            <div class="text-sm text-gray-600">Peratus Layak Sijil</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- =================== MENU TAB (KEMUDAHAN ATAS) =================== -->
+  <div class="analysis-tabs max-w-[1200px] mx-auto px-4 pt-6 pb-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <button onclick="switchTab('gp-sekolah')" id="tab-gp-sekolah" class="tab-active card-hover p-4">
+        <div class="tab-emoji mb-1">📊</div>
+        <div class="tab-title">GP Sekolah</div>
+        <div class="tab-sub">PPSA vs PraSPM</div>
+      </button>
+
+      <button onclick="switchTab('lms-sekolah')" id="tab-lms-sekolah" class="card-hover p-4">
+        <div class="tab-emoji mb-1">📈</div>
+        <div class="tab-title">% LMS Sekolah</div>
+        <div class="tab-sub">Layak Sijil</div>
+      </button>
+
+      <button onclick="switchTab('subjek-teras')" id="tab-subjek-teras" class="card-hover p-4">
+        <div class="tab-emoji mb-1">📚</div>
+        <div class="tab-title">GP Subjek Teras</div>
+        <div class="tab-sub">Subjek utama</div>
+      </button>
+
+      <button onclick="switchTab('mp-kritikal')" id="tab-mp-kritikal" class="card-hover p-4">
+        <div class="tab-emoji mb-1">⚠️</div>
+        <div class="tab-title">GP MP Kritikal</div>
+        <div class="tab-sub">Tumpuan intervensi</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== BAR INFO ========== -->
+  <div class="container-max px-4 pb-2">
+    <div class="flex flex-wrap items-center gap-2 justify-between">
+      <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-600">
+        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Mod: PPSA vs PraSPM</span>
+        <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700">Tahun: 2025</span>
+      </div>
+      <span class="text-[11px] sm:text-xs text-gray-400">(Data sebenar diambil terus dari CSV PPSA &amp; PraSPM)</span>
+    </div>
+  </div>
+
+  <!-- =================== RUANG KANDUNGAN TAB =================== -->
+  <main class="container-max px-4 pb-10 space-y-6">
+
+    <!-- ================= TAB 1: GP SEKOLAH (CARTA CONTOH) ================= -->
+    <section id="panel-gp-sekolah">
+      <div class="soft-card overflow-hidden">
+
+        <div class="px-5 py-4 border-b bg-gradient-to-r from-indigo-50 via-white to-sky-50">
+          <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
+            <div>
+              <h2 class="text-xl font-extrabold text-gray-900">Pencapaian Gred Purata Sekolah</h2>
+              <p class="text-sm text-gray-500">Line + Bar + Jadual ringkas (seperti contoh)</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">GP rendah = lebih baik</span>
+              <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Skala 1.00 – 9.00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-5">
+
+          <!-- 2 carta -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="soft-card p-4">
+              <div class="flex items-center justify-between mb-2">
+                <div class="font-bold text-gray-800">Pencapaian GPS</div>
+                <div class="text-xs text-gray-400">Line</div>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="chartGpsLine"></canvas>
+              </div>
+            </div>
+
+            <div class="soft-card p-4">
+              <div class="flex items-center justify-between mb-2">
+                <div class="font-bold text-gray-800">Perbandingan GPS</div>
+                <div class="text-xs text-gray-400">Bar</div>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="chartGpsBar"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="kpi-card px-4 py-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[11px] text-gray-500 uppercase tracking-wide">TOV (PPSA)</div>
+                  <div class="mt-1 text-2xl font-extrabold text-blue-600" id="gpsPPSAValue">--</div>
+                  <div class="mt-1 text-sm text-gray-500">GPS sebenar</div>
+                </div>
+                <div class="h-10 w-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700">🧾</div>
+              </div>
+            </div>
+
+            <div class="kpi-card px-4 py-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[11px] text-gray-500 uppercase tracking-wide">AR 1 (PraSPM)</div>
+                  <div class="mt-1 text-2xl font-extrabold text-indigo-600" id="gpsPraSpmValue">--</div>
+                  <div class="mt-1 text-sm text-gray-500">GPS sebenar</div>
+                </div>
+                <div class="h-10 w-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700">🎯</div>
+              </div>
+            </div>
+
+            <div class="kpi-card px-4 py-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[11px] text-gray-500 uppercase tracking-wide">Perubahan (AR1 – TOV)</div>
+                  <div class="mt-1 text-2xl font-extrabold text-emerald-600" id="perubahanGpsValue">--</div>
+                  <div class="mt-1 text-sm text-gray-500">Negatif = semakin baik</div>
+                </div>
+                <div class="h-10 w-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700">📉</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- jadual -->
+          <div class="soft-card overflow-hidden">
+            <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+              <div class="font-bold text-gray-800">Jadual Ringkas GPS</div>
+              <div class="text-xs text-gray-400">CSV + Sasaran</div>
+            </div>
+<!-- ====== Sasaran (Dropdown) ====== -->
+<div class="px-4 py-3 border-b bg-white">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+
+    <div class="text-sm font-semibold text-gray-800">
+      Tetapan Sasaran (OTI / ETR)
+      <div class="text-xs font-normal text-gray-500">Pilih nilai → graf & jadual akan auto-kemas kini</div>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+
+      <!-- OTI 1 -->
+      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+        <span class="text-xs font-semibold text-gray-600">OTI 1</span>
+        <select id="selOTI1" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+          <option value="">—</option>
+        </select>
+      </label>
+
+      <!-- OTI 2 -->
+      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+        <span class="text-xs font-semibold text-gray-600">OTI 2</span>
+        <select id="selOTI2" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+          <option value="">—</option>
+        </select>
+      </label>
+
+       <!-- OTI 2 -->
+      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+        <span class="text-xs font-semibold text-gray-600">AR 2</span>
+        <select id="selOTI2" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+          <option value="">—</option>
+        </select>
+      </label>
+
+      <!-- ETR -->
+      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
+        <span class="text-xs font-semibold text-gray-600">ETR</span>
+        <select id="selETR" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+          <option value="">—</option>
+        </select>
+      </label>
+
+      <button id="btnResetTarget"
+        class="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold hover:shadow-md transition">
+        Reset
+      </button>
+    </div>
+  </div>
+</div>
+
+
+           
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-700 text-white">
+                  <tr>
+                    <th class="px-4 py-3 text-center font-extrabold">TOV<br>(PPSA)</th>
+                    <th class="px-4 py-3 text-center font-extrabold">OTI 1</th>
+                    <th class="px-4 py-3 text-center font-extrabold">AR 1<br>(PraSPM)</th>
+                    <th class="px-4 py-3 text-center font-extrabold">OTI 2</th>
+                    <th class="px-4 py-3 text-center font-extrabold">AR 2</th>
+                    <th class="px-4 py-3 text-center font-extrabold">ETR</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr class="border-t">
+                    <td class="px-4 py-3 text-center font-semibold" id="tblTOV">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblOTI1">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblAR1">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblOTI2">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblAR2">--</td>
+                    <td class="px-4 py-3 text-center font-semibold" id="tblETR">--</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="text-xs text-gray-400 flex items-center gap-2">
+            <span class="inline-block h-2 w-2 rounded-full bg-emerald-400"></span>
+            Paparan dikemaskini automatik berdasarkan CSV semasa.
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2 -->
+    <section id="panel-lms-sekolah" class="hidden">
+      <div class="soft-card p-5">
+        <h2 class="text-lg font-bold"> % LMS Sekolah – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder. (Kita sambung selepas Tab 1 siap)</p>
+      </div>
+    </section>
+
+    <!-- TAB 3 -->
+    <section id="panel-subjek-teras" class="hidden">
+      <div class="soft-card p-5">
+        <h2 class="text-lg font-bold"> GP Subjek Teras – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
+      </div>
+    </section>
+
+    <!-- TAB 4 -->
+    <section id="panel-mp-kritikal" class="hidden">
+      <div class="soft-card p-5">
+        <h2 class="text-lg font-bold"> GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="mt-10">
+    <div class="w-full h-[1.5px] bg-gradient-to-r from-blue-400 to-purple-400 opacity-80"></div>
+    <p class="text-center text-[11.5px] text-gray-500 py-4">
+      © <span id="yearNow"></span> XCode Mr LePaK – Analisis PPSA vs PraSPM
+    </p>
+  </footer>
+
+</div>
+
+<script>
+/* ==========================
+   0) SWITCH TAB
+   ========================== */
+function switchTab(tabName) {
+  const panels = [
+    "gp-sekolah",
+    "lms-sekolah",
+    "subjek-teras",
+    "mp-kritikal"
+  ];
+
+  panels.forEach(name => {
+    const panel = document.getElementById("panel-" + name);
+    const tabBtn = document.getElementById("tab-" + name);
+    if (panel) panel.classList.toggle("hidden", name !== tabName);
+
+    if (tabBtn) {
+      if (name === tabName) tabBtn.classList.add("tab-active");
+      else tabBtn.classList.remove("tab-active");
+    }
+  });
+}
+
+/* ==========================
+   1) SUMBER CSV (2 URL)
+   ========================== */
+const csvUrlPPSA   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdnpPQ7vfOqMuuV-DzAmPtQjCEZBwVtXxLBpGFUguqC3ZqqouMN_Bey3AIzXSPBlziV1bNKSpGjfBY/pub?gid=1172655606&single=true&output=csv";
+const csvUrlPraSPM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRck15kwRkf75NPm1IouErXU_CDgHjMEGw1nm0FNCu1XAkIb3EF0XV36Mq66wui_0imgyC9OKzoVQl9/pub?gid=22937657&single=true&output=csv";
+
+/* ==========================
+   2) SASARAN (Series 2)
+   ========================== */
+const TARGET_GPS = {
+  OTI1: null,  // contoh: 5.40
+  OTI2: null,  // contoh: 5.10
+  ETR : null   // contoh: 4.80
+};
+
+/* ==========================
+   SASARAN: DROPDOWN + UPDATE LIVE
+   ========================== */
+
+// Julat pilihan nilai (boleh ubah ikut kehendak Cikgu)
+/*const TARGET_OPTIONS = (() => {
+  const arr = [];
+  // contoh 1.00 hingga 9.00 setiap 0.05
+  for (let v = 1.00; v <= 9.0001; v += 0.05) arr.push(+v.toFixed(2));
+  return arr;
+})();
+*/
+  const TARGET_OPTIONS = (() => {
+  const arr = [];
+  for (let i = 1; i <= 900; i++) {
+    arr.push((i / 100).toFixed(2));
+  }
+  return arr.map(Number);
+})();
+
+
+function fillSelect(selectEl, options) {
+  if (!selectEl) return;
+  // buang semua kecuali option pertama (—)
+  while (selectEl.options.length > 1) selectEl.remove(1);
+
+  options.forEach(val => {
+    const opt = document.createElement("option");
+    opt.value = val.toFixed(2);
+    opt.textContent = val.toFixed(2);
+    selectEl.appendChild(opt);
+  });
+}
+
+function getSelValue(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const v = (el.value || "").trim();
+  if (v === "") return null;
+  const num = Number(v);
+  return Number.isFinite(num) ? +num.toFixed(2) : null;
+}
+
+function setSelValue(id, valueOrNull) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = (valueOrNull == null) ? "" : Number(valueOrNull).toFixed(2);
+}
+
+function updateTargetsFromUI() {
+  TARGET_GPS.OTI1 = getSelValue("selOTI1");
+  TARGET_GPS.OTI2 = getSelValue("selOTI2");
+  TARGET_GPS.ETR  = getSelValue("selETR");
+}
+
+function updateTableTargetsOnly() {
+  const setCell = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = (val == null || Number.isNaN(val)) ? "—" : Number(val).toFixed(2);
+  };
+  setCell("tblOTI1", TARGET_GPS.OTI1);
+  setCell("tblOTI2", TARGET_GPS.OTI2);
+  setCell("tblETR",  TARGET_GPS.ETR);
+}
+
+// Update dua-dua graf tanpa destroy (lebih laju & stabil)
+function updateChartsTargetsOnly() {
+  const targetArr = [null, TARGET_GPS.OTI1, null, TARGET_GPS.OTI2, TARGET_GPS.ETR];
+
+  // LINE: dataset[1] = "Sasaran"
+  if (chartLine && chartLine.data?.datasets?.[1]) {
+    chartLine.data.datasets[1].data = targetArr;
+    chartLine.update();
+  }
+
+  // BAR: tambah dataset sasaran jika belum ada
+  if (chartBar) {
+    if (!chartBar.data.datasets[1]) {
+      chartBar.data.datasets.push({
+        label: "Sasaran",
+        data: targetArr
+      });
+    } else {
+      chartBar.data.datasets[1].data = targetArr;
+    }
+    chartBar.update();
+  }
+}
+
+function applyTargetChanges() {
+  updateTargetsFromUI();
+  updateTableTargetsOnly();
+  updateChartsTargetsOnly();
+}
+
+function initTargetDropdowns() {
+  const sel1 = document.getElementById("selOTI1");
+  const sel2 = document.getElementById("selOTI2");
+  const sel3 = document.getElementById("selETR");
+  const btnR = document.getElementById("btnResetTarget");
+
+  fillSelect(sel1, TARGET_OPTIONS);
+  fillSelect(sel2, TARGET_OPTIONS);
+  fillSelect(sel3, TARGET_OPTIONS);
+
+  // Default kosong (—)
+  setSelValue("selOTI1", TARGET_GPS.OTI1);
+  setSelValue("selOTI2", TARGET_GPS.OTI2);
+  setSelValue("selETR",  TARGET_GPS.ETR);
+
+  [sel1, sel2, sel3].forEach(el => {
+    if (!el) return;
+    el.addEventListener("change", applyTargetChanges);
+  });
+
+  if (btnR) {
+    btnR.addEventListener("click", () => {
+      TARGET_GPS.OTI1 = null;
+      TARGET_GPS.OTI2 = null;
+      TARGET_GPS.ETR  = null;
+      setSelValue("selOTI1", null);
+      setSelValue("selOTI2", null);
+      setSelValue("selETR",  null);
+      applyTargetChanges();
+    });
+  }
+}
+
+/* ==========================
+   3) PEMETAAN NILAI GRED
+   ========================== */
+const gradeValueMapping = {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
+
+/* ==========================
+   4) CSV PARSER (quote)
+   ========================== */
+function parseCSVLine(line){
+  const result=[]; let current=""; let inside=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch === '"'){ inside=!inside; }
+    else if(ch === "," && !inside){ result.push(current); current=""; }
+    else{ current+=ch; }
+  }
+  result.push(current);
+  return result.map(s => (s ?? "").toString().trim());
+}
+
+/* ==========================
+   5) PARSE CSV FORMAT XCODE
+   ========================== */
+function parseCsvXCode(csvText){
+  const lines = csvText.split(/\r?\n/).map(l=>l.trim()).filter(l=>l!=="");
+  if(lines.length < 4){ console.error("❌ CSV format tidak mencukupi (>=4 baris)."); return null; }
+
+  const flagRow   = parseCSVLine(lines[0]);
+  const subjekRow = parseCSVLine(lines[1]);
+  const jenisRow  = parseCSVLine(lines[2]);
+
+  let currentSubjek="";
+  const headers = subjekRow.map((subjek,i)=>{
+    if(subjek) currentSubjek=subjek;
+    return jenisRow[i] ? `${currentSubjek} ${jenisRow[i]}`.trim() : (currentSubjek||"");
+  });
+
+  const headerMap={};
+  headers.forEach(h=>{ if(h) headerMap[h.toLowerCase()] = h; });
+
+  const subjectFlagMap={};
+  subjekRow.forEach((code,i)=>{
+    const jenis=(jenisRow[i]||"").toUpperCase();
+    const flag=(flagRow[i]||"").trim();
+    if(code && jenis==="M" && (flag==="0" || flag==="1")) subjectFlagMap[code.toUpperCase()] = flag;
+  });
+
+  const subjectColumns = headers.filter(h=>{
+    if(!h) return false;
+    const upper=h.toUpperCase();
+    const isGred=/\b(G|GRED|GRADE)\b/.test(upper);
+    const isUmum=upper.includes("KESELURUHAN") || upper.includes("PURATA") || upper.includes("GPMP");
+    return isGred && !isUmum;
+  });
+
+  const rows = lines.slice(3).map(line=>{
+    const vals=parseCSVLine(line);
+    const obj={};
+    headers.forEach((h,i)=>{ if(h) obj[h] = (vals[i]||"").trim(); });
+    return obj;
+  });
+
+  return {headers,headerMap,subjectFlagMap,subjectColumns,rows};
+}
+
+/* ==========================
+   6) KIRA GPS (SUBJEK WAJIB)
+   ========================== */
+function kiraGPS_Wajib(parsed){
+  const { headerMap, subjectFlagMap, subjectColumns, rows } = parsed;
+
+  const namaCol  = headerMap["nama"]  || "NAMA";
+  const kelasCol = headerMap["kelas"] || "KELAS";
+
+  const wajibColumns = subjectColumns.filter(colName=>{
+    const subjCode=(colName.split(" ")[0]||"").toUpperCase();
+    const flag=subjectFlagMap[subjCode];
+    if(flag==="0") return false; // elektif
+    return true;
+  });
+
+  let jumlahNilai=0, bilGred=0;
+  rows.forEach(row=>{
+    const nama=(row[namaCol]||"").trim();
+    const kelas=(row[kelasCol]||"").trim();
+    if(!nama || /^\d+$/.test(nama)) return;
+    if(kelas==="1") return;
+
+    wajibColumns.forEach(col=>{
+      const g=(row[col]||"").toUpperCase().trim();
+      if(gradeValueMapping.hasOwnProperty(g)){
+        jumlahNilai += gradeValueMapping[g];
+        bilGred++;
+      }
+    });
+  });
+
+  if(!bilGred) return null;
+  return +(jumlahNilai / bilGred).toFixed(2);
+}
+
+/* ==========================
+   7) PLUGIN LABEL NILAI (titik & bar)
+   (PASTIKAN hanya 1 kali define)
+   ========================== */
+const valueLabelPlugin = {
+  id: "valueLabelPlugin",
+  afterDatasetsDraw(chart, args, opts){
+    const { ctx } = chart;
+    if(!ctx) return;
+
+    const decimals = (opts && opts.decimals != null) ? opts.decimals : 2;
+    const offsetY  = (opts && opts.offsetY  != null) ? opts.offsetY  : -12;
+
+    ctx.save();
+    ctx.font = "800 12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillStyle = "#111827";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    chart.data.datasets.forEach((ds, di)=>{
+      const meta = chart.getDatasetMeta(di);
+      if(!meta || meta.hidden) return;
+
+      meta.data.forEach((el, i)=>{
+        const v = ds.data[i];
+        if(v == null || Number.isNaN(v)) return;
+        ctx.fillText(Number(v).toFixed(decimals), el.x, el.y + offsetY);
+      });
+    });
+
+    ctx.restore();
+  }
+};
+
+if(window.Chart && Chart.register){
+  Chart.register(valueLabelPlugin);
+}
+
+/* ==========================
+   8) BINA CARTA (LINE + BAR)
+   ========================== */
+let chartLine=null, chartBar=null;
+
+function buildCharts(seriesReal, seriesTarget){
+  // LINE
+  const ctxL = document.getElementById("chartGpsLine")?.getContext("2d");
+  if(ctxL){
+    if(chartLine) chartLine.destroy();
+    chartLine = new Chart(ctxL, {
+      type:"line",
+      data:{
+        labels:["TOV","OTI 1","AR 1","OTI 2","ETR"],
+        datasets:[
+          { label:"GPS Sebenar", data:seriesReal, tension:.35, spanGaps:true, pointRadius:5, pointHoverRadius:6 },
+          { label:"Sasaran", data:seriesTarget, tension:.35, spanGaps:true, borderDash:[6,6], pointRadius:4, pointHoverRadius:5 }
+        ]
+      },
+      options:{
+        responsive:true,
+        plugins:{
+          legend:{ display:true },
+          valueLabelPlugin:{ decimals:2, offsetY:-14 },
+          tooltip:{ callbacks:{ label:(c)=>` ${c.dataset.label}: ${Number(c.parsed.y).toFixed(2)}` } }
+        },
+        scales:{ y:{ reverse:true, suggestedMin:1, suggestedMax:9 } }
+      }
+    });
+  }
+
+  // BAR
+  const ctxB = document.getElementById("chartGpsBar")?.getContext("2d");
+  if(ctxB){
+    if(chartBar) chartBar.destroy();
+    chartBar = new Chart(ctxB, {
+      type:"bar",
+      data:{
+        labels:["TOV","OTI 1","AR 1","OTI 2","ETR"],
+        datasets:[ { label:"GPS Sebenar", data:seriesReal } ]
+      },
+      options:{
+        responsive:true,
+        plugins:{
+          legend:{ display:true },
+          valueLabelPlugin:{ decimals:2, offsetY:-10 },
+          tooltip:{ callbacks:{ label:(c)=>` ${c.dataset.label}: ${Number(c.parsed.y).toFixed(2)}` } }
+        },
+        scales:{ y:{ reverse:true, suggestedMin:1, suggestedMax:9 } }
+      }
+    });
+  }
+}
+
+/* ==========================
+   9) LOAD + UPDATE UI
+   ========================== */
+async function loadAndRender(){
+  try{
+    const [ppsRes, praRes] = await Promise.all([ fetch(csvUrlPPSA), fetch(csvUrlPraSPM) ]);
+    const [ppsText, praText] = await Promise.all([ ppsRes.text(), praRes.text() ]);
+
+    const ppsParsed = parseCsvXCode(ppsText);
+    const praParsed = parseCsvXCode(praText);
+
+    if(!ppsParsed || !praParsed){ console.error("❌ Parse gagal."); return; }
+
+    const gpPPSA = kiraGPS_Wajib(ppsParsed); // TOV
+    const gpPra  = kiraGPS_Wajib(praParsed); // AR1
+
+    // KPI top & tab 1
+    const elPPSA = document.getElementById("gpsPPSAValue");
+    const elPra  = document.getElementById("gpsPraSpmValue");
+    const elDiff = document.getElementById("perubahanGpsValue");
+    const elHead = document.getElementById("gpsValue");
+
+    if(gpPPSA!=null && elPPSA) elPPSA.textContent = gpPPSA.toFixed(2);
+    if(gpPra !=null && elPra)  elPra.textContent  = gpPra.toFixed(2);
+    if(gpPra !=null && elHead) elHead.textContent = gpPra.toFixed(2);
+
+    if(gpPPSA!=null && gpPra!=null && elDiff){
+      const diff = +(gpPra - gpPPSA).toFixed(2);
+      elDiff.textContent = diff.toFixed(2);
+    }
+
+    // Series untuk carta contoh
+    const seriesReal   = [gpPPSA, null, gpPra, null, null];
+    const seriesTarget = [null, TARGET_GPS.OTI1, null, TARGET_GPS.OTI2, TARGET_GPS.ETR];
+
+    buildCharts(seriesReal, seriesTarget);
+    initTargetDropdowns();
+
+
+    // Jadual
+    const setCell = (id, val) => {
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.textContent = (val==null || Number.isNaN(val)) ? "—" : Number(val).toFixed(2);
+    };
+    setCell("tblTOV", gpPPSA);
+    setCell("tblOTI1", TARGET_GPS.OTI1);
+    setCell("tblAR1", gpPra);
+    setCell("tblOTI2", TARGET_GPS.OTI2);
+    setCell("tblETR",  TARGET_GPS.ETR);
+
+    // %LMS masih placeholder (nanti kita sambung)
+    // document.getElementById("layakSijilValue").textContent = "—%";
+
+  }catch(err){
+    console.error("❌ Ralat CSV:", err);
+  }
+}
+
+/* ==========================
+   10) INIT
+   ========================== */
+document.getElementById("yearNow").textContent = new Date().getFullYear();
+switchTab("gp-sekolah");
+loadAndRender();
+</script>
+
+</body>
+</html>
