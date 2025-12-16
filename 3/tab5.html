@@ -942,6 +942,13 @@
                 }
               }
             },
+            // ✅ INI YANG BUANG .00 ATAS TITIK (GRAF INI SAHAJA)
+              datalabels: {
+                formatter: (v) => Math.round(Number(v)),
+                anchor: 'end',
+                align: 'top'
+              }
+            },
             scales: {
               y: { beginAtZero: true, ticks: { precision: 0 } }
             }
