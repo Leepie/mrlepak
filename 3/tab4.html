@@ -471,6 +471,33 @@
 
           function $(id){ return document.getElementById(id); }
           function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function normalizeSubjectCol(s){
+  return String(s ?? "").trim().replace(/\s+/g, " ");
+}
+
+// ✅ Papar NAMA PENUH SAHAJA (BUANG "G")
+function getFullSubjectNameNoG(subjectCol){
+  const x = normalizeSubjectCol(subjectCol);
+  if(!x) return "";
+
+  const parts = x.split(" ");
+  const code  = (parts[0] || "").toUpperCase();
+
+  // jika memang "G" sahaja -> kosongkan (taknak muncul)
+  if(code === "G" && parts.length === 1) return "";
+
+  // nama penuh ikut mapping (kalau tiada, fallback code)
+  return subjectNameMap[code] || code;
+}
+
+// ✅ Tapis senarai subjek: buang "G" sahaja / value pelik
+function isValidSubjectCol(subjectCol){
+  const x = normalizeSubjectCol(subjectCol);
+  if(!x) return false;
+  if(x.toUpperCase() === "G") return false;        // buang subjek = G
+  if(x === "-") return false;
+  return true;
+}
 
 function getSubjectCode(colName){
   return String(colName || "").trim().split(/\s+/)[0].toUpperCase(); // "BI G" -> "BI"
@@ -722,7 +749,7 @@ function getFullSubjectName(colName){
 
   $("t2-status").innerHTML =
     `Paparan: <b>PPSA / PraSPM / Beza</b>
-     • Subjek: <b>${esc(subjek)}</b>
+     • Subjek: <b>${esc(getFullSubjectNameNoG(subjek))}</b>
      • Kelas: <b>${kelas==="ALL"?"SEMUA":esc(kelas)}</b>`;
 
   renderTableBlocks(blocks);
@@ -755,15 +782,24 @@ function getFullSubjectName(colName){
             selK.innerHTML = `<option value="ALL">SEMUA KELAS</option>` + kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
 
             // Subjek (lebih kemas jika cikgu set __TAB2_SUBJECT_COLS)
-            const subjectCols = uniqueSorted(Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
-              ? window.__TAB2_SUBJECT_COLS
-              : inferSubjectColumns(rowsAny)
-            );
-            const selS = $("t2-filter-subjek");
-    //        selS.innerHTML = `<option value="">Pilih Subjek</option>` + subjectCols.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-            selS.innerHTML =
+           let subjectCols = uniqueSorted(
+  (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
+    ? window.__TAB2_SUBJECT_COLS
+    : inferSubjectColumns(rowsAny)
+  )
+  .filter(isValidSubjectCol) // ✅ buang "G" sahaja
+);
+
+// ✅ Papar NAMA PENUH tanpa "G", tapi VALUE kekal contoh "BM G" (untuk kiraan)
+const selS = $("t2-filter-subjek");
+selS.innerHTML =
   `<option value="">Pilih Subjek</option>` +
-  subjectCols.map(col => `<option value="${esc(col)}">${esc(getFullSubjectName(col))}</option>`).join("");
+  subjectCols.map(col => {
+    const label = getFullSubjectNameNoG(col); // ✅ contoh: "BAHASA MELAYU"
+    if(!label) return "";                    // safety
+    return `<option value="${esc(col)}">${esc(label)}</option>`;
+  }).join("");
+
 
           }
 
