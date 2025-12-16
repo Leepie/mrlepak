@@ -348,7 +348,7 @@
     </section>
 
     <!-- ================= TAB 2: ANALISIS MATA PELAJARAN ================= -->
-    <section id="panel-lms-sekolah" class="hidden">
+    <section id="panel-lms-sekolah" class="hidden" hidden>
 
       <!-- KAD: ANALISIS MATA PELAJARAN -->
       <div class="soft-card p-4">
@@ -776,7 +776,7 @@
     </section>
 
     <!-- TAB 3 -->
-    <section id="panel-subjek-teras" class="hidden">
+    <section id="panel-subjek-teras" class="hidden" hidden>
       <div class="soft-card p-4">
         <h2 class="text-lg font-bold"> GP Subjek Teras – PPSA vs PraSPM</h2>
         <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
@@ -784,7 +784,7 @@
     </section>
 
     <!-- TAB 4 -->
-    <section id="panel-mp-kritikal" class="hidden">
+    <section id="panel-mp-kritikal" class="hidden" hidden>
       <div class="soft-card p-4">
         <h2 class="text-lg font-bold"> GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
         <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
@@ -841,37 +841,31 @@ function loadActiveTab(){
 /* ==========================
    0) SWITCH TAB
    ========================== */
+
 function switchTab(tabName) {
   const panels = ["gp-sekolah","lms-sekolah","subjek-teras","mp-kritikal"];
+
   panels.forEach(name => {
     const panel = document.getElementById("panel-" + name);
     const tabBtn = document.getElementById("tab-" + name);
-    if (panel) panel.classList.toggle("hidden", name !== tabName);
+
+    if (panel) {
+      const isActive = (name === tabName);
+
+      // ✅ penting: set atribut hidden supaya "space-y-4" ikut betul
+      panel.hidden = !isActive;
+
+      // kekal class toggling (ok)
+      panel.classList.toggle("hidden", !isActive);
+    }
+
     if (tabBtn) tabBtn.classList.toggle("tab-active", name === tabName);
   });
+
   saveActiveTab(tabName);
 }
 
-/* ==========================
-   1) SUMBER CSV (2 URL)
-   ========================== */
-const csvUrlPPSA   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdnpPQ7vfOqMuuV-DzAmPtQjCEZBwVtXxLBpGFUguqC3ZqqouMN_Bey3AIzXSPBlziV1bNKSpGjfBY/pub?gid=1172655606&single=true&output=csv";
-const csvUrlPraSPM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRck15kwRkf75NPm1IouErXU_CDgHjMEGw1nm0FNCu1XAkIb3EF0XV36Mq66wui_0imgyC9OKzoVQl9/pub?gid=22937657&single=true&output=csv";
 
-/* ==========================
-   2) STATE: SASARAN + AR2
-   ========================== */
-const TARGET_GPS = { OTI1:null, OTI2:null, ETR:null };
-const REAL_GPS   = { AR2:null }; // AR2 manual (dropdown)
-
-/* ==========================
-   2.1) OPTIONS dropdown (1.00 - 9.00)
-   ========================== */
-const TARGET_OPTIONS = (() => {
-  const arr = [];
-  for (let i = 1; i <= 900; i++) arr.push(Number((i / 100).toFixed(2)));
-  return arr;
-})();
 
 function fillSelect(selectEl, options) {
   if (!selectEl) return;
