@@ -496,7 +496,7 @@
           Perbandingan Gred Pelajar (PPSA vs PraSPM)
         </h3>
         <p class="text-sm text-gray-500 mt-1">
-          Taburan gred A+ hingga G. Pilih Line/Bar, highlight C ke bawah, dan eksport PNG.
+          Taburan gred A+ hingga G
         </p>
       </div>
 
@@ -538,7 +538,7 @@
         Jadual Pecahan Kelas
       </h3>
       <p class="text-sm text-gray-500 mt-1">
-        (TH tidak masuk kiraan % Lulus/Gagal).
+        (TH tidak masuk kiraan % Lulus/Gagal)
       </p>
     </div>
 
@@ -574,6 +574,16 @@
     </div>
   </div>
 
+  <script>
+    //TUTUP KEJAP
+  document.getElementById("t2-highlight-cdown")
+    ?.closest("label")
+    ?.classList.add("hidden");
+
+  document.getElementById("t2-btn-export")
+    ?.classList.add("hidden");
+</script>
+  
   <!-- TAB 2 SCRIPT (INIT selepas CSV siap load) -->
   <script>
     // TAB2 init akan dipanggil dari loadAndRender() selepas __CSV_* diisi
