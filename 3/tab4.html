@@ -98,11 +98,15 @@
   color:#1e1b4b;
 }
 
-    .t2-sticky-head thead th{
+
+    /* Freeze header Jadual Pecahan Kelas */
+.t2-sticky-head thead th{
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 50;
+  background: #4f46e5; /* warna header (indigo) */
 }
+
 
   </style>
 
@@ -458,7 +462,7 @@
           </p>
         </div>
 
-        <div class="w-full overflow-x-auto">
+        <div class="w-full overflow-x-auto overflow-y-auto max-h-[65vh]">
           <table class="min-w-[1100px] w-full t2-sticky-head">
             <thead>
               <tr class="bg-indigo-600 text-white text-sm">
