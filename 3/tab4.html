@@ -64,6 +64,16 @@
     .chart-wrap{height:280px}
     @media (max-width:1024px){.chart-wrap{height:250px}}
     @media (max-width:640px){.chart-wrap{height:220px}}
+
+    /* TAB2: highlight row ikut STATUS */
+.t2-row-highlight{
+  background: #fff7ed !important;             /* lembut (oren muda) */
+  box-shadow: inset 0 0 0 2px #fb923c;        /* border dalam */
+}
+.t2-row-dim{
+  opacity: .55;
+}
+
   </style>
 
   <script>
@@ -683,7 +693,11 @@ function getFullSubjectName(colName){
       const frameTop = isFirstRow ? topFrame : "";
       const frameBot = isLastRow  ? bottomFrame : "";
 
-      html += `<tr class="${zebra} border-b ${frameTop} ${frameBot}">`;
+      const isHL  = (viewStatus !== "ALL" && status === viewStatus);
+const isDim = (viewStatus !== "ALL" && status !== viewStatus);
+
+html += `<tr class="${zebra} border-b ${frameTop} ${frameBot} ${isHL ? "t2-row-highlight" : ""} ${isDim ? "t2-row-dim" : ""}">`;
+
 
       // STATUS (kiri)
       html += `<td class="px-4 py-3 text-center font-extrabold text-gray-800 align-middle">
