@@ -472,6 +472,15 @@
           function $(id){ return document.getElementById(id); }
           function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
+function getSubjectCode(colName){
+  return String(colName || "").trim().split(/\s+/)[0].toUpperCase(); // "BI G" -> "BI"
+}
+function getFullSubjectName(colName){
+  const code = getSubjectCode(colName);
+  return subjectNameMap[code] || colName; // fallback kalau tiada mapping
+}
+
+          
           function normalizeGrade(g) {
             const x = String(g ?? "").trim().toUpperCase();
             if (!x) return "";
@@ -751,7 +760,11 @@
               : inferSubjectColumns(rowsAny)
             );
             const selS = $("t2-filter-subjek");
-            selS.innerHTML = `<option value="">Pilih Subjek</option>` + subjectCols.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    //        selS.innerHTML = `<option value="">Pilih Subjek</option>` + subjectCols.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+            selS.innerHTML =
+  `<option value="">Pilih Subjek</option>` +
+  subjectCols.map(col => `<option value="${esc(col)}">${esc(getFullSubjectName(col))}</option>`).join("");
+
           }
 
           // ===== events (GANTI YANG LAMA) =====
@@ -926,6 +939,59 @@ function updateStateFromUI(){
    3) PEMETAAN NILAI GRED
    ========================== */
 const gradeValueMapping = {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
+
+  const chartGradeLabels = ["A+","A","A-","B+","B","C+","C","D","E","G"];
+const topGradeLabels   = ["A+","A","A-","B+","B","C+","C"];
+
+const gradeColors = {
+  "A+": "#16a34a",
+  "A": "#22c55e",
+  "A-": "#86efac",
+  "B+": "#eab308",
+  "B": "#facc15",
+  "C+": "#fb923c",
+  "C": "#f97316",
+  "D": "#f87171",
+  "E": "#ef4444",
+  "G": "#991b1b"
+};
+
+const subjectNameMap = {
+  "BM": "BAHASA MELAYU",
+  "BI": "BAHASA INGGERIS",
+  "M": "MATEMATIK",
+  "SN": "SAINS",
+  "MT": "MATEMATIK TAMBAHAN",
+  "SEJ": "SEJARAH",
+  "PAI": "PENDIDIKAN ISLAM",
+  "PM": "PENDIDIKAN MORAL",
+  "PSV": "PENDIDIKAN SENI VISUAL",
+  "PJK": "PENDIDIKAN JASMANI DAN KESIHATAN",
+  "BIO": "BIOLOGI",
+  "KIM": "KIMIA",
+  "FIZ": "FIZIK",
+  "SS": "SAINS SUKAN",
+  "SK": "SAINS KOMPUTER",
+  "SRT": "SAINS RUMAH TANGGA",
+  "PER": "PERTANIAN",
+  "PNG": "PERNIAGAAN",
+  "PA": "PRINSIP PERAKAUNAN",
+  "TAS": "TASAWWUR ISLAM",
+  "PAIM": "PENDIDIKAN ISLAM MPAK",
+  "GEO": "GEOGRAFI",
+  "BT": "BAHASA TAMIL",
+  "KT": "KESUSASTERAAN TAMIL",
+  "RC": "REKA CIPTA",
+  "SPER": "SAINS PERTANIAN"
+};
+
+const subjectGroupMap = {
+  "Bahasa": ["BM","BI","BT","KT"],
+  "Kemanusiaan": ["PAI","PM","SEJ","GEO","PSV","PJK","PAIM","TAS"],
+  "Sains & Matematik": ["M","SN","MT","FIZ","BIO","KIM"],
+  "Teknik & Vokasional": ["SK","SRT","PER","PNG","PA","SS","RC","SPER"]
+};
+
 
 /* ==========================
    4) CSV PARSER (quote)
