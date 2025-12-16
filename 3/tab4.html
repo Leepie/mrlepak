@@ -604,68 +604,97 @@
           // (3) Render jadual ikut IMEJ 2 (3 baris per kelas)
           function renderTableBlocks(blocks){
   const tbody = $("t2-tbody");
-  if(!blocks.length){
-    tbody.innerHTML = `<tr>
-      <td colspan="17" class="text-center py-6 text-gray-500">
-        Tiada data
-      </td></tr>`;
+  if(!blocks || !blocks.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="17" class="px-4 py-6 text-center text-gray-500">
+          Tiada data untuk dipaparkan.
+        </td>
+      </tr>`;
     return;
   }
 
   let html = "";
 
+  const cell = (v, isDiff=false) => {
+    const val = isDiff ? fmtDiff(v) : (v ?? 0);
+    const cls = isDiff ? clsDiff(v) : "";
+    return `<td class="px-3 py-3 text-center ${cls}">${val}</td>`;
+  };
+
+  const rowNormalTail = (o) => `
+    <td class="px-3 py-3 text-center text-green-600 font-bold">${fmtPct(o.pctLulus)}</td>
+    <td class="px-3 py-3 text-center text-red-600 font-bold">${fmtPct(o.pctGagal)}</td>
+    <td class="px-4 py-3 text-center text-purple-600 font-bold">${fmtNum(o.gpmp,2)}</td>
+  `;
+
+  const rowDiffTail = (o) => `
+    <td class="px-3 py-3 text-center ${clsDiff(o.pctLulus)}">${fmtPctDiff(o.pctLulus)}</td>
+    <td class="px-3 py-3 text-center ${clsDiff(o.pctGagal)}">${fmtPctDiff(o.pctGagal)}</td>
+    <td class="px-4 py-3 text-center ${clsDiff(o.gpmp)}">${fmtGpmpDiff(o.gpmp)}</td>
+  `;
+
   blocks.forEach((blk, idx)=>{
-    const zebra = (idx % 2 === 1) ? "bg-gray-50" : "bg-white";
+    // zebra ikut BLOK (bukan ikut baris)
+    const zebra = (idx % 2 === 1) ? "bg-gray-50/60" : "bg-white";
 
-    const makeRow = (label, o, isFirst, isDiff=false) => {
-      html += `<tr class="${zebra} border-b">`;
+    // “bingkai” blok (atas & bawah)
+    const topFrame    = "border-t-[6px] border-indigo-200";
+    const bottomFrame = "border-b-[6px] border-indigo-200";
 
-      // STATUS
-      html += `<td class="px-3 py-2 font-extrabold text-center">
-        ${label}
+    // buat 3 baris: PPSA, PRASPM, BEZA
+    const addRow = (status, o, isFirstRow, isLastRow, isDiff) => {
+      const frameTop = isFirstRow ? topFrame : "";
+      const frameBot = isLastRow  ? bottomFrame : "";
+
+      html += `<tr class="${zebra} border-b ${frameTop} ${frameBot}">`;
+
+      // STATUS (kiri)
+      html += `<td class="px-4 py-3 text-center font-extrabold text-gray-800 align-middle">
+        ${status}
       </td>`;
 
-      // KELAS (rowspan 3)
-      if(isFirst){
-        html += `<td rowspan="3"
-          class="px-4 py-2 font-bold text-left align-middle">
+      // KELAS rowspan 3
+      if(isFirstRow){
+        html += `<td class="px-4 py-3 font-extrabold text-gray-800 align-middle" rowspan="3">
           ${esc(blk.kelas)}
         </td>`;
       }
 
-      // DATA
-      const cell = (v, diff=false) =>
-        `<td class="px-3 py-2 text-center ${diff ? clsDiff(v) : ""}">
-          ${diff ? fmtDiff(v) : v}
-        </td>`;
+      // Hadir + TH
+      html += cell(o.hadir || 0, isDiff);
+      html += cell(o.th    || 0, isDiff);
 
-      html += cell(o.hadir, isDiff);
-      html += cell(o.th, isDiff);
-
+      // Gred A+..G
       GRADE_ORDER.forEach(g=>{
-        html += cell(o.grades[g] || 0, isDiff);
+        const v = (o.grades && o.grades[g]) ? o.grades[g] : 0;
+        html += cell(v, isDiff);
       });
 
-      html += `
-        <td class="px-3 py-2 text-center ${isDiff?clsDiff(o.pctLulus):"text-green-600 font-bold"}">
-          ${isDiff ? fmtPctDiff(o.pctLulus) : fmtPct(o.pctLulus)}
-        </td>
-        <td class="px-3 py-2 text-center ${isDiff?clsDiff(o.pctGagal):"text-red-600 font-bold"}">
-          ${isDiff ? fmtPctDiff(o.pctGagal) : fmtPct(o.pctGagal)}
-        </td>
-        <td class="px-3 py-2 text-center ${isDiff?clsDiff(o.gpmp):"text-purple-600 font-bold"}">
-          ${isDiff ? fmtGpmpDiff(o.gpmp) : fmtNum(o.gpmp,2)}
-        </td>
-      </tr>`;
+      // %Lulus %Gagal GPMP
+      html += isDiff ? rowDiffTail(o) : rowNormalTail(o);
+
+      html += `</tr>`;
     };
 
-    makeRow("PPSA",   blk.P, true,  false);
-    makeRow("PRASPM", blk.R, false, false);
-    makeRow("BEZA",   blk.B, false, true);
+    addRow("PPSA",   blk.P, true,  false, false);
+    addRow("PRASPM", blk.R, false, false, false);
+    addRow("BEZA",   blk.B, false, true,  true);
+
+    // ✅ spacer row (jarak antara kelas) — hanya bila pilih SEMUA KELAS
+    const kelasFilter = $("t2-filter-kelas")?.value || "ALL";
+    if (kelasFilter === "ALL") {
+      html += `
+        <tr>
+          <td colspan="17" class="h-3 bg-transparent"></td>
+        </tr>
+      `;
+    }
   });
 
   tbody.innerHTML = html;
 }
+
 
 
           // (4) Jana (guna blok 3 baris)
