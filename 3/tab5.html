@@ -936,7 +936,9 @@
               },
               tooltip: {
                 callbacks: {
-                  label: (c)=> ` ${c.dataset.label}: ${c.parsed.y}`
+               //   label: (c)=> ` ${c.dataset.label}: ${c.parsed.y}`
+                 // -   label: (c)=> ` ${c.dataset.label}: ${c.parsed.y}`
+                    label: (c)=> ` ${c.dataset.label}: ${Math.round(c.parsed.y)}`
                 }
               }
             },
