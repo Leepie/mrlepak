@@ -808,7 +808,28 @@
    ========================== */
 const STORAGE_KEY = "xcode_ppsa_praspm_targets_v1";
 const STORAGE_TAB = "xcode_ppsa_praspm_active_tab_v1";
+/* ==========================
+   1) SUMBER CSV (2 URL)
+   ========================== */
+const csvUrlPPSA   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdnpPQ7vfOqMuuV-DzAmPtQjCEZBwVtXxLBpGFUguqC3ZqqouMN_Bey3AIzXSPBlziV1bNKSpGjfBY/pub?gid=1172655606&single=true&output=csv";
+const csvUrlPraSPM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRck15kwRkf75NPm1IouErXU_CDgHjMEGw1nm0FNCu1XAkIb3EF0XV36Mq66wui_0imgyC9OKzoVQl9/pub?gid=22937657&single=true&output=csv";
 
+/* ==========================
+   2) STATE: SASARAN + AR2
+   ========================== */
+const TARGET_GPS = { OTI1:null, OTI2:null, ETR:null };
+const REAL_GPS   = { AR2:null };
+
+/* ==========================
+   2.1) OPTIONS dropdown (1.00 - 9.00)
+   ========================== */
+const TARGET_OPTIONS = (() => {
+  const arr = [];
+  for (let i = 1; i <= 900; i++) arr.push(Number((i / 100).toFixed(2)));
+  return arr;
+})();
+
+  
 function saveTargetsToStorage(){
   const payload = {
     OTI1: TARGET_GPS.OTI1,
