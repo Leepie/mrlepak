@@ -670,7 +670,20 @@ function getFullSubjectName(colName){
             const mapP = computeMapByClass(getRowsPPSA(), subjectCol, kelasFilter);
             const mapR = computeMapByClass(getRowsPRASPM(), subjectCol, kelasFilter);
 
-            const allClasses = uniqueSorted([...mapP.keys(), ...mapR.keys()]);
+           // const allClasses = uniqueSorted([...mapP.keys(), ...mapR.keys()]);
+
+            const allClasses = uniqueSorted(
+  [...mapP.keys(), ...mapR.keys()]
+).filter(kelas => {
+  const P = mapP.get(kelas);
+  const R = mapR.get(kelas);
+
+  const adaPPSA   = P && P.hadir > 0;
+  const adaPRASPM = R && R.hadir > 0;
+
+  return adaPPSA || adaPRASPM;
+});
+
 
             return allClasses.map(kelas=>{
               const P = mapP.get(kelas) || { kelas, hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])), pctLulus:0, pctGagal:0, gpmp:NaN };
