@@ -66,61 +66,53 @@
     @media (max-width:640px){.chart-wrap{height:220px}}
 
     /* TAB2: highlight row ikut STATUS */
-.t2-row-highlight{
-  background: #fff7ed !important;             /* lembut (oren muda) */
-  box-shadow: inset 0 0 0 2px #fb923c;        /* border dalam */
-}
-.t2-row-dim{
-  opacity: .55;
-}
+    .t2-row-highlight{
+      background: #fff7ed !important;
+      box-shadow: inset 0 0 0 2px #fb923c;
+    }
+    .t2-row-dim{ opacity:.55; }
 
     /* ===== TAB2: Butang PPSA / PraSPM / Beza ===== */
-.t2-exam-btn{
-  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
-}
-
-/* AKTIF – kekal walaupun hover */
-.t2-exam-btn.active{
-  background:#4f46e5 !important;
-  color:#fff !important;
-  border-color:#4f46e5 !important;
-  box-shadow:0 6px 14px rgba(79,70,229,.35);
-}
-.t2-exam-btn.active:hover{
-  background:#4f46e5 !important; /* ❗ elak jadi putih */
-  color:#fff !important;
-}
-
-/* TIDAK AKTIF – hover lembut */
-.t2-exam-btn:not(.active):hover{
-  background:#eef2ff;   /* indigo-50 */
-  border-color:#c7d2fe; /* indigo-200 */
-  color:#1e1b4b;
-}
-
+    .t2-exam-btn{
+      transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+    }
+    .t2-exam-btn.active{
+      background:#4f46e5 !important;
+      color:#fff !important;
+      border-color:#4f46e5 !important;
+      box-shadow:0 6px 14px rgba(79,70,229,.35);
+    }
+    .t2-exam-btn.active:hover{
+      background:#4f46e5 !important;
+      color:#fff !important;
+    }
+    .t2-exam-btn:not(.active):hover{
+      background:#eef2ff;
+      border-color:#c7d2fe;
+      color:#1e1b4b;
+    }
 
     /* Freeze header Jadual Pecahan Kelas */
-.t2-sticky-head thead th{
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: #4f46e5; /* warna header (indigo) */
-}
-/* Sembunyikan scrollbar tapi kekalkan fungsi scroll */
-.no-scrollbar{
-  -ms-overflow-style: none;  /* IE/Edge lama */
-  scrollbar-width: none;     /* Firefox */
-}
-.no-scrollbar::-webkit-scrollbar{
-  width: 0;
-  height: 0;
-}
+    .t2-sticky-head thead th{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #4f46e5;
+    }
 
-
+    /* Sembunyikan scrollbar tapi kekalkan fungsi scroll */
+    .no-scrollbar{
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .no-scrollbar::-webkit-scrollbar{
+      width: 0;
+      height: 0;
+    }
   </style>
 
   <script>
-    // Legend bulat
+    // Legend bulat (selepas Chart.js load)
     if (window.Chart) {
       Chart.defaults.plugins.legend.labels.usePointStyle = true;
       Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
@@ -325,7 +317,6 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                  <!-- OTI 1 -->
                   <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
                     <span class="text-xs font-semibold text-gray-600">OTI 1</span>
                     <select id="selOTI1" class="text-sm bg-transparent outline-none font-bold text-gray-900">
@@ -333,7 +324,6 @@
                     </select>
                   </label>
 
-                  <!-- OTI 2 -->
                   <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
                     <span class="text-xs font-semibold text-gray-600">OTI 2</span>
                     <select id="selOTI2" class="text-sm bg-transparent outline-none font-bold text-gray-900">
@@ -341,7 +331,6 @@
                     </select>
                   </label>
 
-                  <!-- AR 2 -->
                   <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
                     <span class="text-xs font-semibold text-gray-600">AR 2</span>
                     <select id="selAR2" class="text-sm bg-transparent outline-none font-bold text-gray-900">
@@ -349,7 +338,6 @@
                     </select>
                   </label>
 
-                  <!-- ETR -->
                   <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50">
                     <span class="text-xs font-semibold text-gray-600">ETR</span>
                     <select id="selETR" class="text-sm bg-transparent outline-none font-bold text-gray-900">
@@ -457,6 +445,75 @@
         </div>
 
         <div id="t2-status" class="mt-4 text-sm text-gray-500"></div>
+
+        <!-- KPI kecil -->
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="kpi-card px-4 py-3">
+            <div class="text-[11px] text-gray-500 uppercase tracking-wide">GPMP PPSA</div>
+            <div class="mt-1 text-2xl font-extrabold text-blue-600" id="t2-kpi-gpmp-ppsa">—</div>
+            <div class="mt-1 text-xs text-gray-500">Lebih rendah lebih baik</div>
+          </div>
+
+          <div class="kpi-card px-4 py-3">
+            <div class="text-[11px] text-gray-500 uppercase tracking-wide">GPMP PraSPM</div>
+            <div class="mt-1 text-2xl font-extrabold text-indigo-600" id="t2-kpi-gpmp-praspm">—</div>
+            <div class="mt-1 text-xs text-gray-500">Lebih rendah lebih baik</div>
+          </div>
+
+          <div class="kpi-card px-4 py-3">
+            <div class="text-[11px] text-gray-500 uppercase tracking-wide">Beza (PraSPM − PPSA)</div>
+            <div class="mt-1 text-2xl font-extrabold text-emerald-600" id="t2-kpi-gpmp-beza">—</div>
+            <div class="mt-1 text-xs text-gray-500">Negatif = semakin baik</div>
+          </div>
+
+          <div class="kpi-card px-4 py-3">
+            <div class="text-[11px] text-gray-500 uppercase tracking-wide">Peralihan C ke bawah</div>
+            <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t2-kpi-cdown">—</div>
+            <div class="mt-1 text-xs text-gray-500">C, D, E, G (ikut hadir)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KAD: GRAF PERBANDINGAN GRED -->
+      <div class="soft-card p-4 mt-5">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h3 class="text-lg font-bold flex items-center gap-2">
+              <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600">📈</span>
+              Perbandingan Gred Pelajar (PPSA vs PraSPM)
+            </h3>
+            <p class="text-sm text-gray-500 mt-1">
+              Taburan gred A+ hingga G
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-2 px-3 py-2 rounded-xl border bg-white">
+              <span class="text-xs font-semibold text-gray-600">Jenis</span>
+              <select id="t2-chart-type" class="text-sm bg-transparent outline-none font-bold text-gray-900">
+                <option value="line">Line</option>
+                <option value="bar">Bar</option>
+              </select>
+            </div>
+
+            <label class="flex items-center gap-2 px-3 py-2 rounded-xl border bg-white text-sm font-semibold text-gray-700">
+              <input id="t2-highlight-cdown" type="checkbox" class="accent-indigo-600" checked>
+              Highlight C ke bawah
+            </label>
+
+            <button id="t2-btn-export"
+              class="px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold hover:shadow-md transition">
+              Export PNG
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="chart-wrap">
+            <canvas id="t2-chart-grade"></canvas>
+          </div>
+          <div id="t2-chart-note" class="mt-2 text-xs text-gray-500"></div>
+        </div>
       </div>
 
       <!-- KAD: JADUAL PECAHAN KELAS -->
@@ -467,11 +524,11 @@
             Jadual Pecahan Kelas
           </h3>
           <p class="text-sm text-gray-500 mt-1">
-            (TH tidak masuk kiraan % Lulus/Gagal).
+            (TH tidak masuk kiraan % Lulus/Gagal)
           </p>
         </div>
 
-       <div class="w-full overflow-x-auto overflow-y-auto max-h-[65vh] no-scrollbar">
+        <div class="w-full overflow-x-auto overflow-y-auto max-h-[65vh] no-scrollbar">
           <table class="min-w-[1100px] w-full t2-sticky-head">
             <thead>
               <tr class="bg-indigo-600 text-white text-sm">
@@ -503,11 +560,19 @@
         </div>
       </div>
 
-      <!-- TAB 2 SCRIPT (INIT selepas CSV siap load) -->
+      <!-- TUTUP KEJAP: highlight + export -->
       <script>
-        // TAB2 init akan dipanggil dari loadAndRender() selepas __CSV_* diisi
+        document.getElementById("t2-highlight-cdown")
+          ?.closest("label")
+          ?.classList.add("hidden");
+
+        document.getElementById("t2-btn-export")
+          ?.classList.add("hidden");
+      </script>
+
+      <!-- TAB 2 SCRIPT -->
+      <script>
         window.__initTab2 = function () {
-          // ===== elak init berganda =====
           if (window.__tab2_inited) return;
           window.__tab2_inited = true;
 
@@ -519,48 +584,30 @@
             "GURU KELAS","SEKOLAH","ID","MURID","NAMA MURID","NAMA_PENUH"
           ]);
 
-          // ✅ UBAH: viewStatus ikut imej 2 (ALL/PPSA/PRASPM/BEZA)
-          let viewStatus = "ALL"; // "ALL" | "PPSA" | "PRASPM" | "BEZA"
+          let viewStatus = "ALL";
+          let t2Chart = null;
+          let lastAgg = null;
 
           function $(id){ return document.getElementById(id); }
           function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function normalizeSubjectCol(s){
-  return String(s ?? "").trim().replace(/\s+/g, " ");
-}
+          function normalizeSubjectCol(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
 
-// ✅ Papar NAMA PENUH SAHAJA (BUANG "G")
-function getFullSubjectNameNoG(subjectCol){
-  const x = normalizeSubjectCol(subjectCol);
-  if(!x) return "";
+          function getFullSubjectNameNoG(subjectCol){
+            const x = normalizeSubjectCol(subjectCol);
+            if(!x) return "";
+            const parts = x.split(" ");
+            const code  = (parts[0] || "").toUpperCase();
+            if(code === "G" && parts.length === 1) return "";
+            return subjectNameMap[code] || code;
+          }
+          function isValidSubjectCol(subjectCol){
+            const x = normalizeSubjectCol(subjectCol);
+            if(!x) return false;
+            if(x.toUpperCase() === "G") return false;
+            if(x === "-") return false;
+            return true;
+          }
 
-  const parts = x.split(" ");
-  const code  = (parts[0] || "").toUpperCase();
-
-  // jika memang "G" sahaja -> kosongkan (taknak muncul)
-  if(code === "G" && parts.length === 1) return "";
-
-  // nama penuh ikut mapping (kalau tiada, fallback code)
-  return subjectNameMap[code] || code;
-}
-
-// ✅ Tapis senarai subjek: buang "G" sahaja / value pelik
-function isValidSubjectCol(subjectCol){
-  const x = normalizeSubjectCol(subjectCol);
-  if(!x) return false;
-  if(x.toUpperCase() === "G") return false;        // buang subjek = G
-  if(x === "-") return false;
-  return true;
-}
-
-function getSubjectCode(colName){
-  return String(colName || "").trim().split(/\s+/)[0].toUpperCase(); // "BI G" -> "BI"
-}
-function getFullSubjectName(colName){
-  const code = getSubjectCode(colName);
-  return subjectNameMap[code] || colName; // fallback kalau tiada mapping
-}
-
-          
           function normalizeGrade(g) {
             const x = String(g ?? "").trim().toUpperCase();
             if (!x) return "";
@@ -571,10 +618,7 @@ function getFullSubjectName(colName){
 
           function getRowsPPSA(){ return Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : []; }
           function getRowsPRASPM(){ return Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : []; }
-
-          function getClassKey(row) {
-            return (row["KELAS"] || row["Kelas"] || row["kelas"] || "").toString().trim();
-          }
+          function getClassKey(row) { return (row["KELAS"] || row["Kelas"] || row["kelas"] || "").toString().trim(); }
 
           function inferSubjectColumns(rows) {
             if (!rows || !rows.length) return [];
@@ -596,13 +640,14 @@ function getFullSubjectName(colName){
             if (!isFinite(x)) return "0.0%";
             return (Math.round(x * 10) / 10).toFixed(1) + "%";
           }
-
           function fmtNum(x, dp=2) {
             if (!isFinite(x)) return "-";
             return (Math.round(x * Math.pow(10,dp)) / Math.pow(10,dp)).toFixed(dp);
           }
 
-          // ====== PAPARAN STATUS (ikut imej 2) ======
+          /* ===========================
+             WARNA BEZA (UMUM)
+             =========================== */
           function clsDiff(n){
             if (!isFinite(n) || n === 0) return "text-gray-700";
             return (n > 0) ? "text-green-600 font-bold" : "text-red-600 font-bold";
@@ -612,15 +657,47 @@ function getFullSubjectName(colName){
             const s = (n > 0) ? "+" : "";
             return s + n;
           }
-          function fmtPctDiff(n){
-            if (!isFinite(n)) return "-";
-            const s = (n > 0) ? "+" : "";
-            return s + (Math.round(n*10)/10).toFixed(1) + "%";
+
+          /* ===========================
+             WARNA BEZA (KHAS METRIK)
+             %Lulus: + baik
+             %Gagal: + buruk
+             GPMP  : + buruk (lebih tinggi = lebih teruk)
+             + Tambah ikon ▲/▼
+             =========================== */
+          function clsPosGood(n){
+            if (!isFinite(n) || n === 0) return "text-gray-700";
+            return (n > 0) ? "text-emerald-600 font-bold" : "text-rose-600 font-bold";
           }
-          function fmtGpmpDiff(n){
+          function clsPosBad(n){
+            if (!isFinite(n) || n === 0) return "text-gray-700";
+            return (n > 0) ? "text-rose-600 font-bold" : "text-emerald-600 font-bold";
+          }
+          function arrowHTML(n, mode){
+            // mode: "good" (pos good) | "bad" (pos bad)
+            if (!isFinite(n) || n === 0) return "";
+            const isUp = n > 0;
+            const goodPos = (mode === "good");
+            // Tentukan warna ikon ikut makna
+            // good: + hijau ▲, - merah ▼
+            // bad : + merah ▲, - hijau ▼
+            const cls = goodPos
+              ? (isUp ? "text-emerald-600" : "text-rose-600")
+              : (isUp ? "text-rose-600" : "text-emerald-600");
+            const sym = isUp ? "▲" : "▼";
+            return `<span class="inline-block mr-1 ${cls} font-extrabold" aria-hidden="true">${sym}</span>`;
+          }
+          function fmtPctDiffWithArrow(n, mode){
             if (!isFinite(n)) return "-";
-            const s = (n > 0) ? "+" : "";
-            return s + (Math.round(n*100)/100).toFixed(2);
+            const sign = (n > 0) ? "+" : "";
+            const val  = (Math.round(n*10)/10).toFixed(1) + "%";
+            return `${arrowHTML(n, mode)}${sign}${val}`;
+          }
+          function fmtGpmpDiffWithArrow(n, mode){
+            if (!isFinite(n)) return "-";
+            const sign = (n > 0) ? "+" : "";
+            const val  = (Math.round(n*100)/100).toFixed(2);
+            return `${arrowHTML(n, mode)}${sign}${val}`;
           }
 
           // (1) KIRA ikut kelas untuk PPSA / PRASPM (MAP)
@@ -670,20 +747,13 @@ function getFullSubjectName(colName){
             const mapP = computeMapByClass(getRowsPPSA(), subjectCol, kelasFilter);
             const mapR = computeMapByClass(getRowsPRASPM(), subjectCol, kelasFilter);
 
-           // const allClasses = uniqueSorted([...mapP.keys(), ...mapR.keys()]);
-
-            const allClasses = uniqueSorted(
-  [...mapP.keys(), ...mapR.keys()]
-).filter(kelas => {
-  const P = mapP.get(kelas);
-  const R = mapR.get(kelas);
-
-  const adaPPSA   = P && P.hadir > 0;
-  const adaPRASPM = R && R.hadir > 0;
-
-  return adaPPSA || adaPRASPM;
-});
-
+            const allClasses = uniqueSorted([...mapP.keys(), ...mapR.keys()]).filter(kelas => {
+              const P = mapP.get(kelas);
+              const R = mapR.get(kelas);
+              const adaPPSA   = P && P.hadir > 0;
+              const adaPRASPM = R && R.hadir > 0;
+              return adaPPSA || adaPRASPM;
+            });
 
             return allClasses.map(kelas=>{
               const P = mapP.get(kelas) || { kelas, hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])), pctLulus:0, pctGagal:0, gpmp:NaN };
@@ -703,189 +773,282 @@ function getFullSubjectName(colName){
             });
           }
 
-          // (3) Render jadual ikut IMEJ 2 (3 baris per kelas)
+          // ✅ (3) Agregat seluruh kelas (untuk graf + KPI)
+          function computeAggregate(rows, subjectCol, kelasFilter){
+            const agg = { hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])) };
+
+            rows.forEach(r=>{
+              const kelas = getClassKey(r);
+              if (!kelas) return;
+              if (kelasFilter && kelasFilter !== "ALL" && kelas !== kelasFilter) return;
+
+              const g = normalizeGrade(r[subjectCol]);
+              if (!g) return;
+              if (g === "TH"){ agg.th++; return; }
+              if (!GRADE_ORDER.includes(g)) return;
+
+              agg.hadir++;
+              agg.grades[g]++;
+            });
+
+            const lulus = agg.hadir - (agg.grades["G"]||0);
+            const gagal = (agg.grades["G"]||0);
+
+            agg.pctLulus = agg.hadir ? (lulus/agg.hadir)*100 : 0;
+            agg.pctGagal = agg.hadir ? (gagal/agg.hadir)*100 : 0;
+
+            let jumlahPoint=0, jumlahKira=0;
+            GRADE_ORDER.forEach(gr=>{
+              const c=agg.grades[gr]||0;
+              if(c){ jumlahPoint += GPMP_POINT[gr]*c; jumlahKira += c; }
+            });
+            agg.gpmp = jumlahKira ? (jumlahPoint/jumlahKira) : NaN;
+
+            return agg;
+          }
+
+          // ✅ KPI helper: C ke bawah (C,D,E,G) ikut hadir
+          function countCDown(grades){
+            return (grades["C"]||0) + (grades["D"]||0) + (grades["E"]||0) + (grades["G"]||0);
+          }
+
+          // (4) Render jadual (3 baris per kelas)
           function renderTableBlocks(blocks){
-  const tbody = $("t2-tbody");
-  if(!blocks || !blocks.length){
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="17" class="px-4 py-6 text-center text-gray-500">
-          Tiada data untuk dipaparkan.
-        </td>
-      </tr>`;
-    return;
-  }
+            const tbody = $("t2-tbody");
+            if(!blocks || !blocks.length){
+              tbody.innerHTML = `
+                <tr>
+                  <td colspan="17" class="px-4 py-6 text-center text-gray-500">
+                    Tiada data untuk dipaparkan.
+                  </td>
+                </tr>`;
+              return;
+            }
 
-  let html = "";
+            let html = "";
 
-  const cell = (v, isDiff=false) => {
-    const val = isDiff ? fmtDiff(v) : (v ?? 0);
-    const cls = isDiff ? clsDiff(v) : "";
-    return `<td class="px-3 py-3 text-center ${cls}">${val}</td>`;
-  };
+            const cell = (v, isDiff=false) => {
+              const val = isDiff ? fmtDiff(v) : (v ?? 0);
+              const cls = isDiff ? clsDiff(v) : "";
+              return `<td class="px-3 py-3 text-center ${cls}">${val}</td>`;
+            };
 
-  const rowNormalTail = (o) => `
-    <td class="px-3 py-3 text-center text-green-600 font-bold">${fmtPct(o.pctLulus)}</td>
-    <td class="px-3 py-3 text-center text-red-600 font-bold">${fmtPct(o.pctGagal)}</td>
-    <td class="px-4 py-3 text-center text-purple-600 font-bold">${fmtNum(o.gpmp,2)}</td>
-  `;
+            const rowNormalTail = (o) => `
+              <td class="px-3 py-3 text-center text-green-600 font-bold">${fmtPct(o.pctLulus)}</td>
+              <td class="px-3 py-3 text-center text-red-600 font-bold">${fmtPct(o.pctGagal)}</td>
+              <td class="px-4 py-3 text-center text-purple-600 font-bold">${fmtNum(o.gpmp,2)}</td>
+            `;
 
-  const rowDiffTail = (o) => `
-    <td class="px-3 py-3 text-center ${clsDiff(o.pctLulus)}">${fmtPctDiff(o.pctLulus)}</td>
-    <td class="px-3 py-3 text-center ${clsDiff(o.pctGagal)}">${fmtPctDiff(o.pctGagal)}</td>
-    <td class="px-4 py-3 text-center ${clsDiff(o.gpmp)}">${fmtGpmpDiff(o.gpmp)}</td>
-  `;
+            /* ✅ FIX WARNA + IKON untuk BEZA (kotak %Lulus/%Gagal/GPMP) */
+            const rowDiffTail = (o) => `
+              <td class="px-3 py-3 text-center ${clsPosGood(o.pctLulus)}">
+                ${fmtPctDiffWithArrow(o.pctLulus, "good")}
+              </td>
+              <td class="px-3 py-3 text-center ${clsPosBad(o.pctGagal)}">
+                ${fmtPctDiffWithArrow(o.pctGagal, "bad")}
+              </td>
+              <td class="px-4 py-3 text-center ${clsPosBad(o.gpmp)}">
+                ${fmtGpmpDiffWithArrow(o.gpmp, "bad")}
+              </td>
+            `;
 
-  blocks.forEach((blk, idx)=>{
-    // zebra ikut BLOK (bukan ikut baris)
-    const zebra = (idx % 2 === 1) ? "bg-gray-50/60" : "bg-white";
+            blocks.forEach((blk, idx)=>{
+              const zebra = (idx % 2 === 1) ? "bg-gray-50/60" : "bg-white";
+              const topFrame    = "border-t-[6px] border-indigo-200";
+              const bottomFrame = "border-b-[6px] border-indigo-200";
 
-    // “bingkai” blok (atas & bawah)
-    const topFrame    = "border-t-[6px] border-indigo-200";
-    const bottomFrame = "border-b-[6px] border-indigo-200";
+              const addRow = (status, o, isFirstRow, isLastRow, isDiff) => {
+                const frameTop = isFirstRow ? topFrame : "";
+                const frameBot = isLastRow  ? bottomFrame : "";
 
-    // buat 3 baris: PPSA, PRASPM, BEZA
-    const addRow = (status, o, isFirstRow, isLastRow, isDiff) => {
-      const frameTop = isFirstRow ? topFrame : "";
-      const frameBot = isLastRow  ? bottomFrame : "";
+                const isHL  = (viewStatus !== "ALL" && status === viewStatus);
+                const isDim = (viewStatus !== "ALL" && status !== viewStatus);
 
-      const isHL  = (viewStatus !== "ALL" && status === viewStatus);
-const isDim = (viewStatus !== "ALL" && status !== viewStatus);
+                html += `<tr class="${zebra} border-b ${frameTop} ${frameBot} ${isHL ? "t2-row-highlight" : ""} ${isDim ? "t2-row-dim" : ""}">`;
 
-html += `<tr class="${zebra} border-b ${frameTop} ${frameBot} ${isHL ? "t2-row-highlight" : ""} ${isDim ? "t2-row-dim" : ""}">`;
+                html += `<td class="px-4 py-3 text-center font-extrabold text-gray-800 align-middle">${status}</td>`;
 
+                if(isFirstRow){
+                  html += `<td class="px-4 py-3 font-extrabold text-gray-800 text-center align-middle" rowspan="3">
+                    ${esc(blk.kelas)}
+                  </td>`;
+                }
 
-      // STATUS (kiri)
-      html += `<td class="px-4 py-3 text-center font-extrabold text-gray-800 align-middle">
-        ${status}
-      </td>`;
+                html += cell(o.hadir || 0, isDiff);
+                html += cell(o.th    || 0, isDiff);
 
-      // KELAS rowspan 3
-      if(isFirstRow){
-        html += `<td class="px-4 py-3 font-extrabold text-gray-800 text-center align-middle" rowspan="3">
-          ${esc(blk.kelas)}
-        </td>`;
-      }
+                GRADE_ORDER.forEach(g=>{
+                  const v = (o.grades && o.grades[g]) ? o.grades[g] : 0;
+                  html += cell(v, isDiff);
+                });
 
-      // Hadir + TH
-      html += cell(o.hadir || 0, isDiff);
-      html += cell(o.th    || 0, isDiff);
+                html += isDiff ? rowDiffTail(o) : rowNormalTail(o);
+                html += `</tr>`;
+              };
 
-      // Gred A+..G
-      GRADE_ORDER.forEach(g=>{
-        const v = (o.grades && o.grades[g]) ? o.grades[g] : 0;
-        html += cell(v, isDiff);
-      });
+              addRow("PPSA",   blk.P, true,  false, false);
+              addRow("PRASPM", blk.R, false, false, false);
+              addRow("BEZA",   blk.B, false, true,  true);
 
-      // %Lulus %Gagal GPMP
-      html += isDiff ? rowDiffTail(o) : rowNormalTail(o);
+              const kelasFilter = $("t2-filter-kelas")?.value || "ALL";
+              if (kelasFilter === "ALL") {
+                html += `<tr><td colspan="17" class="h-3 bg-transparent"></td></tr>`;
+              }
+            });
 
-      html += `</tr>`;
-    };
+            tbody.innerHTML = html;
+          }
 
-    addRow("PPSA",   blk.P, true,  false, false);
-    addRow("PRASPM", blk.R, false, false, false);
-    addRow("BEZA",   blk.B, false, true,  true);
+          function buildOrUpdateChart(aggP, aggR, kelasFilter, subjectCol){
+            const type = $("t2-chart-type")?.value || "line";
+            const highlight = $("t2-highlight-cdown")?.checked ?? true;
 
-    // ✅ spacer row (jarak antara kelas) — hanya bila pilih SEMUA KELAS
-    const kelasFilter = $("t2-filter-kelas")?.value || "ALL";
-    if (kelasFilter === "ALL") {
-      html += `
-        <tr>
-          <td colspan="17" class="h-3 bg-transparent"></td>
-        </tr>
-      `;
-    }
-  });
+            const dataP = GRADE_ORDER.map(g => (aggP.grades[g]||0));
+            const dataR = GRADE_ORDER.map(g => (aggR.grades[g]||0));
 
-  tbody.innerHTML = html;
-}
+            lastAgg = { aggP, aggR, kelasFilter, subjectCol };
 
+            const dsP = {
+              label: "PPSA",
+              data: dataP,
+              tension: 0.3,
+              borderWidth: 2,
+              pointRadius: 5,
+              pointHoverRadius: 6
+            };
+            const dsR = {
+              label: "PRASPM",
+              data: dataR,
+              tension: 0.3,
+              borderWidth: 2,
+              pointRadius: 5,
+              pointHoverRadius: 6
+            };
 
+            if (highlight && type === "line") {
+              const idxHi = new Set(["C","D","E","G"].map(g => GRADE_ORDER.indexOf(g)));
+              dsP.pointRadius = GRADE_ORDER.map((_,i)=> idxHi.has(i) ? 7 : 4);
+              dsR.pointRadius = GRADE_ORDER.map((_,i)=> idxHi.has(i) ? 7 : 4);
+            }
 
-          // (4) Jana (guna blok 3 baris)
-          function jana(){
-  const subjek = $("t2-filter-subjek").value;
-  const kelas  = $("t2-filter-kelas").value;
+            const ctx = $("t2-chart-grade")?.getContext("2d");
+            if(!ctx) return;
 
-  if(!subjek){
-    $("t2-status").innerHTML =
-      `<span class="text-red-600 font-semibold">Sila pilih Subjek.</span>`;
-    renderTableBlocks([]);
-    return;
-  }
+            if (t2Chart) t2Chart.destroy();
 
-  const blocks = buildBlocks(subjek, kelas);
+            t2Chart = new Chart(ctx, {
+              type,
+              data: { labels: GRADE_ORDER, datasets: [dsP, dsR] },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: "bottom" },
+                  title: { display: true, text: "Perbandingan Gred Pelajar PPSA dan PraSPM" },
+                  tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${Math.round(c.parsed.y)}` } }
+                },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+              }
+            });
 
-  $("t2-status").innerHTML =
-    `Paparan: 
-     • Subjek: <b>${esc(getFullSubjectNameNoG(subjek))}</b>
-     • Kelas: <b>${kelas==="ALL"?"SEMUA":esc(kelas)}</b>`;
+            const kelasTxt = (kelasFilter === "ALL") ? "SEMUA KELAS" : kelasFilter;
+            $("t2-chart-note").innerHTML =
+              `Subjek: <b>${esc(getFullSubjectNameNoG(subjectCol))}</b> • Kelas: <b>${esc(kelasTxt)}</b> • (Graf ikut bilangan murid hadir)`;
+          }
 
-  renderTableBlocks(blocks);
-}
+          function exportChartPNG(){
+            if(!t2Chart) return alert("Graf belum dijana.");
+            const a = document.createElement("a");
+            const subjek = $("t2-filter-subjek")?.value || "SUBJEK";
+            const kelas  = $("t2-filter-kelas")?.value || "ALL";
+            a.download = `graf_gred_${subjek.replace(/\s+/g,'_')}_${kelas}.png`;
+            a.href = t2Chart.toBase64Image();
+            a.click();
+          }
 
-
-          // (5) Button PPSA/PraSPM/Beza jadi FILTER (klik sama -> ALL)
-     /*     function setExamButtons(){
+          function setExamButtons(){
             document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
               const isActive = btn.dataset.exam === viewStatus;
-
-              btn.classList.toggle("bg-indigo-600", isActive);
-              btn.classList.toggle("text-white", isActive);
-              btn.classList.toggle("border-indigo-600", isActive);
-
-              btn.classList.toggle("bg-white", !isActive);
-              btn.classList.toggle("text-gray-700", !isActive);
-              btn.classList.toggle("border-gray-200", !isActive);
+              btn.classList.toggle("active", isActive);
             });
           }
-*/
-          function setExamButtons(){
-  document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
-    const isActive = btn.dataset.exam === viewStatus;
-    btn.classList.toggle("active", isActive);
-  });
-}
-
 
           function fillDropdowns() {
             const rowsP = getRowsPPSA();
             const rowsR = getRowsPRASPM();
             const rowsAny = rowsP.length ? rowsP : rowsR;
 
-            // Kelas
             const kelas = uniqueSorted(rowsAny.map(getClassKey));
             const selK = $("t2-filter-kelas");
             selK.innerHTML = `<option value="ALL">SEMUA KELAS</option>` + kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
 
-            // Subjek (lebih kemas jika cikgu set __TAB2_SUBJECT_COLS)
-           let subjectCols = uniqueSorted(
-  (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
-    ? window.__TAB2_SUBJECT_COLS
-    : inferSubjectColumns(rowsAny)
-  )
-  .filter(isValidSubjectCol) // ✅ buang "G" sahaja
-);
+            let subjectCols = uniqueSorted(
+              (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
+                ? window.__TAB2_SUBJECT_COLS
+                : inferSubjectColumns(rowsAny)
+              ).filter(isValidSubjectCol)
+            );
 
-// ✅ Papar NAMA PENUH tanpa "G", tapi VALUE kekal contoh "BM G" (untuk kiraan)
-const selS = $("t2-filter-subjek");
-selS.innerHTML =
-  `<option value="">Pilih Subjek</option>` +
-  subjectCols.map(col => {
-    const label = getFullSubjectNameNoG(col); // ✅ contoh: "BAHASA MELAYU"
-    if(!label) return "";                    // safety
-    return `<option value="${esc(col)}">${esc(label)}</option>`;
-  }).join("");
-
-
+            const selS = $("t2-filter-subjek");
+            selS.innerHTML =
+              `<option value="">Pilih Subjek</option>` +
+              subjectCols.map(col => {
+                const label = getFullSubjectNameNoG(col);
+                if(!label) return "";
+                return `<option value="${esc(col)}">${esc(label)}</option>`;
+              }).join("");
           }
 
-          // ===== events (GANTI YANG LAMA) =====
+          function jana(){
+            const subjek = $("t2-filter-subjek").value;
+            const kelas  = $("t2-filter-kelas").value;
+
+            if(!subjek){
+              $("t2-status").innerHTML = `<span class="text-red-600 font-semibold">Sila pilih Subjek.</span>`;
+              renderTableBlocks([]);
+              if (t2Chart) { t2Chart.destroy(); t2Chart = null; }
+              ["t2-kpi-gpmp-ppsa","t2-kpi-gpmp-praspm","t2-kpi-gpmp-beza","t2-kpi-cdown"].forEach(id=>{
+                const el=$(id); if(el) el.textContent="—";
+              });
+              $("t2-chart-note").innerHTML = "";
+              return;
+            }
+
+            const blocks = buildBlocks(subjek, kelas);
+            renderTableBlocks(blocks);
+
+            $("t2-status").innerHTML =
+              `Paparan:
+               • Subjek: <b>${esc(getFullSubjectNameNoG(subjek))}</b>
+               • Kelas: <b>${kelas==="ALL"?"SEMUA":esc(kelas)}</b>`;
+
+            const aggP = computeAggregate(getRowsPPSA(), subjek, kelas);
+            const aggR = computeAggregate(getRowsPRASPM(), subjek, kelas);
+
+            $("t2-kpi-gpmp-ppsa").textContent   = fmtNum(aggP.gpmp, 2);
+            $("t2-kpi-gpmp-praspm").textContent = fmtNum(aggR.gpmp, 2);
+
+            const beza = (isFinite(aggR.gpmp) && isFinite(aggP.gpmp)) ? +(aggR.gpmp - aggP.gpmp).toFixed(2) : NaN;
+            const elBeza = $("t2-kpi-gpmp-beza");
+            elBeza.textContent = isFinite(beza) ? beza.toFixed(2) : "—";
+            elBeza.classList.remove("text-emerald-600","text-rose-600");
+            if (isFinite(beza)) elBeza.classList.add(beza <= 0 ? "text-emerald-600" : "text-rose-600");
+
+            const cP = countCDown(aggP.grades);
+            const cR = countCDown(aggR.grades);
+            const cDiff = cR - cP;
+            const elC = $("t2-kpi-cdown");
+            elC.textContent = (isFinite(cDiff) ? ((cDiff>0?"+":"") + cDiff) : "—");
+            elC.classList.remove("text-rose-600","text-emerald-600");
+            if (isFinite(cDiff)) elC.classList.add(cDiff <= 0 ? "text-emerald-600" : "text-rose-600");
+
+            buildOrUpdateChart(aggP, aggR, kelas, subjek);
+          }
+
           document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
             btn.addEventListener("click", ()=>{
               const next = btn.dataset.exam;
-              viewStatus = (viewStatus === next) ? "ALL" : next; // toggle
+              viewStatus = (viewStatus === next) ? "ALL" : next;
               setExamButtons();
               if($("t2-filter-subjek").value) jana();
             });
@@ -893,11 +1056,20 @@ selS.innerHTML =
 
           $("t2-btn-jana").addEventListener("click", jana);
 
-          // init (lepas CSV siap)
+          $("t2-chart-type").addEventListener("change", ()=>{
+            if(!lastAgg) return;
+            buildOrUpdateChart(lastAgg.aggP, lastAgg.aggR, lastAgg.kelasFilter, lastAgg.subjectCol);
+          });
+          $("t2-highlight-cdown").addEventListener("change", ()=>{
+            if(!lastAgg) return;
+            buildOrUpdateChart(lastAgg.aggP, lastAgg.aggR, lastAgg.kelasFilter, lastAgg.subjectCol);
+          });
+
+          $("t2-btn-export").addEventListener("click", exportChartPNG);
+
           setExamButtons();
           fillDropdowns();
-          $("t2-status").innerHTML =
-            `Pilih Subjek dan klik <b>Jana Analisis</b>`;
+          $("t2-status").innerHTML = `Pilih Subjek dan klik <b>Jana Analisis</b>`;
         };
       </script>
     </section>
@@ -935,6 +1107,7 @@ selS.innerHTML =
    ========================== */
 const STORAGE_KEY = "xcode_ppsa_praspm_targets_v1";
 const STORAGE_TAB = "xcode_ppsa_praspm_active_tab_v1";
+
 /* ==========================
    1) SUMBER CSV (2 URL)
    ========================== */
@@ -956,7 +1129,6 @@ const TARGET_OPTIONS = (() => {
   return arr;
 })();
 
-  
 function saveTargetsToStorage(){
   const payload = {
     OTI1: TARGET_GPS.OTI1,
@@ -989,7 +1161,6 @@ function loadActiveTab(){
 /* ==========================
    0) SWITCH TAB
    ========================== */
-
 function switchTab(tabName) {
   const panels = ["gp-sekolah","lms-sekolah","subjek-teras","mp-kritikal"];
 
@@ -999,21 +1170,14 @@ function switchTab(tabName) {
 
     if (panel) {
       const isActive = (name === tabName);
-
-      // ✅ penting: set atribut hidden supaya "space-y-4" ikut betul
       panel.hidden = !isActive;
-
-      // kekal class toggling (ok)
       panel.classList.toggle("hidden", !isActive);
     }
-
     if (tabBtn) tabBtn.classList.toggle("tab-active", name === tabName);
   });
 
   saveActiveTab(tabName);
 }
-
-
 
 function fillSelect(selectEl, options) {
   if (!selectEl) return;
@@ -1054,7 +1218,7 @@ function updateStateFromUI(){
    ========================== */
 const gradeValueMapping = {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
 
-  const chartGradeLabels = ["A+","A","A-","B+","B","C+","C","D","E","G"];
+const chartGradeLabels = ["A+","A","A-","B+","B","C+","C","D","E","G"];
 const topGradeLabels   = ["A+","A","A-","B+","B","C+","C"];
 
 const gradeColors = {
@@ -1105,7 +1269,6 @@ const subjectGroupMap = {
   "Sains & Matematik": ["M","SN","MT","FIZ","BIO","KIM"],
   "Teknik & Vokasional": ["SK","SRT","PER","PNG","PA","SS","RC","SPER"]
 };
-
 
 /* ==========================
    4) CSV PARSER (quote)
@@ -1204,7 +1367,7 @@ function kiraGPS_Wajib(parsed){
 }
 
 /* ==========================
-   7) PLUGIN LABEL NILAI
+   7) PLUGIN LABEL NILAI (FIX: TAB2 BULAT SAHAJA)
    ========================== */
 const valueLabelPlugin = {
   id: "valueLabelPlugin",
@@ -1212,7 +1375,10 @@ const valueLabelPlugin = {
     const { ctx } = chart;
     if(!ctx) return;
 
-    const decimals = (opts && opts.decimals != null) ? opts.decimals : 2;
+    const decimals =
+      (opts && opts.decimals != null) ? opts.decimals :
+      (chart?.canvas?.id === "t2-chart-grade" ? 0 : 2);
+
     const offsetY  = (opts && opts.offsetY  != null) ? opts.offsetY  : -12;
 
     ctx.save();
@@ -1238,7 +1404,7 @@ const valueLabelPlugin = {
 if(window.Chart && Chart.register) Chart.register(valueLabelPlugin);
 
 /* ==========================
-   8) CARTA (LABEL IKUT IMEJ)
+   8) CARTA TAB1
    ========================== */
 let chartLine=null, chartBar=null;
 const CHART_LABELS = [
@@ -1328,7 +1494,7 @@ function updateTableOnly(gpTOV, gpAR1){
 }
 
 /* ==========================
-   10) INIT DROPDOWNS (KEKAL)
+   10) INIT DROPDOWNS
    ========================== */
 function initDropdowns(onChangeFn){
   const selOTI1 = document.getElementById("selOTI1");
@@ -1382,10 +1548,8 @@ async function loadAndRender(){
 
     if(!ppsParsed || !praParsed){ console.error("❌ Parse gagal."); return; }
 
-    // ✅ TAB2 perlukan rows untuk dropdown & table
     window.__CSV_PPSA_ROWS   = ppsParsed.rows || [];
     window.__CSV_PRASPM_ROWS = praParsed.rows || [];
-    // ✅ lebih tepat untuk dropdown Subjek (kolum gred sahaja)
     window.__TAB2_SUBJECT_COLS = ppsParsed.subjectColumns || [];
 
     const gpTOV = kiraGPS_Wajib(ppsParsed);
@@ -1414,7 +1578,6 @@ async function loadAndRender(){
 
     updateTableOnly(gpTOV, gpAR1);
 
-    // ✅ init TAB2 selepas data tersedia
     if(typeof window.__initTab2 === "function"){
       window.__initTab2();
     }
