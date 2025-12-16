@@ -74,6 +74,30 @@
   opacity: .55;
 }
 
+    /* ===== TAB2: Butang PPSA / PraSPM / Beza ===== */
+.t2-exam-btn{
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+/* AKTIF – kekal walaupun hover */
+.t2-exam-btn.active{
+  background:#4f46e5 !important;
+  color:#fff !important;
+  border-color:#4f46e5 !important;
+  box-shadow:0 6px 14px rgba(79,70,229,.35);
+}
+.t2-exam-btn.active:hover{
+  background:#4f46e5 !important; /* ❗ elak jadi putih */
+  color:#fff !important;
+}
+
+/* TIDAK AKTIF – hover lembut */
+.t2-exam-btn:not(.active):hover{
+  background:#eef2ff;   /* indigo-50 */
+  border-color:#c7d2fe; /* indigo-200 */
+  color:#1e1b4b;
+}
+
   </style>
 
   <script>
@@ -771,7 +795,7 @@ html += `<tr class="${zebra} border-b ${frameTop} ${frameBot} ${isHL ? "t2-row-h
 
 
           // (5) Button PPSA/PraSPM/Beza jadi FILTER (klik sama -> ALL)
-          function setExamButtons(){
+     /*     function setExamButtons(){
             document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
               const isActive = btn.dataset.exam === viewStatus;
 
@@ -784,6 +808,14 @@ html += `<tr class="${zebra} border-b ${frameTop} ${frameBot} ${isHL ? "t2-row-h
               btn.classList.toggle("border-gray-200", !isActive);
             });
           }
+*/
+          function setExamButtons(){
+  document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
+    const isActive = btn.dataset.exam === viewStatus;
+    btn.classList.toggle("active", isActive);
+  });
+}
+
 
           function fillDropdowns() {
             const rowsP = getRowsPPSA();
