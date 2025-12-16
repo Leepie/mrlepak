@@ -359,7 +359,7 @@
               Analisis Mata Pelajaran – PPSA vs PraSPM
             </h2>
             <p class="text-sm text-gray-500 mt-1">
-              Pilih Kelas dan Subjek, kemudian jana pecahan mengikut kelas (gred, %lulus/%gagal, GPMP).
+              Perbandingan (Gred, %Lulus/%Gagal, GPMP)
             </p>
           </div>
 
@@ -414,7 +414,7 @@
             Jadual Pecahan Kelas
           </h3>
           <p class="text-sm text-gray-500 mt-1">
-            Pecahan gred untuk subjek dipilih mengikut kelas (TH tidak masuk kiraan % lulus/gagal).
+            (TH tidak masuk kiraan % Lulus/Gagal).
           </p>
         </div>
 
@@ -423,7 +423,7 @@
             <thead>
               <tr class="bg-indigo-600 text-white text-sm">
                 <th class="text-center px-4 py-3 font-bold">STATUS</th>
-                <th class="text-left px-4 py-3 font-bold">Kelas</th>
+                <th class="text-center px-4 py-3 font-bold">Kelas</th>
 
                 <th class="text-center px-3 py-3 font-bold">Hadir</th>
                 <th class="text-center px-3 py-3 font-bold">TH</th>
@@ -748,7 +748,7 @@ function getFullSubjectName(colName){
   const blocks = buildBlocks(subjek, kelas);
 
   $("t2-status").innerHTML =
-    `Paparan: <b>PPSA / PraSPM / Beza</b>
+    `Paparan: 
      • Subjek: <b>${esc(getFullSubjectNameNoG(subjek))}</b>
      • Kelas: <b>${kelas==="ALL"?"SEMUA":esc(kelas)}</b>`;
 
