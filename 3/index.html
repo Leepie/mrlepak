@@ -359,7 +359,7 @@
               Analisis Mata Pelajaran – PPSA vs PraSPM
             </h2>
             <p class="text-sm text-gray-500 mt-1">
-              Pilih Kelas dan Subjek, kemudian jana pecahan mengikut kelas (gred, %lulus/%gagal, GPMP).
+              Perbandingan (Gred, %Lulus/%Gagal, GPMP)
             </p>
           </div>
 
@@ -414,7 +414,7 @@
             Jadual Pecahan Kelas
           </h3>
           <p class="text-sm text-gray-500 mt-1">
-            Pecahan gred untuk subjek dipilih mengikut kelas (TH tidak masuk kiraan % lulus/gagal).
+            (TH tidak masuk kiraan % Lulus/Gagal).
           </p>
         </div>
 
@@ -423,7 +423,7 @@
             <thead>
               <tr class="bg-indigo-600 text-white text-sm">
                 <th class="text-center px-4 py-3 font-bold">STATUS</th>
-                <th class="text-left px-4 py-3 font-bold">Kelas</th>
+                <th class="text-center px-4 py-3 font-bold">Kelas</th>
 
                 <th class="text-center px-3 py-3 font-bold">Hadir</th>
                 <th class="text-center px-3 py-3 font-bold">TH</th>
@@ -471,7 +471,43 @@
 
           function $(id){ return document.getElementById(id); }
           function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function normalizeSubjectCol(s){
+  return String(s ?? "").trim().replace(/\s+/g, " ");
+}
 
+// ✅ Papar NAMA PENUH SAHAJA (BUANG "G")
+function getFullSubjectNameNoG(subjectCol){
+  const x = normalizeSubjectCol(subjectCol);
+  if(!x) return "";
+
+  const parts = x.split(" ");
+  const code  = (parts[0] || "").toUpperCase();
+
+  // jika memang "G" sahaja -> kosongkan (taknak muncul)
+  if(code === "G" && parts.length === 1) return "";
+
+  // nama penuh ikut mapping (kalau tiada, fallback code)
+  return subjectNameMap[code] || code;
+}
+
+// ✅ Tapis senarai subjek: buang "G" sahaja / value pelik
+function isValidSubjectCol(subjectCol){
+  const x = normalizeSubjectCol(subjectCol);
+  if(!x) return false;
+  if(x.toUpperCase() === "G") return false;        // buang subjek = G
+  if(x === "-") return false;
+  return true;
+}
+
+function getSubjectCode(colName){
+  return String(colName || "").trim().split(/\s+/)[0].toUpperCase(); // "BI G" -> "BI"
+}
+function getFullSubjectName(colName){
+  const code = getSubjectCode(colName);
+  return subjectNameMap[code] || colName; // fallback kalau tiada mapping
+}
+
+          
           function normalizeGrade(g) {
             const x = String(g ?? "").trim().toUpperCase();
             if (!x) return "";
@@ -712,8 +748,8 @@
   const blocks = buildBlocks(subjek, kelas);
 
   $("t2-status").innerHTML =
-    `Paparan: <b>PPSA / PraSPM / Beza</b>
-     • Subjek: <b>${esc(subjek)}</b>
+    `Paparan: 
+     • Subjek: <b>${esc(getFullSubjectNameNoG(subjek))}</b>
      • Kelas: <b>${kelas==="ALL"?"SEMUA":esc(kelas)}</b>`;
 
   renderTableBlocks(blocks);
@@ -746,12 +782,25 @@
             selK.innerHTML = `<option value="ALL">SEMUA KELAS</option>` + kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
 
             // Subjek (lebih kemas jika cikgu set __TAB2_SUBJECT_COLS)
-            const subjectCols = uniqueSorted(Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
-              ? window.__TAB2_SUBJECT_COLS
-              : inferSubjectColumns(rowsAny)
-            );
-            const selS = $("t2-filter-subjek");
-            selS.innerHTML = `<option value="">Pilih Subjek</option>` + subjectCols.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+           let subjectCols = uniqueSorted(
+  (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
+    ? window.__TAB2_SUBJECT_COLS
+    : inferSubjectColumns(rowsAny)
+  )
+  .filter(isValidSubjectCol) // ✅ buang "G" sahaja
+);
+
+// ✅ Papar NAMA PENUH tanpa "G", tapi VALUE kekal contoh "BM G" (untuk kiraan)
+const selS = $("t2-filter-subjek");
+selS.innerHTML =
+  `<option value="">Pilih Subjek</option>` +
+  subjectCols.map(col => {
+    const label = getFullSubjectNameNoG(col); // ✅ contoh: "BAHASA MELAYU"
+    if(!label) return "";                    // safety
+    return `<option value="${esc(col)}">${esc(label)}</option>`;
+  }).join("");
+
+
           }
 
           // ===== events (GANTI YANG LAMA) =====
@@ -770,7 +819,7 @@
           setExamButtons();
           fillDropdowns();
           $("t2-status").innerHTML =
-            `Sedia. Pilih Subjek dan klik <b>Jana Analisis</b>. (Klik PPSA/PraSPM/Beza untuk tapis; klik semula untuk kembali ALL)`;
+            `Pilih Subjek dan klik <b>Jana Analisis</b>`;
         };
       </script>
     </section>
@@ -926,6 +975,59 @@ function updateStateFromUI(){
    3) PEMETAAN NILAI GRED
    ========================== */
 const gradeValueMapping = {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
+
+  const chartGradeLabels = ["A+","A","A-","B+","B","C+","C","D","E","G"];
+const topGradeLabels   = ["A+","A","A-","B+","B","C+","C"];
+
+const gradeColors = {
+  "A+": "#16a34a",
+  "A": "#22c55e",
+  "A-": "#86efac",
+  "B+": "#eab308",
+  "B": "#facc15",
+  "C+": "#fb923c",
+  "C": "#f97316",
+  "D": "#f87171",
+  "E": "#ef4444",
+  "G": "#991b1b"
+};
+
+const subjectNameMap = {
+  "BM": "BAHASA MELAYU",
+  "BI": "BAHASA INGGERIS",
+  "M": "MATEMATIK",
+  "SN": "SAINS",
+  "MT": "MATEMATIK TAMBAHAN",
+  "SEJ": "SEJARAH",
+  "PAI": "PENDIDIKAN ISLAM",
+  "PM": "PENDIDIKAN MORAL",
+  "PSV": "PENDIDIKAN SENI VISUAL",
+  "PJK": "PENDIDIKAN JASMANI DAN KESIHATAN",
+  "BIO": "BIOLOGI",
+  "KIM": "KIMIA",
+  "FIZ": "FIZIK",
+  "SS": "SAINS SUKAN",
+  "SK": "SAINS KOMPUTER",
+  "SRT": "SAINS RUMAH TANGGA",
+  "PER": "PERTANIAN",
+  "PNG": "PERNIAGAAN",
+  "PA": "PRINSIP PERAKAUNAN",
+  "TAS": "TASAWWUR ISLAM",
+  "PAIM": "PENDIDIKAN ISLAM MPAK",
+  "GEO": "GEOGRAFI",
+  "BT": "BAHASA TAMIL",
+  "KT": "KESUSASTERAAN TAMIL",
+  "RC": "REKA CIPTA",
+  "SPER": "SAINS PERTANIAN"
+};
+
+const subjectGroupMap = {
+  "Bahasa": ["BM","BI","BT","KT"],
+  "Kemanusiaan": ["PAI","PM","SEJ","GEO","PSV","PJK","PAIM","TAS"],
+  "Sains & Matematik": ["M","SN","MT","FIZ","BIO","KIM"],
+  "Teknik & Vokasional": ["SK","SRT","PER","PNG","PA","SS","RC","SPER"]
+};
+
 
 /* ==========================
    4) CSV PARSER (quote)
