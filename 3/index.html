@@ -64,6 +64,40 @@
     .chart-wrap{height:280px}
     @media (max-width:1024px){.chart-wrap{height:250px}}
     @media (max-width:640px){.chart-wrap{height:220px}}
+
+    /* TAB2: highlight row ikut STATUS */
+.t2-row-highlight{
+  background: #fff7ed !important;             /* lembut (oren muda) */
+  box-shadow: inset 0 0 0 2px #fb923c;        /* border dalam */
+}
+.t2-row-dim{
+  opacity: .55;
+}
+
+    /* ===== TAB2: Butang PPSA / PraSPM / Beza ===== */
+.t2-exam-btn{
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+/* AKTIF – kekal walaupun hover */
+.t2-exam-btn.active{
+  background:#4f46e5 !important;
+  color:#fff !important;
+  border-color:#4f46e5 !important;
+  box-shadow:0 6px 14px rgba(79,70,229,.35);
+}
+.t2-exam-btn.active:hover{
+  background:#4f46e5 !important; /* ❗ elak jadi putih */
+  color:#fff !important;
+}
+
+/* TIDAK AKTIF – hover lembut */
+.t2-exam-btn:not(.active):hover{
+  background:#eef2ff;   /* indigo-50 */
+  border-color:#c7d2fe; /* indigo-200 */
+  color:#1e1b4b;
+}
+
   </style>
 
   <script>
@@ -170,7 +204,7 @@
         <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Mod: PPSA vs PraSPM</span>
         <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700">Tahun: 2025</span>
       </div>
-      <span class="text-[11px] sm:text-xs text-gray-400">(Data sebenar diambil terus dari CSV PPSA &amp; PraSPM)</span>
+      <span class="text-[11px] sm:text-xs text-gray-400">(Data: CSV PPSA &amp; PraSPM)</span>
     </div>
   </div>
 
@@ -683,7 +717,11 @@ function getFullSubjectName(colName){
       const frameTop = isFirstRow ? topFrame : "";
       const frameBot = isLastRow  ? bottomFrame : "";
 
-      html += `<tr class="${zebra} border-b ${frameTop} ${frameBot}">`;
+      const isHL  = (viewStatus !== "ALL" && status === viewStatus);
+const isDim = (viewStatus !== "ALL" && status !== viewStatus);
+
+html += `<tr class="${zebra} border-b ${frameTop} ${frameBot} ${isHL ? "t2-row-highlight" : ""} ${isDim ? "t2-row-dim" : ""}">`;
+
 
       // STATUS (kiri)
       html += `<td class="px-4 py-3 text-center font-extrabold text-gray-800 align-middle">
@@ -692,7 +730,7 @@ function getFullSubjectName(colName){
 
       // KELAS rowspan 3
       if(isFirstRow){
-        html += `<td class="px-4 py-3 font-extrabold text-gray-800 align-middle" rowspan="3">
+        html += `<td class="px-4 py-3 font-extrabold text-gray-800 text-center align-middle" rowspan="3">
           ${esc(blk.kelas)}
         </td>`;
       }
@@ -757,7 +795,7 @@ function getFullSubjectName(colName){
 
 
           // (5) Button PPSA/PraSPM/Beza jadi FILTER (klik sama -> ALL)
-          function setExamButtons(){
+     /*     function setExamButtons(){
             document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
               const isActive = btn.dataset.exam === viewStatus;
 
@@ -770,6 +808,14 @@ function getFullSubjectName(colName){
               btn.classList.toggle("border-gray-200", !isActive);
             });
           }
+*/
+          function setExamButtons(){
+  document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
+    const isActive = btn.dataset.exam === viewStatus;
+    btn.classList.toggle("active", isActive);
+  });
+}
+
 
           function fillDropdowns() {
             const rowsP = getRowsPPSA();
