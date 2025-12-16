@@ -401,7 +401,7 @@
     </section>
 
     <!-- ================= TAB 2: ANALISIS MATA PELAJARAN ================= -->
-   <!-- ================= TAB 2: ANALISIS MATA PELAJARAN ================= -->
+  <!-- ================= TAB 2: ANALISIS MATA PELAJARAN ================= -->
 <section id="panel-lms-sekolah" class="hidden" hidden>
 
   <!-- KAD: ANALISIS MATA PELAJARAN -->
@@ -496,7 +496,7 @@
           Perbandingan Gred Pelajar (PPSA vs PraSPM)
         </h3>
         <p class="text-sm text-gray-500 mt-1">
-          Taburan gred A+ hingga G
+          Taburan gred A+ hingga G. Pilih Line/Bar, highlight C ke bawah, dan eksport PNG.
         </p>
       </div>
 
@@ -538,7 +538,7 @@
         Jadual Pecahan Kelas
       </h3>
       <p class="text-sm text-gray-500 mt-1">
-        (TH tidak masuk kiraan % Lulus/Gagal)
+        (TH tidak masuk kiraan % Lulus/Gagal).
       </p>
     </div>
 
@@ -574,16 +574,6 @@
     </div>
   </div>
 
-  <script>
-    //TUTUP KEJAP
-  document.getElementById("t2-highlight-cdown")
-    ?.closest("label")
-    ?.classList.add("hidden");
-
-  document.getElementById("t2-btn-export")
-    ?.classList.add("hidden");
-</script>
-  
   <!-- TAB 2 SCRIPT (INIT selepas CSV siap load) -->
   <script>
     // TAB2 init akan dipanggil dari loadAndRender() selepas __CSV_* diisi
@@ -925,35 +915,26 @@
             labels: GRADE_ORDER,
             datasets: [dsP, dsR]
           },
-
-          
           options: {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { position: "bottom" },
-    title: {
-      display: true,
-      text: "Perbandingan Gred Pelajar PPSA dan PraSPM"
-    },
-    tooltip: {
-      callbacks: {
-        label: (c) => ` ${c.dataset.label}: ${Math.round(c.parsed.y)}`
-      }
-    },
-
-    // ✅ INI YANG BUANG .00 ATAS TITIK (GRAF INI SAHAJA)
-    datalabels: {
-      formatter: (v) => Math.round(Number(v)),
-      anchor: "end",
-      align: "top"
-    }
-  },
-  scales: {
-    y: { beginAtZero: true, ticks: { precision: 0 } }
-  }
-}
-
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "bottom" },
+              title: {
+                display: true,
+                text: "Perbandingan Gred Pelajar PPSA dan PraSPM"
+              },
+              tooltip: {
+                callbacks: {
+                  label: (c)=> ` ${c.dataset.label}: ${c.parsed.y}`
+                }
+              }
+            },
+            scales: {
+              y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+          }
+        });
 
         const kelasTxt = (kelasFilter === "ALL") ? "SEMUA KELAS" : kelasFilter;
         $("t2-chart-note").innerHTML =
@@ -1088,6 +1069,7 @@
     };
   </script>
 </section>
+
 
 
     <!-- TAB 3 -->
