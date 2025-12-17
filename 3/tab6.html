@@ -1504,6 +1504,13 @@ const CHART_LABELS = [
   ["ETR","(Sasaran)"]
 ];
 
+  /* ==========================
+   WARNA STANDARD GPS
+   ========================== */
+const COLOR_GPS_SEBENAR = "#1e3a8a"; // Biru pekat
+const COLOR_SASARAN    = "#991b1b"; // Merah hati
+
+
 function buildCharts(seriesReal, seriesTarget){
   const ctxL = document.getElementById("chartGpsLine")?.getContext("2d");
   if(ctxL){
@@ -1511,10 +1518,33 @@ function buildCharts(seriesReal, seriesTarget){
     chartLine = new Chart(ctxL, {
       type:"line",
       data:{ labels: CHART_LABELS,
-        datasets:[
-          { label:"GPS Sebenar", data:seriesReal, tension:.35, spanGaps:true, pointRadius:6, pointHoverRadius:7 },
-          { label:"Sasaran",    data:seriesTarget, tension:.35, spanGaps:true, borderDash:[6,6], pointRadius:6, pointHoverRadius:7 }
-        ]
+        datasets: [
+  {
+    label: "GPS Sebenar",
+    data: seriesReal,
+    tension: .35,
+    spanGaps: true,
+    pointRadius: 6,
+    pointHoverRadius: 7,
+    borderColor: COLOR_GPS_SEBENAR,
+    backgroundColor: COLOR_GPS_SEBENAR,
+    pointBackgroundColor: COLOR_GPS_SEBENAR,
+    pointBorderColor: "#fff"
+  },
+  {
+    label: "Sasaran",
+    data: seriesTarget,
+    tension: .35,
+    spanGaps: true,
+    borderDash: [6,6],
+    pointRadius: 6,
+    pointHoverRadius: 7,
+    borderColor: COLOR_SASARAN,
+    backgroundColor: COLOR_SASARAN,
+    pointBackgroundColor: COLOR_SASARAN,
+    pointBorderColor: "#fff"
+  }
+]
       },
       options:{
         responsive:true, maintainAspectRatio:false,
@@ -1534,7 +1564,18 @@ function buildCharts(seriesReal, seriesTarget){
     chartBar = new Chart(ctxB, {
       type:"bar",
       data:{ labels: CHART_LABELS,
-        datasets:[ { label:"GPS Sebenar", data:seriesReal }, { label:"Sasaran", data:seriesTarget } ]
+        datasets: [
+  {
+    label: "GPS Sebenar",
+    data: seriesReal,
+    backgroundColor: COLOR_GPS_SEBENAR
+  },
+  {
+    label: "Sasaran",
+    data: seriesTarget,
+    backgroundColor: COLOR_SASARAN
+  }
+]
       },
       options:{
         responsive:true, maintainAspectRatio:false,
@@ -1548,6 +1589,9 @@ function buildCharts(seriesReal, seriesTarget){
     });
   }
 }
+
+  
+
 
 function updateChartsOnly(gpTOV, gpAR1){
   const seriesReal   = [gpTOV, gpAR1, REAL_GPS.AR2, null];
