@@ -966,30 +966,49 @@
           }
 
           function fillDropdowns() {
-            const rowsP = getRowsPPSA();
-            const rowsR = getRowsPRASPM();
-            const rowsAny = rowsP.length ? rowsP : rowsR;
+  const rowsP = getRowsPPSA();
+  const rowsR = getRowsPRASPM();
+  const rowsAny = rowsP.length ? rowsP : rowsR;
 
-            const kelas = uniqueSorted(rowsAny.map(getClassKey));
-            const selK = $("t2-filter-kelas");
-            selK.innerHTML = `<option value="ALL">SEMUA KELAS</option>` + kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
+  // ✅ simpan pilihan semasa user (kalau ada)
+  const selK = $("t2-filter-kelas");
+  const prevKelas = (selK?.value ?? "");
 
-            let subjectCols = uniqueSorted(
-              (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
-                ? window.__TAB2_SUBJECT_COLS
-                : inferSubjectColumns(rowsAny)
-              ).filter(isValidSubjectCol)
-            );
+  const kelas = uniqueSorted(rowsAny.map(getClassKey));
 
-            const selS = $("t2-filter-subjek");
-            selS.innerHTML =
-              `<option value="">Pilih Subjek</option>` +
-              subjectCols.map(col => {
-                const label = getFullSubjectNameNoG(col);
-                if(!label) return "";
-                return `<option value="${esc(col)}">${esc(label)}</option>`;
-              }).join("");
-          }
+  // ✅ bina semula options, tapi kekalkan "Pilih Kelas" di atas
+  selK.innerHTML =
+    `<option value="">Pilih Kelas</option>` +
+    `<option value="ALL">SEMUA KELAS</option>` +
+    kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
+
+  // ✅ restore pilihan (kalau masih wujud), kalau tak → kekal ""
+  const canRestore = Array.from(selK.options).some(o => o.value === prevKelas);
+  selK.value = canRestore ? prevKelas : "";
+
+  // ===== Subjek (buat benda sama supaya tak reset) =====
+  const selS = $("t2-filter-subjek");
+  const prevSubjek = (selS?.value ?? "");
+
+  let subjectCols = uniqueSorted(
+    (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
+      ? window.__TAB2_SUBJECT_COLS
+      : inferSubjectColumns(rowsAny)
+    ).filter(isValidSubjectCol)
+  );
+
+  selS.innerHTML =
+    `<option value="">Pilih Subjek</option>` +
+    subjectCols.map(col => {
+      const label = getFullSubjectNameNoG(col);
+      if(!label) return "";
+      return `<option value="${esc(col)}">${esc(label)}</option>`;
+    }).join("");
+
+  const canRestoreS = Array.from(selS.options).some(o => o.value === prevSubjek);
+  selS.value = canRestoreS ? prevSubjek : "";
+}
+
 
           function jana(){
             const subjek = $("t2-filter-subjek").value;
