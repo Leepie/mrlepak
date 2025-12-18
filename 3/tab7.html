@@ -1167,26 +1167,7 @@
 <!-- ===========================
      TAMBAHAN SWITCH TAB
      =========================== -->
-<script>
 
-
-  panels.forEach(name=>{
-    const panel = document.getElementById("panel-"+name);
-    const btn   = document.getElementById("tab-"+name);
-
-    if(panel){
-      const active = (name === tabName);
-      panel.hidden = !active;
-      panel.classList.toggle("hidden", !active);
-    }
-    if(btn){
-      btn.classList.toggle("tab-active", name === tabName);
-    }
-  });
-
-  try{ localStorage.setItem("xcode_ppsa_praspm_active_tab_v1", tabName); }catch(e){}
-}
-</script>
 
 
     <!-- TAB 4 -->
@@ -1269,7 +1250,7 @@ function loadActiveTab(){
    0) SWITCH TAB
    ========================== */
 function switchTab(tabName) {
-  const panels = ["gp-sekolah","lms-sekolah","headcount-individu","subjek-teras","mp-kritikal"];
+  const panels = ["gp-sekolah","lms-sekolah","headcount-individu","mp-kritikal"];
 
   panels.forEach(name => {
     const panel = document.getElementById("panel-" + name);
