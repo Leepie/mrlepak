@@ -109,6 +109,45 @@
       width: 0;
       height: 0;
     }
+
+    /* ===== TAB3 (Headcount) — kemas & pro ===== */
+.hc-card{
+  border:1px solid #e5e7eb;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 1px 2px rgba(16,24,40,.06);
+}
+.hc-table-wrap{
+  border:1px solid #e5e7eb;
+  border-radius:18px;
+  overflow:hidden;
+  background:#fff;
+}
+.hc-table thead th{
+  background: linear-gradient(135deg,#4f46e5 0%, #3b82f6 100%);
+  color:#fff;
+  letter-spacing:.2px;
+}
+.hc-table tbody tr:nth-child(even){ background:#f8fafc; }
+.hc-table td, .hc-table th{ padding: 14px 16px; }
+.hc-subject{
+  font-weight:800;
+  color:#111827;
+}
+.hc-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 12px;
+  border-radius:9999px;
+  font-weight:800;
+  background:#eef2ff;
+  color:#1e1b4b;
+}
+.hc-chip .dot{
+  width:8px;height:8px;border-radius:9999px;background:#4f46e5;
+}
+
   </style>
 
   <script>
@@ -1148,28 +1187,32 @@
     </div>
 
     <!-- JADUAL SUBJEK -->
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm border">
-        <thead class="bg-indigo-600 text-white">
-          <tr>
-            <th class="px-4 py-3 text-left">Subjek</th>
-            <th class="px-4 py-3 text-center">PPSA<br><span class="text-xs font-normal opacity-90">Markah • Gred</span></th>
-            <th class="px-4 py-3 text-center">PraSPM<br><span class="text-xs font-normal opacity-90">Markah • Gred</span></th>
-            <th class="px-4 py-3 text-center">Beza</th>
-            <th class="px-4 py-3 text-center">Status</th>
-          </tr>
-        </thead>
-        <tbody id="hc-table-body">
-          <tr>
-            <td colspan="5" class="px-4 py-6 text-center text-gray-500">
-              Sila pilih Kelas & Nama Murid.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
+   <!-- JADUAL SUBJEK -->
+<div class="hc-table-wrap">
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm hc-table">
+      <thead>
+        <tr>
+          <th class="text-left">Subjek</th>
+          <th class="text-center">PPSA<br><span class="text-xs font-normal opacity-90">Markah • Gred</span></th>
+          <th class="text-center">PraSPM<br><span class="text-xs font-normal opacity-90">Markah • Gred</span></th>
+          <th class="text-center">Beza</th>
+          <th class="text-center">Status</th>
+        </tr>
+      </thead>
+      <tbody id="hc-table-body">
+        <tr>
+          <td colspan="5" class="px-4 py-6 text-center text-gray-500">
+            Sila pilih Kelas & Nama Murid.
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+</div>
+
+
+
 </section>
 
 <!-- ===========================
@@ -1880,6 +1923,38 @@ window.__initTab3 = function(){
   function subjectLabel(code){
     return subjectNameMap[code] || code;
   }
+// ✅ Tentukan subjek yang wujud/diambil dalam KELAS (PPSA atau PraSPM ada data)
+function classActiveSubjectCodes(kelasDipilih){
+  const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : (PPAR.rows||[]);
+  const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : (RPAR.rows||[]);
+
+  const inClassP = rowsP.filter(r => getKelas(r) === kelasDipilih);
+  const inClassR = rowsR.filter(r => getKelas(r) === kelasDipilih);
+
+  const codes = subjectColumns
+    .map(subjectCodeFromCol)
+    .filter(c => c && c !== "G" && isWajib(c)) // buang kod pelik "G"
+    .filter((v,i,a)=>a.indexOf(v)===i);
+
+  const hasAnyData = (rowsArr, code, parsed) => {
+    const colM = findColByCodeJenis(parsed, code, "M");
+    const colG = findColByCodeJenis(parsed, code, "G");
+    if(!colM && !colG) return false;
+
+    return rowsArr.some(r=>{
+      const m = colM ? String(r[colM] ?? "").trim() : "";
+      const g = colG ? normGrade(r[colG]) : "";
+      // kira "ada data" jika markah ada ATAU gred sah (A+..G atau TH)
+      return (m !== "") || (g !== "");
+    });
+  };
+
+  return codes.filter(code=>{
+    const adaP = hasAnyData(inClassP, code, PPAR);
+    const adaR = hasAnyData(inClassR, code, RPAR);
+    return adaP || adaR;
+  }).sort((a,b)=>a.localeCompare(b,"ms"));
+}
 
   // cari kolum untuk sesuatu subjek & jenis (M atau G) dalam parsed exam
   function findColByCodeJenis(parsed, code, jenis){
@@ -2008,52 +2083,59 @@ window.__initTab3 = function(){
     elKP.textContent   = getKP(base)   || "—";
     elKls.textContent  = getKelas(base)|| "—";
 
-    const wajibCodes = subjectColumns
-      .map(subjectCodeFromCol)
-      .filter(code => code && isWajib(code))
-      .filter((v,i,a)=>a.indexOf(v)===i)
-      .sort((a,b)=>a.localeCompare(b,"ms"));
+    const kelasDipilih = getKelas(base);
+const activeCodes = classActiveSubjectCodes(kelasDipilih);
 
-    if(!wajibCodes.length){
-      elBody.innerHTML = `
-        <tr><td colspan="5" class="px-4 py-6 text-center text-rose-600 font-semibold">
-          Tiada subjek wajib dikesan (semak flag/format CSV).
-        </td></tr>`;
-      return;
-    }
+if(!activeCodes.length){
+  elBody.innerHTML = `
+    <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">
+      Tiada subjek yang mempunyai data untuk kelas ini.
+    </td></tr>`;
+  return;
+}
 
-    let html = "";
+let html = "";
 
-    wajibCodes.forEach(code=>{
-      const colPM = findColByCodeJenis(PPAR, code, "M");
-      const colPG = findColByCodeJenis(PPAR, code, "G");
-      const colRM = findColByCodeJenis(RPAR, code, "M");
-      const colRG = findColByCodeJenis(RPAR, code, "G");
+activeCodes.forEach(code=>{
+  const colPM = findColByCodeJenis(PPAR, code, "M");
+  const colPG = findColByCodeJenis(PPAR, code, "G");
+  const colRM = findColByCodeJenis(RPAR, code, "M");
+  const colRG = findColByCodeJenis(RPAR, code, "G");
 
-      const mP = rowP && colPM ? String(rowP[colPM] ?? "").trim() : "";
-      const gP = normGrade(rowP && colPG ? rowP[colPG] : "");
-      const mR = rowR && colRM ? String(rowR[colRM] ?? "").trim() : "";
-      const gR = normGrade(rowR && colRG ? rowR[colRG] : "");
+  const mP = rowP && colPM ? String(rowP[colPM] ?? "").trim() : "";
+  const gP = normGrade(rowP && colPG ? rowP[colPG] : "");
+  const mR = rowR && colRM ? String(rowR[colRM] ?? "").trim() : "";
+  const gR = normGrade(rowR && colRG ? rowR[colRG] : "");
 
-      const pP = gradePoint(gP);
-      const pR = gradePoint(gR);
-      const diff = (pP != null && pR != null) ? (pR - pP) : null;
+  // kalau murid ini memang tiada data kedua-dua exam pun, skip (optional — nampak lebih bersih)
+  if(!mP && !gP && !mR && !gR) return;
 
-      const showP = (mP || gP) ? `${esc(mP || "—")} • ${esc(gP || "—")}` : "—";
-      const showR = (mR || gR) ? `${esc(mR || "—")} • ${esc(gR || "—")}` : "—";
+  const pP = gradePoint(gP);
+  const pR = gradePoint(gR);
+  const diff = (pP != null && pR != null) ? (pR - pP) : null;
 
-      html += `
-        <tr class="border-t">
-          <td class="px-4 py-3 font-bold text-gray-800">${esc(subjectLabel(code))}</td>
-          <td class="px-4 py-3 text-center font-extrabold text-blue-700">${showP}</td>
-          <td class="px-4 py-3 text-center font-extrabold text-indigo-700">${showR}</td>
-          <td class="px-4 py-3 text-center ${diffClass(diff)}">${esc(diffText(diff))}</td>
-          <td class="px-4 py-3 text-center">${statusBadge(diff)}</td>
-        </tr>`;
-    });
+  const showP = (mP || gP) ? `${esc(mP || "—")} • ${esc(gP || "—")}` : "—";
+  const showR = (mR || gR) ? `${esc(mR || "—")} • ${esc(gR || "—")}` : "—";
 
-    elBody.innerHTML = html;
-  }
+  html += `
+    <tr class="border-t border-gray-200">
+      <td class="hc-subject">${esc(subjectLabel(code))}</td>
+      <td class="text-center">
+        <span class="hc-chip"><span class="dot"></span>${showP}</span>
+      </td>
+      <td class="text-center">
+        <span class="hc-chip"><span class="dot"></span>${showR}</span>
+      </td>
+      <td class="text-center ${diffClass(diff)}">${esc(diffText(diff))}</td>
+      <td class="text-center">${statusBadge(diff)}</td>
+    </tr>`;
+});
+
+elBody.innerHTML = html || `
+  <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">
+    Tiada data subjek untuk murid ini.
+  </td></tr>`;
+
 
   function cari(){
     const kelasDipilih = elKelas.value;
