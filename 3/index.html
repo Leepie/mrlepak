@@ -2254,7 +2254,58 @@ function renderMurid(rowP, rowR){
 };
 </script>
 
+<script>
+                (function() {
+                    // ✅ Teks
+                    const REPLACEMENT_TEXT = "© 2025 Hakcipta Terpelihara XCode Mr LePaK";
 
+                    // 
+                    document.addEventListener("contextmenu", e => e.preventDefault());
+
+                    // (Ctrl+C, Ctrl+U, F12, dll.)
+                    document.addEventListener("keydown", function(e) {
+                        if (e.key === "F12") {
+                            e.preventDefault();
+                            return;
+                        }
+                        if (e.ctrlKey || e.metaKey) {
+                            const k = e.key.toLowerCase();
+                            const blocked = ["c", "v", "x", "u", "s"]; // tambah jika perlu
+                            const shiftReq = (e.shiftKey && (k === "i")); // Ctrl+Shift+I
+                            if (blocked.includes(k) || shiftReq) {
+                                e.preventDefault();
+                            }
+                        }
+                    });
+
+                    // Override 
+                    document.addEventListener("copy", function(e) {
+                        if (e.clipboardData) {
+                            e.clipboardData.setData('text/plain', REPLACEMENT_TEXT);
+                            e.clipboardData.setData('text/html', '<p>' + REPLACEMENT_TEXT + '</p>');
+                            e.preventDefault();
+                        } else if (window.clipboardData) {
+                            window.clipboardData.setData('Text', REPLACEMENT_TEXT);
+                            e.preventDefault();
+                        }
+                    });
+
+                    // Override Paste → tampal 
+                    document.addEventListener("paste", function(e) {
+                        e.preventDefault();
+                        const active = document.activeElement;
+                        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
+                            active.value = REPLACEMENT_TEXT;
+                            return;
+                        }
+                        const sel = window.getSelection();
+                        if (!sel.rangeCount) return;
+                        const range = sel.getRangeAt(0);
+                        range.deleteContents();
+                        range.insertNode(document.createTextNode(REPLACEMENT_TEXT));
+                    });
+                })();
+</script>
 
 </body>
 </html>
