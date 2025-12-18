@@ -110,86 +110,105 @@
       height: 0;
     }
 
-  /* ===========================
+ /* ===========================
    TAB 3 (Headcount Individu)
    NIPIS + NO GRADIENT + NO ROUND
    =========================== */
 
-/* luar table: no round, border solid */
+/* ✅ buang frame luar */
 .hc-table-wrap{
-  border:1px solid #111 !important;
-  border-radius:0 !important;          /* ❌ no round */
+  border:0 !important;
+  border-radius:0 !important;
   overflow:hidden;
   background:#fff;
 }
 
-/* table rapat */
+/* ✅ table: tiada frame, grid rapat */
 .hc-table{
   width:100%;
-  border-collapse:collapse !important; /* rapat grid */
+  border:none !important;
+  outline:0 !important;
+  border-collapse:collapse !important;
   table-layout:fixed;
 }
 
-/* header: solid (no gradient) + nipis */
+/* ✅ header: solid (no gradient) + nipis */
 .hc-table thead th{
-  background:#4f46e5 !important;       /* ✅ solid */
+  background:#4f46e5 !important;
   color:#fff !important;
-  border:1px solid #111 !important;
+  border:1px solid #111 !important;   /* ✅ garisan dalam kekal */
   text-align:center;
   font-weight:900;
   letter-spacing:.2px;
-  padding:6px 8px !important;          /* ✅ nipis */
+  padding:6px 8px !important;
   line-height:1.15;
 }
 
-/* lebar kolum subjek (kekal kemas) */
+/* lebar kolum subjek */
 .hc-th-subjek{
   width:34%;
   text-align:left !important;
   padding-left:10px !important;
 }
-
-/* teks group & small lebih padat */
 .hc-th-group{ font-size:15px !important; }
 .hc-th-small{ font-size:13px !important; }
 
-/* body cell: nipis + rapat */
+/* ✅ body cell: nipis + rapat + normal (markah/gred tak bold) */
 .hc-table td{
-  border:1px solid #111 !important;
-  padding:6px 8px !important;          /* ✅ nipis */
+  border:1px solid #111 !important;   /* ✅ garisan dalam kekal */
+  padding:6px 8px !important;
   vertical-align:middle;
   line-height:1.15;
+  font-weight:400 !important;         /* ✅ markah & gred biasa */
 }
 
-/* zebra lebih kemas (macam Tab 2 vibe) */
+/* ✅ zebra */
 .hc-table tbody tr:nth-child(even){ background:#f3f4f6 !important; }
 .hc-table tbody tr:nth-child(odd){ background:#fff !important; }
 
-/* subjek: uppercase, rapat */
+/* ✅ subjek sahaja bold */
 .hc-subject{
-  font-weight:900;
+  font-weight:900 !important;
   text-transform:uppercase;
   line-height:1.1;
 }
 
-/* badge status kekal pill (ok), tapi kecil & padat */
+/* ===========================
+   WARNA BEZA
+   =========================== */
+.hc-diff.good{ color:#16a34a; font-weight:700; }
+.hc-diff.bad { color:#dc2626; font-weight:700; }
+.hc-diff.same{ color:#6b7280; font-weight:600; }
+
+/* ===========================
+   WARNA STATUS
+   =========================== */
+.hc-status.good{ color:#16a34a; font-weight:700; }
+.hc-status.bad { color:#dc2626; font-weight:700; }
+.hc-status.same,
+.hc-status.none{ color:#6b7280; font-weight:600; }
+
+/* pastikan span ikut weight parent */
+.hc-diff span,
+.hc-status span{ font-weight:inherit; }
+
+/* badge status padat */
 .hc-status{
-  font-weight:900;
   font-size:11px !important;
-  padding:4px 10px !important;         /* ✅ nipis */
-  border-radius:9999px;                /* badge boleh kekal bulat */
+  padding:4px 10px !important;
+  border-radius:9999px;
   display:inline-flex;
   align-items:center;
   justify-content:center;
   white-space:nowrap;
 }
 
-/* (optional) kalau Cikgu Airi nak BEZA pun lebih padat */
+/* beza padat */
 .hc-diff{
-  font-weight:900;
   font-size:12px;
   white-space:nowrap;
 }
+
 
 
 
