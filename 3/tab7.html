@@ -1057,7 +1057,187 @@
           fillDropdowns();
           $("t2-status").innerHTML = `Pilih Subjek dan klik <b>Jana Analisis</b>`;
         };
+
+        /* =========================================================
+   TAB 3: HEADCOUNT (TOTAL / HADIR / TH) — PPSA vs PRASPM
+   ========================================================= */
+
+let t3Chart = null;
+
+// util: escape (kalau perlu)
+function _t3_isValidGradeAtoG(g){
+  const x = String(g ?? "").trim().toUpperCase();
+  return gradeValueMapping.hasOwnProperty(x); // A+..G
+}
+
+function _t3_getNameKey(row){
+  // guna NAMA dulu, kalau tiada cuba NO KP; fallback gabung
+  const nama = (row["NAMA"] || row["Nama"] || row["nama"] || "").toString().trim();
+  const kp   = (row["NO KP"] || row["NO. KP"] || row["NO KP/IC"] || row["MYKAD"] || row["No KP"] || row["no kp"] || "").toString().trim();
+  // key: kalau ada KP, KP paling kuat; kalau tidak, guna nama
+  const base = kp || nama;
+  return base ? base.toUpperCase() : "";
+}
+
+function _t3_inferSubjectColumnsFromRows(rows){
+  // guna logik ringkas: ambil semua kolum yang nampak macam subjek (bukan meta)
+  if(!rows || !rows.length) return [];
+
+  const META = new Set([
+    "BIL","NAMA","NO KP","NO. KP","NO KP/IC","MYKAD","KELAS","TINGKATAN","JANTINA","KAUM",
+    "GURU KELAS","SEKOLAH","ID","MURID","NAMA MURID","NAMA_PENUH"
+  ]);
+
+  const keys = Object.keys(rows[0] || {});
+  return keys.filter(k=>{
+    const kk = String(k||"").trim();
+    if(!kk) return false;
+    if(META.has(kk.toUpperCase())) return false;
+    if (/^CATATAN|ULASAN|TARIKH|MASA|NO\.|NOMBOR/i.test(kk)) return false;
+    // elak kolum umum
+    const U = kk.toUpperCase();
+    if (U.includes("KESELURUHAN") || U.includes("PURATA") || U.includes("GPMP")) return false;
+    return true;
+  });
+}
+
+function kiraHeadcount(rows){
+  // Definisi:
+  // TOTAL = bil murid unik (ikut key NAMA/KP)
+  // HADIR = murid yang ada sekurang-kurangnya 1 gred sah A+..G dalam mana-mana subjek
+  // TH    = TOTAL - HADIR (murid yang tiada gred sah; biasanya kosong/TH semua)
+  if(!Array.isArray(rows) || !rows.length){
+    return { total: 0, hadir: 0, th: 0 };
+  }
+
+  // guna subjectColumns yang Tab2 dah siap infer jika ada
+  const subjectCols =
+    (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length)
+      ? window.__TAB2_SUBJECT_COLS
+      : _t3_inferSubjectColumnsFromRows(rows);
+
+  const seen = new Map(); // key -> { hadir:boolean }
+
+  rows.forEach(r=>{
+    const key = _t3_getNameKey(r);
+    if(!key) return;
+
+    if(!seen.has(key)) seen.set(key, { hadir:false });
+
+    // check hadir: ada mana-mana gred A+..G
+    if(!seen.get(key).hadir){
+      for(const col of subjectCols){
+        const g = (r[col] ?? "").toString().trim().toUpperCase();
+        if(_t3_isValidGradeAtoG(g)){
+          seen.get(key).hadir = true;
+          break;
+        }
+      }
+    }
+  });
+
+  const total = seen.size;
+  let hadir = 0;
+  for(const [,v] of seen) if(v.hadir) hadir++;
+  const th = total - hadir;
+
+  return { total, hadir, th };
+}
+
+function _t3_setText(id, v){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = (v == null ? "—" : String(v));
+}
+
+function _t3_setDiff(id, diff, goodMode){
+  // goodMode:
+  // - untuk TOTAL/HADIR: naik = baik (good)
+  // - untuk TH: naik = buruk (bad)
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  const n = Number(diff);
+  const sign = (n > 0) ? "+" : "";
+  el.textContent = isFinite(n) ? (sign + n) : "0";
+
+  el.classList.remove("text-gray-700","text-emerald-600","text-rose-600","font-bold");
+
+  if(!isFinite(n) || n === 0){
+    el.classList.add("text-gray-700");
+    return;
+  }
+
+  // goodMode = "good" => + hijau, - merah
+  // goodMode = "bad"  => + merah, - hijau
+  if(goodMode === "bad"){
+    el.classList.add(n > 0 ? "text-rose-600" : "text-emerald-600", "font-bold");
+  }else{
+    el.classList.add(n > 0 ? "text-emerald-600" : "text-rose-600", "font-bold");
+  }
+}
+
+function renderTab3Headcount(){
+  const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : [];
+  const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : [];
+
+  const P = kiraHeadcount(rowsP);
+  const R = kiraHeadcount(rowsR);
+
+  // KPI
+  _t3_setText("t3-ppsa-total", P.total);
+  _t3_setText("t3-pra-total",  R.total);
+  _t3_setDiff("t3-diff-total", (R.total - P.total), "good");
+
+  _t3_setText("t3-ppsa-hadir", P.hadir);
+  _t3_setText("t3-pra-hadir",  R.hadir);
+  _t3_setDiff("t3-diff-hadir", (R.hadir - P.hadir), "good");
+
+  _t3_setText("t3-ppsa-th", P.th);
+  _t3_setText("t3-pra-th",  R.th);
+  _t3_setDiff("t3-diff-th", (R.th - P.th), "bad");
+
+  // graf
+  const ctx = document.getElementById("t3-chart-headcount")?.getContext("2d");
+  if(!ctx) return;
+
+  if(t3Chart) t3Chart.destroy();
+
+  t3Chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["TOTAL", "HADIR", "TH"],
+      datasets: [
+        { label: "PPSA",   data: [P.total, P.hadir, P.th] },
+        { label: "PRASPM", data: [R.total, R.hadir, R.th] }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom" },
+        valueLabelPlugin: { decimals: 0, offsetY: -10 },
+        tooltip: { callbacks:{ label:(c)=>` ${c.dataset.label}: ${Math.round(c.parsed.y)}` } }
+      },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+}
+
+/* =========================================================
+   HOOK: panggil Tab3 bila data CSV siap
+   - Tambah panggilan ini dalam loadAndRender() selepas Tab2 init
+   ========================================================= */
+
+// ✅ Cari blok ini dalam loadAndRender():
+// if(typeof window.__initTab2 === "function"){ window.__initTab2(); }
+//
+// ✅ dan TAMBAH selepasnya:
+
       </script>
+
+      
     </section>
 
     <!-- ================= TAB 3: HEADCOUNT INDIVIDU (SIAP) ================= -->
@@ -1361,3 +1541,461 @@ function parseCsvXCode(csvText){
     const jenis=(jenisRow[i]||"").toUpperCase();
     const flag=(flagRow[i]||"").trim();
     if(code && jenis==="M" && (flag==="0" || flag==="1")) subjectFlagMap
+    ={};
+/* sambungan parseCsvXCode */
+    [code.toUpperCase()] = flag;
+  });
+
+  const subjectColumns = headers.filter(h=>{
+    if(!h) return false;
+    const upper = h.toUpperCase();
+    const isGred = /\b(G|GRED|GRADE)\b/.test(upper);
+    const isUmum = upper.includes("KESELURUHAN") || upper.includes("PURATA") || upper.includes("GPMP");
+    return isGred && !isUmum;
+  });
+
+  const rows = lines.slice(3).map(line=>{
+    const vals = parseCSVLine(line);
+    const obj  = {};
+    headers.forEach((h,i)=>{ if(h) obj[h] = (vals[i]||"").trim(); });
+    return obj;
+  });
+
+  return { headers, headerMap, subjectFlagMap, subjectColumns, rows };
+}
+
+/* ==========================
+   6) KIRA GPS (SUBJEK WAJIB)
+   ========================== */
+function kiraGPS_Wajib(parsed){
+  const { headerMap, subjectFlagMap, subjectColumns, rows } = parsed;
+
+  const namaCol  = headerMap["nama"]  || "NAMA";
+  const kelasCol = headerMap["kelas"] || "KELAS";
+
+  const wajibColumns = subjectColumns.filter(colName=>{
+    const subjCode = (colName.split(" ")[0] || "").toUpperCase();
+    const flag = subjectFlagMap[subjCode];
+    if (flag === "0") return false; // elektif
+    return true; // 1 atau tiada flag → kira
+  });
+
+  let jumlahNilai=0, bilGred=0;
+
+  rows.forEach(row=>{
+    const nama  = (row[namaCol]  || "").trim();
+    const kelas = (row[kelasCol] || "").trim();
+    if(!nama || /^\d+$/.test(nama)) return;
+    if(kelas === "1") return;
+
+    wajibColumns.forEach(col=>{
+      const g = (row[col] || "").toUpperCase().trim();
+      if (gradeValueMapping.hasOwnProperty(g)){
+        jumlahNilai += gradeValueMapping[g];
+        bilGred++;
+      }
+    });
+  });
+
+  if(!bilGred) return null;
+  return +(jumlahNilai / bilGred).toFixed(2);
+}
+
+/* ==========================
+   6B) KPI HEADER (BEST)
+   - GPS: subjek WAJIB (ikut flag)
+   - % Layak Sijil: kira hanya murid yang ada gred BM & SEJ sah (A+..G)
+     (TH/kosong tidak masuk denominator)
+   ========================== */
+function _isValidGradeAtoG(g){
+  const x = String(g ?? "").trim().toUpperCase();
+  return gradeValueMapping.hasOwnProperty(x); // A+..G
+}
+
+function kiraHeaderKPI_Parsed(parsed){
+  const gpsElHeader   = document.getElementById('gpsValue');
+  const sijilElHeader = document.getElementById('layakSijilValue');
+
+  if(!parsed){
+    if(gpsElHeader) gpsElHeader.textContent = "--";
+    if(sijilElHeader) sijilElHeader.textContent = "-";
+    return { gps:null, peratusLayak:null };
+  }
+
+  const { headerMap, subjectFlagMap, subjectColumns, rows } = parsed;
+
+  let jumlahNilai  = 0;
+  let bilGred      = 0;
+
+  let denomLayak   = 0; // murid yang ada BM & SEJ sah (A+..G)
+  let layak        = 0; // BM & SEJ ≠ G
+
+  const namaCol  = headerMap["nama"]  || "NAMA";
+  const kelasCol = headerMap["kelas"] || "KELAS";
+
+  const bmCol  = subjectColumns.find(c => (String(c).split(" ")[0] || "").toUpperCase() === "BM") || null;
+  const sejCol = subjectColumns.find(c => (String(c).split(" ")[0] || "").toUpperCase() === "SEJ") || null;
+
+  const wajibColumns = subjectColumns.filter(colName => {
+    const subjCode = (colName.split(" ")[0] || "").toUpperCase();
+    const flag = subjectFlagMap[subjCode];
+    if (flag === "0") return false;
+    return true;
+  });
+
+  rows.forEach(row => {
+    const nama  = (row[namaCol]  || "").trim();
+    const kelas = (row[kelasCol] || "").trim();
+    if(!nama || /^\d+$/.test(nama)) return;
+    if(kelas==="1") return;
+
+    // GPS (subjek wajib)
+    wajibColumns.forEach(col => {
+      const g = String(row[col] || "").toUpperCase().trim();
+      if(gradeValueMapping.hasOwnProperty(g)){
+        jumlahNilai += gradeValueMapping[g];
+        bilGred++;
+      }
+    });
+
+    // % Layak Sijil (BM+SEJ gred sah sahaja)
+    if(!bmCol || !sejCol) return;
+
+    const bm  = String(row[bmCol]  || "").toUpperCase().trim();
+    const sej = String(row[sejCol] || "").toUpperCase().trim();
+
+    if(!_isValidGradeAtoG(bm) || !_isValidGradeAtoG(sej)) return; // TH/kosong dll tak dikira
+
+    denomLayak++;
+    if(bm !== "G" && sej !== "G"){
+      layak++;
+    }
+  });
+
+  const gps = bilGred ? (jumlahNilai / bilGred) : null;
+  const peratusLayak = denomLayak ? ((layak / denomLayak) * 100) : null;
+
+  if(gpsElHeader) gpsElHeader.textContent = (gps==null ? "--" : gps.toFixed(2));
+  if(sijilElHeader) sijilElHeader.textContent = (peratusLayak==null ? "-" : peratusLayak.toFixed(1) + "%");
+
+  return { gps, peratusLayak, denomLayak, layak };
+}
+
+/* ==========================
+   6C) TAB 3: HEADCOUNT (PPSA vs PRASPM)
+   - kira jumlah MURID unik (ikut NAMA+KELAS+NO KP jika ada)
+   - kira HADIR = ada sekurang-kurangnya 1 gred A+..G
+   - kira TH = semua subjek kosong/TH (tiada gred A+..G)
+   ========================== */
+function buildStudentKey(row, headerMap){
+  const namaCol  = headerMap["nama"]  || "NAMA";
+  const kelasCol = headerMap["kelas"] || "KELAS";
+  const kpCol =
+    headerMap["no kp"] || headerMap["no. kp"] || headerMap["no kp/ic"] ||
+    headerMap["mykad"] || headerMap["no kad pengenalan"] || null;
+
+  const nama  = String(row[namaCol]  || "").trim().toUpperCase();
+  const kelas = String(row[kelasCol] || "").trim().toUpperCase();
+  const kp    = kpCol ? String(row[kpCol] || "").trim().toUpperCase() : "";
+
+  // fallback kalau tiada KP
+  return (kp ? `${kp}|${nama}|${kelas}` : `${nama}|${kelas}`);
+}
+
+function kiraHeadcount_Parsed(parsed){
+  if(!parsed) return { total:0, hadir:0, th:0 };
+
+  const { headerMap, subjectColumns, rows } = parsed;
+
+  const namaCol  = headerMap["nama"]  || "NAMA";
+  const kelasCol = headerMap["kelas"] || "KELAS";
+
+  const seen = new Map(); // key -> { hadir:boolean }
+
+  rows.forEach(row=>{
+    const nama  = (row[namaCol]  || "").trim();
+    const kelas = (row[kelasCol] || "").trim();
+    if(!nama || /^\d+$/.test(nama)) return;
+    if(kelas === "1") return;
+
+    const key = buildStudentKey(row, headerMap);
+    if(!seen.has(key)) seen.set(key, { hadir:false });
+
+    // HADIR kalau ada sekurang2 satu gred A+..G dalam mana-mana subjek
+    let adaGred = false;
+    for(const col of subjectColumns){
+      const g = String(row[col] || "").trim().toUpperCase();
+      if(gradeValueMapping.hasOwnProperty(g)){ adaGred = true; break; }
+    }
+    if(adaGred) seen.get(key).hadir = true;
+  });
+
+  const total = seen.size;
+  let hadir = 0;
+  for(const [,v] of seen) if(v.hadir) hadir++;
+
+  const th = Math.max(0, total - hadir);
+  return { total, hadir, th };
+}
+
+/* ==========================
+   8B) TAB3 UI RENDER + GRAF
+   ========================== */
+let t3Chart = null;
+
+function renderTab3Headcount(ppsParsed, praParsed){
+  // kira
+  const P = kiraHeadcount_Parsed(ppsParsed);
+  const R = kiraHeadcount_Parsed(praParsed);
+
+  // beza
+  const dTotal = R.total - P.total;
+  const dHadir = R.hadir - P.hadir;
+  const dTH    = R.th    - P.th;
+
+  // set teks (kalau elemen wujud)
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent = val; };
+
+  set("t3-ppsa-total", P.total);
+  set("t3-ppsa-hadir", P.hadir);
+  set("t3-ppsa-th",    P.th);
+
+  set("t3-pra-total", R.total);
+  set("t3-pra-hadir", R.hadir);
+  set("t3-pra-th",    R.th);
+
+  const fmtDiff = (n)=> (n>0?`+${n}`:`${n}`);
+  const cls = (n)=> (n>0 ? "text-emerald-600 font-bold" : (n<0 ? "text-rose-600 font-bold" : "text-gray-700"));
+
+  const diffSet = (id, n)=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.textContent = fmtDiff(n);
+    el.className = cls(n);
+  };
+
+  diffSet("t3-diff-total", dTotal);
+  diffSet("t3-diff-hadir", dHadir);
+  diffSet("t3-diff-th",    dTH);
+
+  // graf
+  const ctx = document.getElementById("t3-chart-headcount")?.getContext("2d");
+  if(!ctx) return;
+
+  if(t3Chart) t3Chart.destroy();
+
+  t3Chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["TOTAL", "HADIR", "TH"],
+      datasets: [
+        { label: "PPSA",   data: [P.total, P.hadir, P.th] },
+        { label: "PRASPM", data: [R.total, R.hadir, R.th] }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom" },
+        valueLabelPlugin: { decimals: 0, offsetY: -10 },
+        tooltip: { callbacks:{ label:(c)=>` ${c.dataset.label}: ${Math.round(c.parsed.y)}` } }
+      },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+}
+  /* ===== sambungan selepas renderTab3Headcount() ===== */
+
+/* ==========================
+   8C) INIT TAB 3 (sekali sahaja)
+   ========================== */
+window.__initTab3 = function(){
+  if (window.__tab3_inited) return;
+  window.__tab3_inited = true;
+
+  // jika Chart.js / plugin belum siap, tak apa (akan siap bila loadAndRender)
+};
+
+/* ==========================
+   0B) SWITCH TAB (tambahan init Tab2/Tab3 bila buka)
+   ========================== */
+const __switchTab_ori = window.switchTab;
+window.switchTab = function(tabName){
+  __switchTab_ori(tabName);
+
+  if(tabName === "lms-sekolah" && typeof window.__initTab2 === "function"){
+    window.__initTab2();
+  }
+  if(tabName === "subjek-teras" && typeof window.__initTab3 === "function"){
+    window.__initTab3();
+    // kalau data CSV dah ada, render terus
+    if (window.__PPS_PARSED && window.__PRA_PARSED) {
+      renderTab3Headcount(window.__PPS_PARSED, window.__PRA_PARSED);
+    }
+  }
+};
+
+/* ==========================
+   11B) LOAD + RENDER (sambungan kecil)
+   - simpan parsed untuk Tab3
+   - panggil renderTab3Headcount bila perlu
+   ========================== */
+// ✅ Letak 3 baris ini dalam loadAndRender() selepas ppsParsed/praParsed berjaya diparse:
+/// window.__PPS_PARSED = ppsParsed;
+/// window.__PRA_PARSED = praParsed;
+/// if (loadActiveTab() === "subjek-teras") renderTab3Headcount(ppsParsed, praParsed);
+
+/* ==========================
+   12) (OPTIONAL) Bina HTML Tab3 (kalau belum ada)
+   - Pastikan elemen-elemen ID ini wujud dalam panel Tab 3:
+   ========================== */
+/*
+<div class="soft-card p-4">
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h2 class="text-lg font-bold">Headcount – PPSA vs PraSPM</h2>
+      <p class="text-sm text-gray-500 mt-1">Jumlah murid unik, hadir (ada sekurang-kurangnya 1 gred A+..G) dan TH.</p>
+    </div>
+  </div>
+
+  <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div class="kpi-card px-4 py-3">
+      <div class="text-[11px] text-gray-500 uppercase tracking-wide">TOTAL (PPSA | PRASPM | BEZA)</div>
+      <div class="mt-1 text-2xl font-extrabold">
+        <span id="t3-ppsa-total">—</span>
+        <span class="text-gray-400">|</span>
+        <span id="t3-pra-total">—</span>
+        <span class="text-gray-400">|</span>
+        <span id="t3-diff-total" class="text-gray-700">0</span>
+      </div>
+    </div>
+
+    <div class="kpi-card px-4 py-3">
+      <div class="text-[11px] text-gray-500 uppercase tracking-wide">HADIR (PPSA | PRASPM | BEZA)</div>
+      <div class="mt-1 text-2xl font-extrabold">
+        <span id="t3-ppsa-hadir">—</span>
+        <span class="text-gray-400">|</span>
+        <span id="t3-pra-hadir">—</span>
+        <span class="text-gray-400">|</span>
+        <span id="t3-diff-hadir" class="text-gray-700">0</span>
+      </div>
+    </div>
+
+    <div class="kpi-card px-4 py-3">
+      <div class="text-[11px] text-gray-500 uppercase tracking-wide">TH (PPSA | PRASPM | BEZA)</div>
+      <div class="mt-1 text-2xl font-extrabold">
+        <span id="t3-ppsa-th">—</span>
+        <span class="text-gray-400">|</span>
+        <span id="t3-pra-th">—</span>
+        <span class="text-gray-400">|</span>
+        <span id="t3-diff-th" class="text-gray-700">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="soft-card p-4 mt-5">
+    <div class="font-bold text-gray-800 mb-2">Graf Headcount</div>
+    <div class="chart-wrap">
+      <canvas id="t3-chart-headcount"></canvas>
+    </div>
+  </div>
+</div>
+*/
+
+<!-- ================= TAB 3: GP SUBJEK TERAS ================= -->
+<section id="panel-subjek-teras" class="hidden" hidden>
+  <div class="soft-card overflow-hidden">
+
+    <!-- Header Tab 3 -->
+    <div class="px-5 py-4 border-b bg-gradient-to-r from-sky-50 via-white to-indigo-50">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
+        <div>
+          <h2 class="text-xl font-extrabold text-gray-900">Headcount – PPSA vs PraSPM</h2>
+          <p class="text-sm text-gray-500">Jumlah murid unik • Hadir • TH (Perbandingan 2 CSV)</p>
+        </div>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100">Headcount = murid unik</span>
+          <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Hadir: ada ≥ 1 gred A+..G</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Tab 3 -->
+    <div class="p-5 space-y-5">
+
+      <!-- KPI Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <!-- TOTAL -->
+        <div class="kpi-card px-4 py-3">
+          <div class="flex items-start justify-between">
+            <div class="w-full">
+              <div class="text-[11px] text-gray-500 uppercase tracking-wide">TOTAL (PPSA | PRASPM | BEZA)</div>
+              <div class="mt-1 text-2xl font-extrabold">
+                <span id="t3-ppsa-total">—</span>
+                <span class="text-gray-400 mx-1">|</span>
+                <span id="t3-pra-total">—</span>
+                <span class="text-gray-400 mx-1">|</span>
+                <span id="t3-diff-total" class="text-gray-700">0</span>
+              </div>
+              <div class="mt-1 text-xs text-gray-500">Murid unik dalam fail</div>
+            </div>
+            <div class="h-10 w-10 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-700">👥</div>
+          </div>
+        </div>
+
+        <!-- HADIR -->
+        <div class="kpi-card px-4 py-3">
+          <div class="flex items-start justify-between">
+            <div class="w-full">
+              <div class="text-[11px] text-gray-500 uppercase tracking-wide">HADIR (PPSA | PRASPM | BEZA)</div>
+              <div class="mt-1 text-2xl font-extrabold">
+                <span id="t3-ppsa-hadir">—</span>
+                <span class="text-gray-400 mx-1">|</span>
+                <span id="t3-pra-hadir">—</span>
+                <span class="text-gray-400 mx-1">|</span>
+                <span id="t3-diff-hadir" class="text-gray-700">0</span>
+              </div>
+              <div class="mt-1 text-xs text-gray-500">Ada sekurang-kurangnya 1 gred A+..G</div>
+            </div>
+            <div class="h-10 w-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700">✅</div>
+          </div>
+        </div>
+
+        <!-- TH -->
+        <div class="kpi-card px-4 py-3">
+          <div class="flex items-start justify-between">
+            <div class="w-full">
+              <div class="text-[11px] text-gray-500 uppercase tracking-wide">TH (PPSA | PRASPM | BEZA)</div>
+              <div class="mt-1 text-2xl font-extrabold">
+                <span id="t3-ppsa-th">—</span>
+                <span class="text-gray-400 mx-1">|</span>
+                <span id="t3-pra-th">—</span>
+                <span class="text-gray-400 mx-1">|</span>
+                <span id="t3-diff-th" class="text-gray-700">0</span>
+              </div>
+              <div class="mt-1 text-xs text-gray-500">Tidak hadir (tiada gred sah / hanya TH)</div>
+            </div>
+            <div class="h-10 w-10 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-700">⛔</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graf -->
+      <div class="soft-card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-bold text-gray-800">Graf Headcount</div>
+          <div class="text-xs text-gray-400">Bar</div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="t3-chart-headcount"></canvas>
+        </div>
+        <div class="mt-2 text-xs text-gray-500">
+          Nota: Total = bilangan murid unik. Hadir = murid yang mempunyai ≥ 1 gred A+..G (mana-mana subjek).
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
