@@ -1997,16 +1997,21 @@ window.__initTab3 = function(){
   }
 
   const gradeValueMapping = window.gradeValueMapping || {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
-  const subjectNameMap = window.subjectNameMap || {};
+// ✅ ambil mapping sebenar (guna const global jika ada)
+const SUBJECT_NAME_MAP =
+  (typeof subjectNameMap !== "undefined" && subjectNameMap)
+    ? subjectNameMap
+    : (window.subjectNameMap || {});
+
   const subjectFlagMap = window.__SUBJECT_FLAG_MAP || {};
   const subjectColumns = window.__SUBJECT_COLUMNS  || []; // kolum gred (BM G, BI G, ...)
 
   // ✅ ORDER RASMI (ambil global SUBJECT_ORDER)
   function subjectOrderIndex(code){
-    const fullName = (subjectNameMap[code] || code).toUpperCase();
-    const idx = (window.SUBJECT_ORDER || []).indexOf(fullName);
-    return idx === -1 ? 999 : idx;
-  }
+  const fullName = (SUBJECT_NAME_MAP[code] || code).toUpperCase();
+  const idx = SUBJECT_ORDER.indexOf(fullName);
+  return idx === -1 ? 999 : idx;
+}
 
   function normKP(x){ return String(x ?? "").replace(/\D/g,""); }
 
@@ -2042,8 +2047,9 @@ window.__initTab3 = function(){
     return true;
   }
   function subjectLabel(code){
-    return subjectNameMap[code] || code;
-  }
+  const full = (SUBJECT_NAME_MAP[code] || code || "").toString().trim();
+  return full.toUpperCase();
+}
 
   function findColByCodeJenis(parsed, code, jenis){
     const headers = parsed?.headers || [];
