@@ -718,14 +718,24 @@ window.__initTab2 = function () {
     return "";
   }
 
-  function getFullSubjectNameNoG(subjectCol){
-    const x = normalizeSubjectCol(subjectCol);
-    if(!x) return "";
-    const parts = x.split(" ");
-    const code  = (parts[0] || "").toUpperCase();
-    if(code === "G" && parts.length === 1) return "";
-    return (window.subjectNameMap && window.subjectNameMap[code]) ? window.subjectNameMap[code] : code;
-  }
+  // ✅ ambil subjectNameMap walaupun ia "const" (bukan window.*)
+const SUBJECT_NAME_MAP =
+  (typeof subjectNameMap !== "undefined" && subjectNameMap)
+    ? subjectNameMap
+    : (window.subjectNameMap || {});
+
+function getFullSubjectNameNoG(subjectCol){
+  const x = normalizeSubjectCol(subjectCol);
+  if(!x) return "";
+  const parts = x.split(" ");
+  const code  = (parts[0] || "").toUpperCase();
+
+  // elak option pelik "G" sahaja
+  if(code === "G" && parts.length === 1) return "";
+
+  return SUBJECT_NAME_MAP[code] || code;  // ✅ sekarang akan jadi "PENDIDIKAN ISLAM" bukan "PAI"
+}
+
 
   function isValidSubjectCol(subjectCol){
     const x = normalizeSubjectCol(subjectCol);
