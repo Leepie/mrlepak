@@ -673,69 +673,118 @@
 
       <!-- TAB 2 SCRIPT -->
       <script>
-        window.__initTab2 = function () {
-          if (window.__tab2_inited) return;
-          window.__tab2_inited = true;
+      window.__initTab2 = function () {
+  // ✅ kalau dah init, tapi data dah ada → refresh dropdown
+  if (window.__tab2_inited) {
+    if (typeof window.__tab2_refresh === "function") window.__tab2_refresh();
+    return;
+  }
+  window.__tab2_inited = true;
 
-          const GRADE_ORDER = ["A+","A","A-","B+","B","C+","C","D","E","G"];
-          const GPMP_POINT  = { "A+":0, "A":1, "A-":2, "B+":3, "B":4, "C+":5, "C":6, "D":7, "E":8, "G":9 };
+  const GRADE_ORDER = ["A+","A","A-","B+","B","C+","C","D","E","G"];
+  const GPMP_POINT  = { "A+":0, "A":1, "A-":2, "B+":3, "B":4, "C+":5, "C":6, "D":7, "E":8, "G":9 };
 
-          const META_KEYS = new Set([
-            "BIL","NAMA","NO KP","NO. KP","NO KP/IC","MYKAD","KELAS","TINGKATAN","JANTINA","KAUM",
-            "GURU KELAS","SEKOLAH","ID","MURID","NAMA MURID","NAMA_PENUH"
-          ]);
+  const META_KEYS = new Set([
+    "BIL","NAMA","NO KP","NO. KP","NO KP/IC","MYKAD","KELAS","TINGKATAN","JANTINA","KAUM",
+    "GURU KELAS","SEKOLAH","ID","MURID","NAMA MURID","NAMA_PENUH"
+  ]);
 
-          let viewStatus = "ALL";
-          let t2Chart = null;
-          let lastAgg = null;
+  let viewStatus = "ALL";
+  let t2Chart = null;
+  let lastAgg = null;
 
-          function $(id){ return document.getElementById(id); }
-          function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-          function normalizeSubjectCol(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function normalizeSubjectCol(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
 
-          function getFullSubjectNameNoG(subjectCol){
-            const x = normalizeSubjectCol(subjectCol);
-            if(!x) return "";
-            const parts = x.split(" ");
-            const code  = (parts[0] || "").toUpperCase();
-            if(code === "G" && parts.length === 1) return "";
-            return subjectNameMap[code] || code;
-          }
-          function isValidSubjectCol(subjectCol){
-            const x = normalizeSubjectCol(subjectCol);
-            if(!x) return false;
-            if(x.toUpperCase() === "G") return false;
-            if(x === "-") return false;
-            return true;
-          }
+  function getFullSubjectNameNoG(subjectCol){
+    const x = normalizeSubjectCol(subjectCol);
+    if(!x) return "";
+    const parts = x.split(" ");
+    const code  = (parts[0] || "").toUpperCase();
+    if(code === "G" && parts.length === 1) return "";
+    return subjectNameMap[code] || code;
+  }
+  function isValidSubjectCol(subjectCol){
+    const x = normalizeSubjectCol(subjectCol);
+    if(!x) return false;
+    if(x.toUpperCase() === "G") return false;
+    if(x === "-") return false;
+    return true;
+  }
 
-          function normalizeGrade(g) {
-            const x = String(g ?? "").trim().toUpperCase();
-            if (!x) return "";
-            if (x === "TH" || x === "T/H" || x === "TIDAK HADIR") return "TH";
-            if (GRADE_ORDER.includes(x)) return x;
-            return "";
-          }
+  function getRowsPPSA(){ return Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : []; }
+  function getRowsPRASPM(){ return Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : []; }
+  function getClassKey(row) { return (row["KELAS"] || row["Kelas"] || row["kelas"] || "").toString().trim(); }
 
-          function getRowsPPSA(){ return Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : []; }
-          function getRowsPRASPM(){ return Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : []; }
-          function getClassKey(row) { return (row["KELAS"] || row["Kelas"] || row["kelas"] || "").toString().trim(); }
+  function inferSubjectColumns(rows) {
+    if (!rows || !rows.length) return [];
+    const keys = Object.keys(rows[0] || {});
+    return keys.filter(k => {
+      const kk = String(k || "").trim();
+      if (!kk) return false;
+      if (META_KEYS.has(kk.toUpperCase())) return false;
+      if (/^CATATAN|ULASAN|TARIKH|MASA|NO\.|NOMBOR/i.test(kk)) return false;
+      return true;
+    });
+  }
 
-          function inferSubjectColumns(rows) {
-            if (!rows || !rows.length) return [];
-            const keys = Object.keys(rows[0] || {});
-            return keys.filter(k => {
-              const kk = String(k || "").trim();
-              if (!kk) return false;
-              if (META_KEYS.has(kk.toUpperCase())) return false;
-              if (/^CATATAN|ULASAN|TARIKH|MASA|NO\.|NOMBOR/i.test(kk)) return false;
-              return true;
-            });
-          }
+  function uniqueSorted(arr) {
+    return Array.from(new Set(arr.filter(Boolean))).sort((a,b)=>a.localeCompare(b, "ms"));
+  }
 
-          function uniqueSorted(arr) {
-            return Array.from(new Set(arr.filter(Boolean))).sort((a,b)=>a.localeCompare(b, "ms"));
-          }
+  // ✅ expose refresh untuk dipanggil bila CSV dah siap
+  function fillDropdowns() {
+    const rowsP = getRowsPPSA();
+    const rowsR = getRowsPRASPM();
+    const rowsAny = rowsP.length ? rowsP : rowsR;
+
+    const selK = $("t2-filter-kelas");
+    const selS = $("t2-filter-subjek");
+    if(!selK || !selS) return;
+
+    const prevKelas  = selK.value ?? "";
+    const prevSubjek = selS.value ?? "";
+
+    const kelas = uniqueSorted(rowsAny.map(getClassKey));
+    selK.innerHTML =
+      `<option value="">Pilih Kelas</option>` +
+      `<option value="ALL">SEMUA KELAS</option>` +
+      kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
+
+    selK.value = Array.from(selK.options).some(o => o.value === prevKelas) ? prevKelas : "";
+
+    let subjectCols = uniqueSorted(
+      (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
+        ? window.__TAB2_SUBJECT_COLS
+        : inferSubjectColumns(rowsAny)
+      ).filter(isValidSubjectCol)
+    );
+
+    selS.innerHTML =
+      `<option value="">Pilih Subjek</option>` +
+      subjectCols.map(col => {
+        const label = getFullSubjectNameNoG(col);
+        if(!label) return "";
+        return `<option value="${esc(col)}">${esc(label)}</option>`;
+      }).join("");
+
+    selS.value = Array.from(selS.options).some(o => o.value === prevSubjek) ? prevSubjek : "";
+  }
+
+  window.__tab2_refresh = function(){
+    const ready =
+      (Array.isArray(window.__CSV_PPSA_ROWS) && window.__CSV_PPSA_ROWS.length) ||
+      (Array.isArray(window.__CSV_PRASPM_ROWS) && window.__CSV_PRASPM_ROWS.length);
+    if(!ready) return;
+    fillDropdowns();
+  };
+
+  // ✅ panggil sekali masa init
+  fillDropdowns();
+
+
+          
 
           function fmtPct(x) {
             if (!isFinite(x)) return "0.0%";
