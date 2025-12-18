@@ -110,96 +110,87 @@
       height: 0;
     }
 
-    /* ===== TAB3 (Headcount) — kemas & pro ===== */
-.hc-card{
-  border:1px solid #e5e7eb;
-  border-radius:20px;
-  background:#fff;
-  box-shadow:0 1px 2px rgba(16,24,40,.06);
-}
+  /* ===========================
+   TAB 3 (Headcount Individu)
+   NIPIS + NO GRADIENT + NO ROUND
+   =========================== */
+
+/* luar table: no round, border solid */
 .hc-table-wrap{
-  border:1px solid #e5e7eb;
-  border-radius:18px;
-  overflow:hidden;
-  background:#fff;
-}
-.hc-table thead th{
-  background: linear-gradient(135deg,#4f46e5 0%, #3b82f6 100%);
-  color:#fff;
-  letter-spacing:.2px;
-}
-.hc-table tbody tr:nth-child(even){ background:#f8fafc; }
-.hc-table td, .hc-table th{ padding: 14px 16px; }
-.hc-subject{
-  font-weight:800;
-  color:#111827;
-}
-.hc-chip{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:6px 12px;
-  border-radius:9999px;
-  font-weight:800;
-  background:#eef2ff;
-  color:#1e1b4b;
-}
-.hc-chip .dot{
-  width:8px;height:8px;border-radius:9999px;background:#4f46e5;
-}
-/* ===== TAB 3 (Headcount Individu) — NIPIS + NO GRADIENT + NO ROUND ===== */
-.hc-table-wrap{
-  border:1px solid #111;     /* border luar hitam */
-  border-radius:0;           /* ❌ no round */
+  border:1px solid #111 !important;
+  border-radius:0 !important;          /* ❌ no round */
   overflow:hidden;
   background:#fff;
 }
 
+/* table rapat */
 .hc-table{
-  border-collapse:collapse;  /* rapat grid */
   width:100%;
+  border-collapse:collapse !important; /* rapat grid */
+  table-layout:fixed;
 }
 
-/* Tajuk table: solid biru (tiada gradient) */
+/* header: solid (no gradient) + nipis */
 .hc-table thead th{
-  background:#4f46e5;        /* solid */
-  color:#fff;
-  border:1px solid #111;     /* nipis */
+  background:#4f46e5 !important;       /* ✅ solid */
+  color:#fff !important;
+  border:1px solid #111 !important;
   text-align:center;
   font-weight:900;
   letter-spacing:.2px;
-  padding:6px 8px;           /* ✅ rapat */
-}
-
-.hc-th-subjek{ width:34%; text-align:left; padding-left:10px; }
-.hc-th-group{ font-size:16px; }
-.hc-th-small{ font-size:14px; }
-
-/* Sel badan: nipis + rapat */
-.hc-table td{
-  border:1px solid #111;     /* nipis */
-  padding:6px 8px;           /* ✅ rapat */
-  vertical-align:middle;
-}
-
-/* Corak selang-seli (kekal) tapi lebih lembut */
-.hc-table tbody tr:nth-child(even){ background:#eef2ff; }
-.hc-table tbody tr:nth-child(odd){ background:#fff; }
-
-/* teks subjek jangan terlalu tinggi */
-.hc-subject{
-  font-weight:900;
-  text-transform:uppercase;
+  padding:6px 8px !important;          /* ✅ nipis */
   line-height:1.15;
 }
 
-/* pastikan badge status tak tebal sangat */
+/* lebar kolum subjek (kekal kemas) */
+.hc-th-subjek{
+  width:34%;
+  text-align:left !important;
+  padding-left:10px !important;
+}
+
+/* teks group & small lebih padat */
+.hc-th-group{ font-size:15px !important; }
+.hc-th-small{ font-size:13px !important; }
+
+/* body cell: nipis + rapat */
+.hc-table td{
+  border:1px solid #111 !important;
+  padding:6px 8px !important;          /* ✅ nipis */
+  vertical-align:middle;
+  line-height:1.15;
+}
+
+/* zebra lebih kemas (macam Tab 2 vibe) */
+.hc-table tbody tr:nth-child(even){ background:#f3f4f6 !important; }
+.hc-table tbody tr:nth-child(odd){ background:#fff !important; }
+
+/* subjek: uppercase, rapat */
+.hc-subject{
+  font-weight:900;
+  text-transform:uppercase;
+  line-height:1.1;
+}
+
+/* badge status kekal pill (ok), tapi kecil & padat */
 .hc-status{
   font-weight:900;
-  font-size:11px;
-  padding:5px 10px;          /* rapat */
-  border-radius:9999px;      /* badge boleh kekal bulat */
+  font-size:11px !important;
+  padding:4px 10px !important;         /* ✅ nipis */
+  border-radius:9999px;                /* badge boleh kekal bulat */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
 }
+
+/* (optional) kalau Cikgu Airi nak BEZA pun lebih padat */
+.hc-diff{
+  font-weight:900;
+  font-size:12px;
+  white-space:nowrap;
+}
+
 
 
   </style>
