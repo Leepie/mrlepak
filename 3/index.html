@@ -135,21 +135,21 @@
                alt="XCODE Mr LePaK"
                class="h-16 w-16 object-contain rounded-full border" />
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">Analisis PPSA vs PraSPM</h1>
-            <p class="text-sm text-gray-600">Indeks GP &amp; % LMS Sekolah</p>
-            <p class="text-sm font-medium text-gray-800">SMK</p>
+            <h1 class="text-2xl font-bold text-gray-900">PPSA Vs PRASPM</h1>
+            <p class="text-sm text-gray-600">XCode Analisis</p>
+            <p class="text-sm font-medium text-gray-800">SMKDK</p>
             <div class="flex items-center space-x-2 mt-1">
               <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
-              <span class="text-xs text-gray-600">Analisis PPSA &amp; PraSPM / 2025</span>
+              <span class="text-xs text-gray-600">CSV: PPSA &amp; PRASPM</span>
             </div>
           </div>
         </div>
 
-        <!-- KPI kanan (GPS + %LMS) -->
-        <div class="flex items-center gap-8">
+        <!-- KPI kanan (GPS + %LMS) <div class="flex items-center gap-8">-->
+        <div class="flex space-x-6">
           <div class="text-center">
             <div class="flex items-center justify-center gap-2">
-              <div class="text-4xl font-extrabold text-blue-600" id="gpsValue">--</div>
+              <div class="text-3xl font-bold text-blue-600" id="gpsValue">--</div>
 
               <!-- tooltip -->
               <div class="relative group">
@@ -170,7 +170,7 @@
           </div>
 
           <div class="text-center">
-            <div class="text-4xl font-extrabold text-green-600" id="layakSijilValue">--%</div>
+            <div class="text-3xl font-bold text-green-600" id="layakSijilValue">-</div>
             <div class="text-sm text-gray-600">Peratus Layak Sijil</div>
           </div>
         </div>
@@ -399,9 +399,9 @@
               <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600">📊</span>
               Analisis Mata Pelajaran – PPSA vs PraSPM
             </h2>
-            <p class="text-sm text-gray-500 mt-1">
+          <!--  <p class="text-sm text-gray-500 mt-1">
               Perbandingan (Gred, %Lulus/%Gagal, GPMP)
-            </p>
+            </p> -->
           </div>
 
           <!-- Toggle peperiksaan (PPSA / PraSPM / BEZA) -->
@@ -421,15 +421,18 @@
         <!-- Bar pilihan -->
         <div class="mt-5 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div class="md:col-span-4">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Kelas</label>
+<!--            <label class="block text-sm font-semibold text-gray-700 mb-2">Kelas</label> -->
+            <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kelas</label>
+
             <select id="t2-filter-kelas"
               class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-200">
+              <option value="">Pilih Kelas</option>
               <option value="ALL">SEMUA KELAS</option>
             </select>
           </div>
 
           <div class="md:col-span-5">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Subjek</label>
+            <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Subjek</label>
             <select id="t2-filter-subjek"
               class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-200">
               <option value="">Pilih Subjek</option>
@@ -674,13 +677,9 @@
             return (n > 0) ? "text-rose-600 font-bold" : "text-emerald-600 font-bold";
           }
           function arrowHTML(n, mode){
-            // mode: "good" (pos good) | "bad" (pos bad)
             if (!isFinite(n) || n === 0) return "";
             const isUp = n > 0;
             const goodPos = (mode === "good");
-            // Tentukan warna ikon ikut makna
-            // good: + hijau ▲, - merah ▼
-            // bad : + merah ▲, - hijau ▼
             const cls = goodPos
               ? (isUp ? "text-emerald-600" : "text-rose-600")
               : (isUp ? "text-rose-600" : "text-emerald-600");
@@ -700,7 +699,6 @@
             return `${arrowHTML(n, mode)}${sign}${val}`;
           }
 
-          // (1) KIRA ikut kelas untuk PPSA / PRASPM (MAP)
           function computeMapByClass(rows, subjectCol, kelasFilter){
             const map = new Map();
 
@@ -723,7 +721,6 @@
               o.grades[g]++;
             });
 
-            // tambah pct + gpmp
             for (const [,v] of map){
               const lulus = v.hadir - (v.grades["G"]||0);
               const gagal = (v.grades["G"]||0);
@@ -742,7 +739,6 @@
             return map;
           }
 
-          // (2) Bentuk blok 3 baris (PPSA, PRASPM, BEZA) untuk setiap kelas
           function buildBlocks(subjectCol, kelasFilter){
             const mapP = computeMapByClass(getRowsPPSA(), subjectCol, kelasFilter);
             const mapR = computeMapByClass(getRowsPRASPM(), subjectCol, kelasFilter);
@@ -773,7 +769,6 @@
             });
           }
 
-          // ✅ (3) Agregat seluruh kelas (untuk graf + KPI)
           function computeAggregate(rows, subjectCol, kelasFilter){
             const agg = { hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])) };
 
@@ -807,12 +802,10 @@
             return agg;
           }
 
-          // ✅ KPI helper: C ke bawah (C,D,E,G) ikut hadir
           function countCDown(grades){
             return (grades["C"]||0) + (grades["D"]||0) + (grades["E"]||0) + (grades["G"]||0);
           }
 
-          // (4) Render jadual (3 baris per kelas)
           function renderTableBlocks(blocks){
             const tbody = $("t2-tbody");
             if(!blocks || !blocks.length){
@@ -839,7 +832,6 @@
               <td class="px-4 py-3 text-center text-purple-600 font-bold">${fmtNum(o.gpmp,2)}</td>
             `;
 
-            /* ✅ FIX WARNA + IKON untuk BEZA (kotak %Lulus/%Gagal/GPMP) */
             const rowDiffTail = (o) => `
               <td class="px-3 py-3 text-center ${clsPosGood(o.pctLulus)}">
                 ${fmtPctDiffWithArrow(o.pctLulus, "good")}
@@ -877,7 +869,7 @@
                 html += cell(o.hadir || 0, isDiff);
                 html += cell(o.th    || 0, isDiff);
 
-                GRADE_ORDER.forEach(g=>{
+                ["A+","A","A-","B+","B","C+","C","D","E","G"].forEach(g=>{
                   const v = (o.grades && o.grades[g]) ? o.grades[g] : 0;
                   html += cell(v, isDiff);
                 });
@@ -903,8 +895,8 @@
             const type = $("t2-chart-type")?.value || "line";
             const highlight = $("t2-highlight-cdown")?.checked ?? true;
 
-            const dataP = GRADE_ORDER.map(g => (aggP.grades[g]||0));
-            const dataR = GRADE_ORDER.map(g => (aggR.grades[g]||0));
+            const dataP = ["A+","A","A-","B+","B","C+","C","D","E","G"].map(g => (aggP.grades[g]||0));
+            const dataR = ["A+","A","A-","B+","B","C+","C","D","E","G"].map(g => (aggR.grades[g]||0));
 
             lastAgg = { aggP, aggR, kelasFilter, subjectCol };
 
@@ -926,9 +918,9 @@
             };
 
             if (highlight && type === "line") {
-              const idxHi = new Set(["C","D","E","G"].map(g => GRADE_ORDER.indexOf(g)));
-              dsP.pointRadius = GRADE_ORDER.map((_,i)=> idxHi.has(i) ? 7 : 4);
-              dsR.pointRadius = GRADE_ORDER.map((_,i)=> idxHi.has(i) ? 7 : 4);
+              const idxHi = new Set(["C","D","E","G"].map(g => ["A+","A","A-","B+","B","C+","C","D","E","G"].indexOf(g)));
+              dsP.pointRadius = ["A+","A","A-","B+","B","C+","C","D","E","G"].map((_,i)=> idxHi.has(i) ? 7 : 4);
+              dsR.pointRadius = ["A+","A","A-","B+","B","C+","C","D","E","G"].map((_,i)=> idxHi.has(i) ? 7 : 4);
             }
 
             const ctx = $("t2-chart-grade")?.getContext("2d");
@@ -938,7 +930,7 @@
 
             t2Chart = new Chart(ctx, {
               type,
-              data: { labels: GRADE_ORDER, datasets: [dsP, dsR] },
+              data: { labels: ["A+","A","A-","B+","B","C+","C","D","E","G"], datasets: [dsP, dsR] },
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -974,30 +966,49 @@
           }
 
           function fillDropdowns() {
-            const rowsP = getRowsPPSA();
-            const rowsR = getRowsPRASPM();
-            const rowsAny = rowsP.length ? rowsP : rowsR;
+  const rowsP = getRowsPPSA();
+  const rowsR = getRowsPRASPM();
+  const rowsAny = rowsP.length ? rowsP : rowsR;
 
-            const kelas = uniqueSorted(rowsAny.map(getClassKey));
-            const selK = $("t2-filter-kelas");
-            selK.innerHTML = `<option value="ALL">SEMUA KELAS</option>` + kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
+  // ✅ simpan pilihan semasa user (kalau ada)
+  const selK = $("t2-filter-kelas");
+  const prevKelas = (selK?.value ?? "");
 
-            let subjectCols = uniqueSorted(
-              (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
-                ? window.__TAB2_SUBJECT_COLS
-                : inferSubjectColumns(rowsAny)
-              ).filter(isValidSubjectCol)
-            );
+  const kelas = uniqueSorted(rowsAny.map(getClassKey));
 
-            const selS = $("t2-filter-subjek");
-            selS.innerHTML =
-              `<option value="">Pilih Subjek</option>` +
-              subjectCols.map(col => {
-                const label = getFullSubjectNameNoG(col);
-                if(!label) return "";
-                return `<option value="${esc(col)}">${esc(label)}</option>`;
-              }).join("");
-          }
+  // ✅ bina semula options, tapi kekalkan "Pilih Kelas" di atas
+  selK.innerHTML =
+    `<option value="">Pilih Kelas</option>` +
+    `<option value="ALL">SEMUA KELAS</option>` +
+    kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
+
+  // ✅ restore pilihan (kalau masih wujud), kalau tak → kekal ""
+  const canRestore = Array.from(selK.options).some(o => o.value === prevKelas);
+  selK.value = canRestore ? prevKelas : "";
+
+  // ===== Subjek (buat benda sama supaya tak reset) =====
+  const selS = $("t2-filter-subjek");
+  const prevSubjek = (selS?.value ?? "");
+
+  let subjectCols = uniqueSorted(
+    (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
+      ? window.__TAB2_SUBJECT_COLS
+      : inferSubjectColumns(rowsAny)
+    ).filter(isValidSubjectCol)
+  );
+
+  selS.innerHTML =
+    `<option value="">Pilih Subjek</option>` +
+    subjectCols.map(col => {
+      const label = getFullSubjectNameNoG(col);
+      if(!label) return "";
+      return `<option value="${esc(col)}">${esc(label)}</option>`;
+    }).join("");
+
+  const canRestoreS = Array.from(selS.options).some(o => o.value === prevSubjek);
+  selS.value = canRestoreS ? prevSubjek : "";
+}
+
 
           function jana(){
             const subjek = $("t2-filter-subjek").value;
@@ -1367,6 +1378,85 @@ function kiraGPS_Wajib(parsed){
 }
 
 /* ==========================
+   6B) KPI HEADER (BEST)
+   - GPS: subjek WAJIB (ikut flag)
+   - % Layak Sijil: kira hanya murid yang ada gred BM & SEJ sah (A+..G)
+     (TH/kosong tidak masuk denominator)
+   ========================== */
+function _isValidGradeAtoG(g){
+  const x = String(g ?? "").trim().toUpperCase();
+  return gradeValueMapping.hasOwnProperty(x); // A+..G
+}
+function kiraHeaderKPI_Parsed(parsed){
+  const gpsElHeader   = document.getElementById('gpsValue');
+  const sijilElHeader = document.getElementById('layakSijilValue');
+
+  if(!parsed){
+    if(gpsElHeader) gpsElHeader.textContent = "--";
+    if(sijilElHeader) sijilElHeader.textContent = "-";
+    return { gps:null, peratusLayak:null };
+  }
+
+  const { headerMap, subjectFlagMap, subjectColumns, rows } = parsed;
+
+  let jumlahNilai  = 0;
+  let bilGred      = 0;
+
+  let denomLayak   = 0; // murid yang ada BM & SEJ sah (A+..G)
+  let layak        = 0; // BM & SEJ ≠ G
+
+  const namaCol  = headerMap["nama"]  || "NAMA";
+  const kelasCol = headerMap["kelas"] || "KELAS";
+
+  const bmCol  = subjectColumns.find(c => (String(c).split(" ")[0] || "").toUpperCase() === "BM") || null;
+  const sejCol = subjectColumns.find(c => (String(c).split(" ")[0] || "").toUpperCase() === "SEJ") || null;
+
+  const wajibColumns = subjectColumns.filter(colName => {
+    const subjCode = (colName.split(" ")[0] || "").toUpperCase();
+    const flag = subjectFlagMap[subjCode];
+    if (flag === "0") return false;
+    return true;
+  });
+
+  rows.forEach(row => {
+    const nama  = (row[namaCol] || "").trim();
+    const kelas = (row[kelasCol] || "").trim();
+    if(!nama || /^\d+$/.test(nama)) return;
+    if(kelas==="1") return;
+
+    // GPS (subjek wajib)
+    wajibColumns.forEach(col => {
+      const g = String(row[col] || "").toUpperCase().trim();
+      if(gradeValueMapping.hasOwnProperty(g)){
+        jumlahNilai += gradeValueMapping[g];
+        bilGred++;
+      }
+    });
+
+    // % Layak Sijil (BM+SEJ gred sah sahaja)
+    if(!bmCol || !sejCol) return;
+
+    const bm  = String(row[bmCol]  || "").toUpperCase().trim();
+    const sej = String(row[sejCol] || "").toUpperCase().trim();
+
+    if(!_isValidGradeAtoG(bm) || !_isValidGradeAtoG(sej)) return; // TH/kosong dll tak dikira
+
+    denomLayak++;
+    if(bm !== "G" && sej !== "G"){
+      layak++;
+    }
+  });
+
+  const gps = bilGred ? (jumlahNilai / bilGred) : null;
+  const peratusLayak = denomLayak ? ((layak / denomLayak) * 100) : null;
+
+  if(gpsElHeader) gpsElHeader.textContent = (gps==null ? "--" : gps.toFixed(2));
+  if(sijilElHeader) sijilElHeader.textContent = (peratusLayak==null ? "-" : peratusLayak.toFixed(1) + "%");
+
+  return { gps, peratusLayak, denomLayak, layak };
+}
+
+/* ==========================
    7) PLUGIN LABEL NILAI (FIX: TAB2 BULAT SAHAJA)
    ========================== */
 const valueLabelPlugin = {
@@ -1413,6 +1503,11 @@ const CHART_LABELS = [
   ["OTI 2","AR 2"],
   ["ETR","(Sasaran)"]
 ];
+
+  /* ==========================
+   WARNA STANDARD GPS
+   ========================== */
+
 
 function buildCharts(seriesReal, seriesTarget){
   const ctxL = document.getElementById("chartGpsLine")?.getContext("2d");
@@ -1558,14 +1653,19 @@ async function loadAndRender(){
     window.__gpTOV = gpTOV;
     window.__gpAR1 = gpAR1;
 
+    // KPI card Tab1
     if(gpTOV!=null) document.getElementById("gpsPPSAValue").textContent = gpTOV.toFixed(2);
     if(gpAR1!=null) document.getElementById("gpsPraSpmValue").textContent = gpAR1.toFixed(2);
-    if(gpAR1!=null) document.getElementById("gpsValue").textContent = gpAR1.toFixed(2);
 
     if(gpTOV!=null && gpAR1!=null){
       const diff = +(gpAR1 - gpTOV).toFixed(2);
       document.getElementById("perubahanGpsValue").textContent = diff.toFixed(2);
+    } else {
+      document.getElementById("perubahanGpsValue").textContent = "--";
     }
+
+    // ✅ KPI HEADER ikut exam terkini (PraSPM): GPS + %Layak Sijil
+    kiraHeaderKPI_Parsed(praParsed);
 
     const seriesReal   = [gpTOV, gpAR1, REAL_GPS.AR2, null];
     const seriesTarget = [null, TARGET_GPS.OTI1, TARGET_GPS.OTI2, TARGET_GPS.ETR];
