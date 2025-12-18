@@ -147,41 +147,72 @@
 .hc-chip .dot{
   width:8px;height:8px;border-radius:9999px;background:#4f46e5;
 }
-/* ===== TAB3 (Headcount Individu) — table 2-level header ===== */
+/* ===== TAB3: Headcount Individu (Pattern Imej 2, header kekal 2-level) ===== */
 .hc-table-wrap{
   border:1px solid #e5e7eb;
-  border-radius:14px;
+  border-radius:18px;
   overflow:hidden;
   background:#fff;
+  box-shadow:0 10px 25px rgba(16,24,40,.08);
 }
 
-/* header biru macam imej */
+.hc-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
 .hc-table thead th{
-  background:#6f93c8;              /* biru header */
   color:#fff;
-  border:2px solid #111;           /* border hitam tebal */
   text-align:center;
   font-weight:900;
-  letter-spacing:.5px;
-  padding:10px 10px;
+  letter-spacing:.4px;
+  padding:14px 14px;
+  border-bottom:1px solid rgba(255,255,255,.25);
 }
 
-.hc-th-subjek{ width: 32%; text-align:left; padding-left:14px; }
-.hc-th-group{ font-size:18px; }
-.hc-th-small{ font-size:16px; }
+.hc-table thead tr:first-child th{
+  background: linear-gradient(135deg,#4f46e5 0%, #3b82f6 100%);
+  font-size:16px;
+}
 
-.hc-table td{
-  border:2px solid #111;           /* grid hitam */
-  padding:8px 10px;
+.hc-table thead tr:last-child th{
+  background: rgba(79,70,229,.92);
+  font-size:14px;
+}
+
+.hc-th-subjek{
+  text-align:left !important;
+  padding-left:16px !important;
+  width:34%;
+}
+
+.hc-table tbody td{
+  padding:14px 14px;
+  border-bottom:1px solid #eef2f7;
+  text-align:center;
   vertical-align:middle;
+  font-weight:700;
+  color:#111827;
 }
 
-.hc-table tbody tr:nth-child(even){ background:#d9ecf7; } /* biru cair selang-seli */
-.hc-table tbody tr:nth-child(odd){ background:#fff; }
+.hc-table tbody tr:nth-child(even){
+  background:#f3f4f6;
+}
 
-.hc-subject{ font-weight:900; text-transform:uppercase; }
+.hc-table tbody tr:hover{
+  background:#eef2ff;
+}
 
-/* beza label */
+.hc-subject{
+  text-align:left !important;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.2px;
+  color:#111827;
+}
+
+/* beza (point) */
 .hc-diff{
   font-weight:900;
   white-space:nowrap;
@@ -190,20 +221,21 @@
 .hc-diff.bad{  color:#dc2626; }  /* merah */
 .hc-diff.same{ color:#374151; }  /* kelabu */
 
-/* status kecil */
+/* status pill */
 .hc-status{
   font-weight:900;
   font-size:12px;
   display:inline-flex;
   align-items:center;
   gap:6px;
-  padding:6px 10px;
+  padding:8px 12px;
   border-radius:9999px;
 }
 .hc-status.good{ background:#dcfce7; color:#166534; }
 .hc-status.bad{  background:#fee2e2; color:#991b1b; }
 .hc-status.same{ background:#e5e7eb; color:#374151; }
 .hc-status.none{ background:#f3f4f6; color:#6b7280; }
+
 
   </style>
 
@@ -2066,7 +2098,7 @@ window.__initTab3 = function(){
   }
 
   // ✅ BEZA: PraSPM - PPSA (NEGATIF = lebih baik)
-  function bezaBadge(diff){
+/*  function bezaBadge(diff){
     if(diff == null) {
       return { cls:"hc-diff same", text:"—", statusCls:"hc-status none", statusText:"Tiada Data" };
     }
@@ -2088,7 +2120,7 @@ window.__initTab3 = function(){
       statusText:"▼ Menurun"
     };
   }
-
+*/
   function buildKelasOptions(){
     const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : (PPAR.rows||[]);
     const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : (RPAR.rows||[]);
@@ -2148,84 +2180,122 @@ window.__initTab3 = function(){
     return rows.find(r => getKelas(r) === kelasDipilih && getNama(r).toUpperCase() === String(raw||"").toUpperCase()) || null;
   }
 
-  function renderMurid(rowP, rowR){
-    const base = rowR || rowP;
-    if(!base){
-      elInfo.classList.add("hidden");
-      elBody.innerHTML = `
-        <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">
-          Murid tidak ditemui. Cuba pilih semula Nama Murid.
-        </td></tr>`;
-      return;
-    }
+  function subjectLabel(code){
+  // paksa full name
+  const full = (subjectNameMap[code] || code || "").toString().trim();
+  return full.toUpperCase();
+}
 
-    elInfo.classList.remove("hidden");
-    elNama.textContent = getNama(base) || "—";
-    elKP.textContent   = getKP(base)   || "—";
-    elKls.textContent  = getKelas(base)|| "—";
-
-    const kelasDipilih = getKelas(base);
-
-    let activeCodes = classActiveSubjectCodes(kelasDipilih);
-
-    // ✅ SORT ikut order rasmi cikgu
-    activeCodes.sort((a, b) => subjectOrderIndex(a) - subjectOrderIndex(b));
-
-    if(!activeCodes.length){
-      elBody.innerHTML = `
-        <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">
-          Tiada subjek yang mempunyai data untuk kelas ini.
-        </td></tr>`;
-      return;
-    }
-
-    let html = "";
-
-    activeCodes.forEach(code=>{
-      // kolum markah/gred untuk PPSA & PraSPM
-      const colPM = findColByCodeJenis(PPAR, code, "M");
-      const colPG = findColByCodeJenis(PPAR, code, "G");
-      const colRM = findColByCodeJenis(RPAR, code, "M");
-      const colRG = findColByCodeJenis(RPAR, code, "G");
-
-      const mP = rowP && colPM ? String(rowP[colPM] ?? "").trim() : "";
-      const gP = rowP && colPG ? normGrade(rowP[colPG]) : "";
-
-      const mR = rowR && colRM ? String(rowR[colRM] ?? "").trim() : "";
-      const gR = rowR && colRG ? normGrade(rowR[colRG]) : "";
-
-      const pP = gradePoint(gP);
-      const pR = gradePoint(gR);
-      const diff = (pP != null && pR != null) ? (pR - pP) : null;
-
-      const markP = mP ? esc(mP) : "—";
-      const markR = mR ? esc(mR) : "—";
-      const gredP = gP ? esc(gP) : "—";
-      const gredR = gR ? esc(gR) : "—";
-
-      const bb = bezaBadge(diff);
-
-      html += `
-        <tr>
-          <td class="hc-subject">${esc(subjectLabel(code))}</td>
-
-          <td class="text-center font-bold">${markP}</td>
-          <td class="text-center font-extrabold">${gredP}</td>
-
-          <td class="text-center font-bold">${markR}</td>
-          <td class="text-center font-extrabold">${gredR}</td>
-
-          <td class="text-center ${bb.cls}">${bb.text}</td>
-          <td class="text-center"><span class="${bb.statusCls}">${bb.statusText}</span></td>
-        </tr>
-      `;
-    });
-
-    elBody.innerHTML = html || `
-      <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">
-        Tiada data subjek untuk murid ini.
-      </td></tr>`;
+function bezaBadge(diff){
+  // diff = (point PraSPM - point PPSA)
+  if(diff == null){
+    return { diffCls:"hc-diff same", diffHTML:"—", statusCls:"hc-status none", statusHTML:"Tiada Data" };
   }
+  if(diff === 0){
+    return { diffCls:"hc-diff same", diffHTML:"0", statusCls:"hc-status same", statusHTML:"Kekal" };
+  }
+
+  // NEGATIF = lebih baik (gred semakin baik)
+  if(diff < 0){
+    return {
+      diffCls:"hc-diff good",
+      diffHTML:`▲ ${diff} <span class="text-[11px] font-extrabold">(lebih baik)</span>`,
+      statusCls:"hc-status good",
+      statusHTML:"▲ Meningkat"
+    };
+  }
+
+  // POSITIF = lebih lemah
+  return {
+    diffCls:"hc-diff bad",
+    diffHTML:`▼ +${diff} <span class="text-[11px] font-extrabold">(lebih lemah)</span>`,
+    statusCls:"hc-status bad",
+    statusHTML:"▼ Menurun"
+  };
+}
+
+function renderMurid(rowP, rowR){
+  const base = rowR || rowP;
+  if(!base){
+    elInfo.classList.add("hidden");
+    elBody.innerHTML = `
+      <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">
+        Murid tidak ditemui. Cuba pilih semula Nama Murid.
+      </td></tr>`;
+    return;
+  }
+
+  elInfo.classList.remove("hidden");
+  elNama.textContent = getNama(base) || "—";
+  elKP.textContent   = getKP(base)   || "—";
+  elKls.textContent  = getKelas(base)|| "—";
+
+  const kelasDipilih = getKelas(base);
+
+  // ambil subjek yang ada data untuk kelas ini (PPSA atau PraSPM)
+  let activeCodes = classActiveSubjectCodes(kelasDipilih);
+
+  // sort ikut SUBJECT_ORDER (order rasmi)
+  activeCodes.sort((a,b)=>subjectOrderIndex(a)-subjectOrderIndex(b));
+
+  if(!activeCodes.length){
+    elBody.innerHTML = `
+      <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">
+        Tiada subjek yang mempunyai data untuk kelas ini.
+      </td></tr>`;
+    return;
+  }
+
+  let html = "";
+
+  activeCodes.forEach(code=>{
+    const colPM = findColByCodeJenis(PPAR, code, "M");
+    const colPG = findColByCodeJenis(PPAR, code, "G");
+    const colRM = findColByCodeJenis(RPAR, code, "M");
+    const colRG = findColByCodeJenis(RPAR, code, "G");
+
+    const mP = (rowP && colPM) ? String(rowP[colPM] ?? "").trim() : "";
+    const gP = (rowP && colPG) ? normGrade(rowP[colPG]) : "";
+
+    const mR = (rowR && colRM) ? String(rowR[colRM] ?? "").trim() : "";
+    const gR = (rowR && colRG) ? normGrade(rowR[colRG]) : "";
+
+    const pP = gradePoint(gP);
+    const pR = gradePoint(gR);
+
+    const diff = (pP != null && pR != null) ? (pR - pP) : null;
+
+    const markP = mP ? esc(mP) : "—";
+    const markR = mR ? esc(mR) : "—";
+    const gredP = gP ? esc(gP) : "—";
+    const gredR = gR ? esc(gR) : "—";
+
+    const bb = bezaBadge(diff);
+
+    html += `
+      <tr>
+        <td class="hc-subject">${esc(subjectLabel(code))}</td>
+
+        <td class="text-center">${markP}</td>
+        <td class="text-center font-extrabold">${gredP}</td>
+
+        <td class="text-center">${markR}</td>
+        <td class="text-center font-extrabold">${gredR}</td>
+
+        <td class="text-center ${bb.diffCls}">${bb.diffHTML}</td>
+        <td class="text-center">
+          <span class="${bb.statusCls}">${bb.statusHTML}</span>
+        </td>
+      </tr>
+    `;
+  });
+
+  elBody.innerHTML = html || `
+    <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">
+      Tiada data subjek untuk murid ini.
+    </td></tr>`;
+}
+
 
   function cari(){
     const kelasDipilih = elKelas.value;
