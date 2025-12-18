@@ -147,94 +147,59 @@
 .hc-chip .dot{
   width:8px;height:8px;border-radius:9999px;background:#4f46e5;
 }
-/* ===== TAB3: Headcount Individu (Pattern Imej 2, header kekal 2-level) ===== */
+/* ===== TAB 3 (Headcount Individu) — NIPIS + NO GRADIENT + NO ROUND ===== */
 .hc-table-wrap{
-  border:1px solid #e5e7eb;
-  border-radius:18px;
+  border:1px solid #111;     /* border luar hitam */
+  border-radius:0;           /* ❌ no round */
   overflow:hidden;
   background:#fff;
-  box-shadow:0 10px 25px rgba(16,24,40,.08);
 }
 
 .hc-table{
+  border-collapse:collapse;  /* rapat grid */
   width:100%;
-  border-collapse:separate;
-  border-spacing:0;
 }
 
+/* Tajuk table: solid biru (tiada gradient) */
 .hc-table thead th{
+  background:#4f46e5;        /* solid */
   color:#fff;
+  border:1px solid #111;     /* nipis */
   text-align:center;
   font-weight:900;
-  letter-spacing:.4px;
-  padding:14px 14px;
-  border-bottom:1px solid rgba(255,255,255,.25);
+  letter-spacing:.2px;
+  padding:6px 8px;           /* ✅ rapat */
 }
 
-.hc-table thead tr:first-child th{
-  background: linear-gradient(135deg,#4f46e5 0%, #3b82f6 100%);
-  font-size:16px;
-}
+.hc-th-subjek{ width:34%; text-align:left; padding-left:10px; }
+.hc-th-group{ font-size:16px; }
+.hc-th-small{ font-size:14px; }
 
-.hc-table thead tr:last-child th{
-  background: rgba(79,70,229,.92);
-  font-size:14px;
-}
-
-.hc-th-subjek{
-  text-align:left !important;
-  padding-left:16px !important;
-  width:34%;
-}
-
-.hc-table tbody td{
-  padding:14px 14px;
-  border-bottom:1px solid #eef2f7;
-  text-align:center;
+/* Sel badan: nipis + rapat */
+.hc-table td{
+  border:1px solid #111;     /* nipis */
+  padding:6px 8px;           /* ✅ rapat */
   vertical-align:middle;
-  font-weight:700;
-  color:#111827;
 }
 
-.hc-table tbody tr:nth-child(even){
-  background:#f3f4f6;
-}
+/* Corak selang-seli (kekal) tapi lebih lembut */
+.hc-table tbody tr:nth-child(even){ background:#eef2ff; }
+.hc-table tbody tr:nth-child(odd){ background:#fff; }
 
-.hc-table tbody tr:hover{
-  background:#eef2ff;
-}
-
+/* teks subjek jangan terlalu tinggi */
 .hc-subject{
-  text-align:left !important;
   font-weight:900;
   text-transform:uppercase;
-  letter-spacing:.2px;
-  color:#111827;
+  line-height:1.15;
 }
 
-/* beza (point) */
-.hc-diff{
-  font-weight:900;
-  white-space:nowrap;
-}
-.hc-diff.good{ color:#16a34a; }  /* hijau */
-.hc-diff.bad{  color:#dc2626; }  /* merah */
-.hc-diff.same{ color:#374151; }  /* kelabu */
-
-/* status pill */
+/* pastikan badge status tak tebal sangat */
 .hc-status{
   font-weight:900;
-  font-size:12px;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:8px 12px;
-  border-radius:9999px;
+  font-size:11px;
+  padding:5px 10px;          /* rapat */
+  border-radius:9999px;      /* badge boleh kekal bulat */
 }
-.hc-status.good{ background:#dcfce7; color:#166534; }
-.hc-status.bad{  background:#fee2e2; color:#991b1b; }
-.hc-status.same{ background:#e5e7eb; color:#374151; }
-.hc-status.none{ background:#f3f4f6; color:#6b7280; }
 
 
   </style>
