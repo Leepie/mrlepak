@@ -194,11 +194,16 @@
         <div class="tab-sub">PPSA vs PraSPM</div>
       </button>
 
-      <button onclick="switchTab('subjek-teras')" id="tab-subjek-teras" class="card-hover p-4">
-        <div class="tab-emoji mb-1">📚</div>
-        <div class="tab-title">GP Subjek Teras</div>
-        <div class="tab-sub">Subjek utama</div>
-      </button>
+      <!-- ===========================
+     TAMBAHAN TAB BUTTON (MENU)
+     =========================== -->
+<!-- LETAK DI DALAM .analysis-tabs grid -->
+<button onclick="switchTab('headcount-individu')" id="tab-headcount-individu" class="card-hover p-4">
+  <div class="tab-emoji mb-1">👤</div>
+  <div class="tab-title">Headcount Individu</div>
+  <div class="tab-sub">PPSA vs PraSPM</div>
+</button>
+
 
       <button onclick="switchTab('mp-kritikal')" id="tab-mp-kritikal" class="card-hover p-4">
         <div class="tab-emoji mb-1">⚠️</div>
@@ -1086,12 +1091,105 @@
     </section>
 
     <!-- TAB 3 -->
-    <section id="panel-subjek-teras" class="hidden" hidden>
-      <div class="soft-card p-4">
-        <h2 class="text-lg font-bold"> GP Subjek Teras – PPSA vs PraSPM</h2>
-        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
+    <!-- ===========================
+     TAB 3: HEADCOUNT INDIVIDU
+     =========================== -->
+<section id="panel-headcount-individu" class="hidden" hidden>
+
+  <div class="soft-card p-5 space-y-4">
+
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <h2 class="text-xl font-extrabold text-gray-900">Headcount Murid (Individu)</h2>
+        <p class="text-sm text-gray-500">
+          Perbandingan markah subjek wajib PPSA vs PraSPM
+        </p>
       </div>
-    </section>
+    </div>
+
+    <!-- BAR CARIAN -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+      <input id="hc-search-nama"
+        type="text"
+        placeholder="Cari Nama Murid"
+        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
+
+      <input id="hc-search-kp"
+        type="text"
+        placeholder="Cari NO KP"
+        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
+
+      <select id="hc-filter-kelas"
+        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+        <option value="">Semua Kelas</option>
+      </select>
+
+      <button id="hc-btn-cari"
+        class="rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition">
+        Cari Murid
+      </button>
+    </div>
+
+    <!-- INFO MURID -->
+    <div id="hc-murid-info"
+      class="hidden rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+      <b id="hc-nama">Nama Murid</b><br>
+      NO KP: <span id="hc-kp"></span> |
+      Kelas: <span id="hc-kelas"></span>
+    </div>
+
+    <!-- JADUAL SUBJEK -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm border">
+        <thead class="bg-indigo-600 text-white">
+          <tr>
+            <th class="px-4 py-3 text-left">Subjek</th>
+            <th class="px-4 py-3 text-center">PPSA</th>
+            <th class="px-4 py-3 text-center">PraSPM</th>
+            <th class="px-4 py-3 text-center">Beza</th>
+            <th class="px-4 py-3 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody id="hc-table-body">
+          <tr>
+            <td colspan="5" class="px-4 py-6 text-center text-gray-500">
+              Sila cari murid untuk paparan headcount.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+<!-- ===========================
+     TAMBAHAN SWITCH TAB
+     =========================== -->
+<script>
+const _oldSwitchTab = switchTab;
+switchTab = function(tabName){
+  const panels = ["gp-sekolah","lms-sekolah","headcount-individu","subjek-teras","mp-kritikal"];
+
+  panels.forEach(name=>{
+    const panel = document.getElementById("panel-"+name);
+    const btn   = document.getElementById("tab-"+name);
+
+    if(panel){
+      const active = (name === tabName);
+      panel.hidden = !active;
+      panel.classList.toggle("hidden", !active);
+    }
+    if(btn){
+      btn.classList.toggle("tab-active", name === tabName);
+    }
+  });
+
+  try{ localStorage.setItem("xcode_ppsa_praspm_active_tab_v1", tabName); }catch(e){}
+}
+</script>
+
 
     <!-- TAB 4 -->
     <section id="panel-mp-kritikal" class="hidden" hidden>
