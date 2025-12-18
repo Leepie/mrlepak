@@ -672,13 +672,26 @@
       </script>
 
       <!-- TAB 2 SCRIPT -->
-      <script>
-      window.__initTab2 = function () {
-  // ✅ kalau dah init, tapi data dah ada → refresh dropdown
+     <script>
+window.__initTab2 = function () {
+
+  // ✅ Kalau CSV belum siap, jangan lock init
+  const ready =
+    (Array.isArray(window.__CSV_PPSA_ROWS) && window.__CSV_PPSA_ROWS.length) ||
+    (Array.isArray(window.__CSV_PRASPM_ROWS) && window.__CSV_PRASPM_ROWS.length);
+
   if (window.__tab2_inited) {
-    if (typeof window.__tab2_refresh === "function") window.__tab2_refresh();
+    // dah init → refresh dropdown bila data dah ada
+    if (ready && typeof window.__tab2_refresh === "function") window.__tab2_refresh();
     return;
   }
+
+  if (!ready) {
+    const st = document.getElementById("t2-status");
+    if (st) st.innerHTML = `<span class="text-gray-500">Memuat data CSV…</span>`;
+    return;
+  }
+
   window.__tab2_inited = true;
 
   const GRADE_ORDER = ["A+","A","A-","B+","B","C+","C","D","E","G"];
@@ -697,14 +710,23 @@
   function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   function normalizeSubjectCol(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
 
+  // ✅ INI YANG HILANG (punca Tab 2 crash)
+  function normalizeGrade(g){
+    const x = String(g ?? "").trim().toUpperCase();
+    if (GPMP_POINT.hasOwnProperty(x)) return x;                 // A+..G
+    if (x === "TH" || x === "T/H" || x === "TIDAK HADIR") return "TH";
+    return "";
+  }
+
   function getFullSubjectNameNoG(subjectCol){
     const x = normalizeSubjectCol(subjectCol);
     if(!x) return "";
     const parts = x.split(" ");
     const code  = (parts[0] || "").toUpperCase();
     if(code === "G" && parts.length === 1) return "";
-    return subjectNameMap[code] || code;
+    return (window.subjectNameMap && window.subjectNameMap[code]) ? window.subjectNameMap[code] : code;
   }
+
   function isValidSubjectCol(subjectCol){
     const x = normalizeSubjectCol(subjectCol);
     if(!x) return false;
@@ -733,7 +755,6 @@
     return Array.from(new Set(arr.filter(Boolean))).sort((a,b)=>a.localeCompare(b, "ms"));
   }
 
-  // ✅ expose refresh untuk dipanggil bila CSV dah siap
   function fillDropdowns() {
     const rowsP = getRowsPPSA();
     const rowsR = getRowsPRASPM();
@@ -751,7 +772,6 @@
       `<option value="">Pilih Kelas</option>` +
       `<option value="ALL">SEMUA KELAS</option>` +
       kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
-
     selK.value = Array.from(selK.options).some(o => o.value === prevKelas) ? prevKelas : "";
 
     let subjectCols = uniqueSorted(
@@ -768,468 +788,308 @@
         if(!label) return "";
         return `<option value="${esc(col)}">${esc(label)}</option>`;
       }).join("");
-
     selS.value = Array.from(selS.options).some(o => o.value === prevSubjek) ? prevSubjek : "";
   }
 
+  // expose refresh
   window.__tab2_refresh = function(){
-    const ready =
+    const ok =
       (Array.isArray(window.__CSV_PPSA_ROWS) && window.__CSV_PPSA_ROWS.length) ||
       (Array.isArray(window.__CSV_PRASPM_ROWS) && window.__CSV_PRASPM_ROWS.length);
-    if(!ready) return;
+    if(!ok) return;
     fillDropdowns();
   };
 
-  // ✅ panggil sekali masa init
+  function fmtPct(x) { if (!isFinite(x)) return "0.0%"; return (Math.round(x * 10) / 10).toFixed(1) + "%"; }
+  function fmtNum(x, dp=2) { if (!isFinite(x)) return "-"; return (Math.round(x * Math.pow(10,dp)) / Math.pow(10,dp)).toFixed(dp); }
+
+  function clsDiff(n){ if (!isFinite(n) || n === 0) return "text-gray-700"; return (n > 0) ? "text-green-600 font-bold" : "text-red-600 font-bold"; }
+  function fmtDiff(n){ if (!isFinite(n)) return "-"; const s = (n > 0) ? "+" : ""; return s + n; }
+
+  function clsPosGood(n){ if (!isFinite(n) || n === 0) return "text-gray-700"; return (n > 0) ? "text-emerald-600 font-bold" : "text-rose-600 font-bold"; }
+  function clsPosBad(n){ if (!isFinite(n) || n === 0) return "text-gray-700"; return (n > 0) ? "text-rose-600 font-bold" : "text-emerald-600 font-bold"; }
+
+  function arrowHTML(n, mode){
+    if (!isFinite(n) || n === 0) return "";
+    const isUp = n > 0;
+    const goodPos = (mode === "good");
+    const cls = goodPos ? (isUp ? "text-emerald-600" : "text-rose-600") : (isUp ? "text-rose-600" : "text-emerald-600");
+    const sym = isUp ? "▲" : "▼";
+    return `<span class="inline-block mr-1 ${cls} font-extrabold" aria-hidden="true">${sym}</span>`;
+  }
+  function fmtPctDiffWithArrow(n, mode){
+    if (!isFinite(n)) return "-";
+    const sign = (n > 0) ? "+" : "";
+    const val  = (Math.round(n*10)/10).toFixed(1) + "%";
+    return `${arrowHTML(n, mode)}${sign}${val}`;
+  }
+  function fmtGpmpDiffWithArrow(n, mode){
+    if (!isFinite(n)) return "-";
+    const sign = (n > 0) ? "+" : "";
+    const val  = (Math.round(n*100)/100).toFixed(2);
+    return `${arrowHTML(n, mode)}${sign}${val}`;
+  }
+
+  function computeMapByClass(rows, subjectCol, kelasFilter){
+    const map = new Map();
+    rows.forEach(r=>{
+      const kelas = getClassKey(r);
+      if (!kelas) return;
+      if (kelasFilter && kelasFilter !== "ALL" && kelas !== kelasFilter) return;
+
+      const g = normalizeGrade(r[subjectCol]);
+      if (!map.has(kelas)){
+        map.set(kelas, { kelas, hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(x=>[x,0])) });
+      }
+      const o = map.get(kelas);
+      if (!g) return;
+      if (g === "TH"){ o.th++; return; }
+      if (!GRADE_ORDER.includes(g)) return;
+      o.hadir++;
+      o.grades[g]++;
+    });
+
+    for (const [,v] of map){
+      const lulus = v.hadir - (v.grades["G"]||0);
+      const gagal = (v.grades["G"]||0);
+      v.pctLulus = v.hadir ? (lulus/v.hadir)*100 : 0;
+      v.pctGagal = v.hadir ? (gagal/v.hadir)*100 : 0;
+
+      let jumlahPoint=0, jumlahKira=0;
+      GRADE_ORDER.forEach(gr=>{
+        const c=v.grades[gr]||0;
+        if(c){ jumlahPoint += GPMP_POINT[gr]*c; jumlahKira += c; }
+      });
+      v.gpmp = jumlahKira ? (jumlahPoint/jumlahKira) : NaN;
+    }
+    return map;
+  }
+
+  function buildBlocks(subjectCol, kelasFilter){
+    const mapP = computeMapByClass(getRowsPPSA(), subjectCol, kelasFilter);
+    const mapR = computeMapByClass(getRowsPRASPM(), subjectCol, kelasFilter);
+
+    const allClasses = uniqueSorted([...mapP.keys(), ...mapR.keys()]).filter(kelas => {
+      const P = mapP.get(kelas);
+      const R = mapR.get(kelas);
+      const adaPPSA   = P && P.hadir > 0;
+      const adaPRASPM = R && R.hadir > 0;
+      return adaPPSA || adaPRASPM;
+    });
+
+    return allClasses.map(kelas=>{
+      const P = mapP.get(kelas) || { kelas, hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])), pctLulus:0, pctGagal:0, gpmp:NaN };
+      const R = mapR.get(kelas) || { kelas, hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])), pctLulus:0, pctGagal:0, gpmp:NaN };
+      const B = {
+        kelas,
+        hadir: (R.hadir||0) - (P.hadir||0),
+        th:    (R.th||0)    - (P.th||0),
+        grades: Object.fromEntries(GRADE_ORDER.map(g=>[g, (R.grades[g]||0) - (P.grades[g]||0)])),
+        pctLulus: (R.pctLulus||0) - (P.pctLulus||0),
+        pctGagal: (R.pctGagal||0) - (P.pctGagal||0),
+        gpmp: (R.gpmp ?? NaN) - (P.gpmp ?? NaN)
+      };
+      return { kelas, P, R, B };
+    });
+  }
+
+  function computeAggregate(rows, subjectCol, kelasFilter){
+    const agg = { hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])) };
+    rows.forEach(r=>{
+      const kelas = getClassKey(r);
+      if (!kelas) return;
+      if (kelasFilter && kelasFilter !== "ALL" && kelas !== kelasFilter) return;
+
+      const g = normalizeGrade(r[subjectCol]);
+      if (!g) return;
+      if (g === "TH"){ agg.th++; return; }
+      if (!GRADE_ORDER.includes(g)) return;
+      agg.hadir++;
+      agg.grades[g]++;
+    });
+
+    const lulus = agg.hadir - (agg.grades["G"]||0);
+    const gagal = (agg.grades["G"]||0);
+    agg.pctLulus = agg.hadir ? (lulus/agg.hadir)*100 : 0;
+    agg.pctGagal = agg.hadir ? (gagal/agg.hadir)*100 : 0;
+
+    let jumlahPoint=0, jumlahKira=0;
+    GRADE_ORDER.forEach(gr=>{
+      const c=agg.grades[gr]||0;
+      if(c){ jumlahPoint += GPMP_POINT[gr]*c; jumlahKira += c; }
+    });
+    agg.gpmp = jumlahKira ? (jumlahPoint/jumlahKira) : NaN;
+    return agg;
+  }
+
+  function countCDown(grades){
+    return (grades["C"]||0) + (grades["D"]||0) + (grades["E"]||0) + (grades["G"]||0);
+  }
+
+  function renderTableBlocks(blocks){
+    const tbody = $("t2-tbody");
+    if(!blocks || !blocks.length){
+      tbody.innerHTML = `<tr><td colspan="17" class="px-4 py-6 text-center text-gray-500">Tiada data untuk dipaparkan.</td></tr>`;
+      return;
+    }
+
+    let html = "";
+    const cell = (v, isDiff=false) => {
+      const val = isDiff ? fmtDiff(v) : (v ?? 0);
+      const cls = isDiff ? clsDiff(v) : "";
+      return `<td class="px-3 py-3 text-center ${cls}">${val}</td>`;
+    };
+
+    const rowNormalTail = (o) => `
+      <td class="px-3 py-3 text-center text-green-600 font-bold">${fmtPct(o.pctLulus)}</td>
+      <td class="px-3 py-3 text-center text-red-600 font-bold">${fmtPct(o.pctGagal)}</td>
+      <td class="px-4 py-3 text-center text-purple-600 font-bold">${fmtNum(o.gpmp,2)}</td>
+    `;
+
+    const rowDiffTail = (o) => `
+      <td class="px-3 py-3 text-center ${clsPosGood(o.pctLulus)}">${fmtPctDiffWithArrow(o.pctLulus, "good")}</td>
+      <td class="px-3 py-3 text-center ${clsPosBad(o.pctGagal)}">${fmtPctDiffWithArrow(o.pctGagal, "bad")}</td>
+      <td class="px-4 py-3 text-center ${clsPosBad(o.gpmp)}">${fmtGpmpDiffWithArrow(o.gpmp, "bad")}</td>
+    `;
+
+    blocks.forEach((blk, idx)=>{
+      const zebra = (idx % 2 === 1) ? "bg-gray-50/60" : "bg-white";
+      const topFrame    = "border-t-[6px] border-indigo-200";
+      const bottomFrame = "border-b-[6px] border-indigo-200";
+
+      const addRow = (status, o, isFirstRow, isLastRow, isDiff) => {
+        const frameTop = isFirstRow ? topFrame : "";
+        const frameBot = isLastRow  ? bottomFrame : "";
+        const isHL  = (viewStatus !== "ALL" && status === viewStatus);
+        const isDim = (viewStatus !== "ALL" && status !== viewStatus);
+
+        html += `<tr class="${zebra} border-b ${frameTop} ${frameBot} ${isHL ? "t2-row-highlight" : ""} ${isDim ? "t2-row-dim" : ""}">`;
+        html += `<td class="px-4 py-3 text-center font-extrabold text-gray-800 align-middle">${status}</td>`;
+
+        if(isFirstRow){
+          html += `<td class="px-4 py-3 font-extrabold text-gray-800 text-center align-middle" rowspan="3">${esc(blk.kelas)}</td>`;
+        }
+
+        html += cell(o.hadir || 0, isDiff);
+        html += cell(o.th    || 0, isDiff);
+
+        ["A+","A","A-","B+","B","C+","C","D","E","G"].forEach(g=>{
+          const v = (o.grades && o.grades[g]) ? o.grades[g] : 0;
+          html += cell(v, isDiff);
+        });
+
+        html += isDiff ? rowDiffTail(o) : rowNormalTail(o);
+        html += `</tr>`;
+      };
+
+      addRow("PPSA",   blk.P, true,  false, false);
+      addRow("PRASPM", blk.R, false, false, false);
+      addRow("BEZA",   blk.B, false, true,  true);
+
+      const kelasFilter = $("t2-filter-kelas")?.value || "ALL";
+      if (kelasFilter === "ALL") html += `<tr><td colspan="17" class="h-3 bg-transparent"></td></tr>`;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  function buildOrUpdateChart(aggP, aggR, kelasFilter, subjectCol){
+    const type = $("t2-chart-type")?.value || "line";
+
+    const dataP = GRADE_ORDER.map(g => (aggP.grades[g]||0));
+    const dataR = GRADE_ORDER.map(g => (aggR.grades[g]||0));
+    lastAgg = { aggP, aggR, kelasFilter, subjectCol };
+
+    const ctx = $("t2-chart-grade")?.getContext("2d");
+    if(!ctx) return;
+
+    if (t2Chart) t2Chart.destroy();
+
+    t2Chart = new Chart(ctx, {
+      type,
+      data: { labels: GRADE_ORDER, datasets: [
+        { label:"PPSA",   data:dataP, tension:0.3, borderWidth:2, pointRadius:5, pointHoverRadius:6 },
+        { label:"PRASPM", data:dataR, tension:0.3, borderWidth:2, pointRadius:5, pointHoverRadius:6 }
+      ]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:"bottom" } },
+        scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } }
+      }
+    });
+
+    const kelasTxt = (kelasFilter === "ALL") ? "SEMUA KELAS" : kelasFilter;
+    $("t2-chart-note").innerHTML =
+      `Subjek: <b>${esc(getFullSubjectNameNoG(subjectCol))}</b> • Kelas: <b>${esc(kelasTxt)}</b> • (Graf ikut bilangan murid hadir)`;
+  }
+
+  function jana(){
+    const subjek = $("t2-filter-subjek").value;
+    const kelas  = $("t2-filter-kelas").value;
+
+    if(!subjek){
+      $("t2-status").innerHTML = `<span class="text-red-600 font-semibold">Sila pilih Subjek.</span>`;
+      renderTableBlocks([]);
+      if (t2Chart) { t2Chart.destroy(); t2Chart = null; }
+      ["t2-kpi-gpmp-ppsa","t2-kpi-gpmp-praspm","t2-kpi-gpmp-beza","t2-kpi-cdown"].forEach(id=>{
+        const el=$(id); if(el) el.textContent="—";
+      });
+      $("t2-chart-note").innerHTML = "";
+      return;
+    }
+
+    const blocks = buildBlocks(subjek, kelas);
+    renderTableBlocks(blocks);
+
+    $("t2-status").innerHTML =
+      `Paparan: • Subjek: <b>${esc(getFullSubjectNameNoG(subjek))}</b> • Kelas: <b>${kelas==="ALL"?"SEMUA":esc(kelas)}</b>`;
+
+    const aggP = computeAggregate(getRowsPPSA(), subjek, kelas);
+    const aggR = computeAggregate(getRowsPRASPM(), subjek, kelas);
+
+    $("t2-kpi-gpmp-ppsa").textContent   = fmtNum(aggP.gpmp, 2);
+    $("t2-kpi-gpmp-praspm").textContent = fmtNum(aggR.gpmp, 2);
+
+    const beza = (isFinite(aggR.gpmp) && isFinite(aggP.gpmp)) ? +(aggR.gpmp - aggP.gpmp).toFixed(2) : NaN;
+    const elBeza = $("t2-kpi-gpmp-beza");
+    elBeza.textContent = isFinite(beza) ? beza.toFixed(2) : "—";
+    elBeza.classList.remove("text-emerald-600","text-rose-600");
+    if (isFinite(beza)) elBeza.classList.add(beza <= 0 ? "text-emerald-600" : "text-rose-600");
+
+    const cP = countCDown(aggP.grades);
+    const cR = countCDown(aggR.grades);
+    const cDiff = cR - cP;
+    const elC = $("t2-kpi-cdown");
+    elC.textContent = (isFinite(cDiff) ? ((cDiff>0?"+":"") + cDiff) : "—");
+    elC.classList.remove("text-rose-600","text-emerald-600");
+    if (isFinite(cDiff)) elC.classList.add(cDiff <= 0 ? "text-emerald-600" : "text-rose-600");
+
+    buildOrUpdateChart(aggP, aggR, kelas, subjek);
+  }
+
+  // init listeners
+  document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const next = btn.dataset.exam;
+      viewStatus = (viewStatus === next) ? "ALL" : next;
+      document.querySelectorAll(".t2-exam-btn").forEach(b=>b.classList.toggle("active", b.dataset.exam===viewStatus));
+      if($("t2-filter-subjek").value) jana();
+    });
+  });
+
+  $("t2-btn-jana").addEventListener("click", jana);
+
+  $("t2-chart-type").addEventListener("change", ()=>{
+    if(!lastAgg) return;
+    buildOrUpdateChart(lastAgg.aggP, lastAgg.aggR, lastAgg.kelasFilter, lastAgg.subjectCol);
+  });
+
+  // mula
   fillDropdowns();
+  $("t2-status").innerHTML = `Pilih Subjek dan klik <b>Jana Analisis</b>`;
+};
+</script>
 
-
-          
-
-          function fmtPct(x) {
-            if (!isFinite(x)) return "0.0%";
-            return (Math.round(x * 10) / 10).toFixed(1) + "%";
-          }
-          function fmtNum(x, dp=2) {
-            if (!isFinite(x)) return "-";
-            return (Math.round(x * Math.pow(10,dp)) / Math.pow(10,dp)).toFixed(dp);
-          }
-
-          /* ===========================
-             WARNA BEZA (UMUM)
-             =========================== */
-          function clsDiff(n){
-            if (!isFinite(n) || n === 0) return "text-gray-700";
-            return (n > 0) ? "text-green-600 font-bold" : "text-red-600 font-bold";
-          }
-          function fmtDiff(n){
-            if (!isFinite(n)) return "-";
-            const s = (n > 0) ? "+" : "";
-            return s + n;
-          }
-
-          /* ===========================
-             WARNA BEZA (KHAS METRIK)
-             %Lulus: + baik
-             %Gagal: + buruk
-             GPMP  : + buruk (lebih tinggi = lebih teruk)
-             + Tambah ikon ▲/▼
-             =========================== */
-          function clsPosGood(n){
-            if (!isFinite(n) || n === 0) return "text-gray-700";
-            return (n > 0) ? "text-emerald-600 font-bold" : "text-rose-600 font-bold";
-          }
-          function clsPosBad(n){
-            if (!isFinite(n) || n === 0) return "text-gray-700";
-            return (n > 0) ? "text-rose-600 font-bold" : "text-emerald-600 font-bold";
-          }
-          function arrowHTML(n, mode){
-            if (!isFinite(n) || n === 0) return "";
-            const isUp = n > 0;
-            const goodPos = (mode === "good");
-            const cls = goodPos
-              ? (isUp ? "text-emerald-600" : "text-rose-600")
-              : (isUp ? "text-rose-600" : "text-emerald-600");
-            const sym = isUp ? "▲" : "▼";
-            return `<span class="inline-block mr-1 ${cls} font-extrabold" aria-hidden="true">${sym}</span>`;
-          }
-          function fmtPctDiffWithArrow(n, mode){
-            if (!isFinite(n)) return "-";
-            const sign = (n > 0) ? "+" : "";
-            const val  = (Math.round(n*10)/10).toFixed(1) + "%";
-            return `${arrowHTML(n, mode)}${sign}${val}`;
-          }
-          function fmtGpmpDiffWithArrow(n, mode){
-            if (!isFinite(n)) return "-";
-            const sign = (n > 0) ? "+" : "";
-            const val  = (Math.round(n*100)/100).toFixed(2);
-            return `${arrowHTML(n, mode)}${sign}${val}`;
-          }
-
-          function computeMapByClass(rows, subjectCol, kelasFilter){
-            const map = new Map();
-
-            rows.forEach(r=>{
-              const kelas = getClassKey(r);
-              if (!kelas) return;
-              if (kelasFilter && kelasFilter !== "ALL" && kelas !== kelasFilter) return;
-
-              const g = normalizeGrade(r[subjectCol]);
-              if (!map.has(kelas)){
-                map.set(kelas, { kelas, hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(x=>[x,0])) });
-              }
-              const o = map.get(kelas);
-
-              if (!g) return;
-              if (g === "TH"){ o.th++; return; }
-              if (!GRADE_ORDER.includes(g)) return;
-
-              o.hadir++;
-              o.grades[g]++;
-            });
-
-            for (const [,v] of map){
-              const lulus = v.hadir - (v.grades["G"]||0);
-              const gagal = (v.grades["G"]||0);
-
-              v.pctLulus = v.hadir ? (lulus/v.hadir)*100 : 0;
-              v.pctGagal = v.hadir ? (gagal/v.hadir)*100 : 0;
-
-              let jumlahPoint=0, jumlahKira=0;
-              GRADE_ORDER.forEach(gr=>{
-                const c=v.grades[gr]||0;
-                if(c){ jumlahPoint += GPMP_POINT[gr]*c; jumlahKira += c; }
-              });
-              v.gpmp = jumlahKira ? (jumlahPoint/jumlahKira) : NaN;
-            }
-
-            return map;
-          }
-
-          function buildBlocks(subjectCol, kelasFilter){
-            const mapP = computeMapByClass(getRowsPPSA(), subjectCol, kelasFilter);
-            const mapR = computeMapByClass(getRowsPRASPM(), subjectCol, kelasFilter);
-
-            const allClasses = uniqueSorted([...mapP.keys(), ...mapR.keys()]).filter(kelas => {
-              const P = mapP.get(kelas);
-              const R = mapR.get(kelas);
-              const adaPPSA   = P && P.hadir > 0;
-              const adaPRASPM = R && R.hadir > 0;
-              return adaPPSA || adaPRASPM;
-            });
-
-            return allClasses.map(kelas=>{
-              const P = mapP.get(kelas) || { kelas, hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])), pctLulus:0, pctGagal:0, gpmp:NaN };
-              const R = mapR.get(kelas) || { kelas, hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])), pctLulus:0, pctGagal:0, gpmp:NaN };
-
-              const B = {
-                kelas,
-                hadir: (R.hadir||0) - (P.hadir||0),
-                th:    (R.th||0)    - (P.th||0),
-                grades: Object.fromEntries(GRADE_ORDER.map(g=>[g, (R.grades[g]||0) - (P.grades[g]||0)])),
-                pctLulus: (R.pctLulus||0) - (P.pctLulus||0),
-                pctGagal: (R.pctGagal||0) - (P.pctGagal||0),
-                gpmp: (R.gpmp ?? NaN) - (P.gpmp ?? NaN)
-              };
-
-              return { kelas, P, R, B };
-            });
-          }
-
-          function computeAggregate(rows, subjectCol, kelasFilter){
-            const agg = { hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])) };
-
-            rows.forEach(r=>{
-              const kelas = getClassKey(r);
-              if (!kelas) return;
-              if (kelasFilter && kelasFilter !== "ALL" && kelas !== kelasFilter) return;
-
-              const g = normalizeGrade(r[subjectCol]);
-              if (!g) return;
-              if (g === "TH"){ agg.th++; return; }
-              if (!GRADE_ORDER.includes(g)) return;
-
-              agg.hadir++;
-              agg.grades[g]++;
-            });
-
-            const lulus = agg.hadir - (agg.grades["G"]||0);
-            const gagal = (agg.grades["G"]||0);
-
-            agg.pctLulus = agg.hadir ? (lulus/agg.hadir)*100 : 0;
-            agg.pctGagal = agg.hadir ? (gagal/agg.hadir)*100 : 0;
-
-            let jumlahPoint=0, jumlahKira=0;
-            GRADE_ORDER.forEach(gr=>{
-              const c=agg.grades[gr]||0;
-              if(c){ jumlahPoint += GPMP_POINT[gr]*c; jumlahKira += c; }
-            });
-            agg.gpmp = jumlahKira ? (jumlahPoint/jumlahKira) : NaN;
-
-            return agg;
-          }
-
-          function countCDown(grades){
-            return (grades["C"]||0) + (grades["D"]||0) + (grades["E"]||0) + (grades["G"]||0);
-          }
-
-          function renderTableBlocks(blocks){
-            const tbody = $("t2-tbody");
-            if(!blocks || !blocks.length){
-              tbody.innerHTML = `
-                <tr>
-                  <td colspan="17" class="px-4 py-6 text-center text-gray-500">
-                    Tiada data untuk dipaparkan.
-                  </td>
-                </tr>`;
-              return;
-            }
-
-            let html = "";
-
-            const cell = (v, isDiff=false) => {
-              const val = isDiff ? fmtDiff(v) : (v ?? 0);
-              const cls = isDiff ? clsDiff(v) : "";
-              return `<td class="px-3 py-3 text-center ${cls}">${val}</td>`;
-            };
-
-            const rowNormalTail = (o) => `
-              <td class="px-3 py-3 text-center text-green-600 font-bold">${fmtPct(o.pctLulus)}</td>
-              <td class="px-3 py-3 text-center text-red-600 font-bold">${fmtPct(o.pctGagal)}</td>
-              <td class="px-4 py-3 text-center text-purple-600 font-bold">${fmtNum(o.gpmp,2)}</td>
-            `;
-
-            const rowDiffTail = (o) => `
-              <td class="px-3 py-3 text-center ${clsPosGood(o.pctLulus)}">
-                ${fmtPctDiffWithArrow(o.pctLulus, "good")}
-              </td>
-              <td class="px-3 py-3 text-center ${clsPosBad(o.pctGagal)}">
-                ${fmtPctDiffWithArrow(o.pctGagal, "bad")}
-              </td>
-              <td class="px-4 py-3 text-center ${clsPosBad(o.gpmp)}">
-                ${fmtGpmpDiffWithArrow(o.gpmp, "bad")}
-              </td>
-            `;
-
-            blocks.forEach((blk, idx)=>{
-              const zebra = (idx % 2 === 1) ? "bg-gray-50/60" : "bg-white";
-              const topFrame    = "border-t-[6px] border-indigo-200";
-              const bottomFrame = "border-b-[6px] border-indigo-200";
-
-              const addRow = (status, o, isFirstRow, isLastRow, isDiff) => {
-                const frameTop = isFirstRow ? topFrame : "";
-                const frameBot = isLastRow  ? bottomFrame : "";
-
-                const isHL  = (viewStatus !== "ALL" && status === viewStatus);
-                const isDim = (viewStatus !== "ALL" && status !== viewStatus);
-
-                html += `<tr class="${zebra} border-b ${frameTop} ${frameBot} ${isHL ? "t2-row-highlight" : ""} ${isDim ? "t2-row-dim" : ""}">`;
-
-                html += `<td class="px-4 py-3 text-center font-extrabold text-gray-800 align-middle">${status}</td>`;
-
-                if(isFirstRow){
-                  html += `<td class="px-4 py-3 font-extrabold text-gray-800 text-center align-middle" rowspan="3">
-                    ${esc(blk.kelas)}
-                  </td>`;
-                }
-
-                html += cell(o.hadir || 0, isDiff);
-                html += cell(o.th    || 0, isDiff);
-
-                ["A+","A","A-","B+","B","C+","C","D","E","G"].forEach(g=>{
-                  const v = (o.grades && o.grades[g]) ? o.grades[g] : 0;
-                  html += cell(v, isDiff);
-                });
-
-                html += isDiff ? rowDiffTail(o) : rowNormalTail(o);
-                html += `</tr>`;
-              };
-
-              addRow("PPSA",   blk.P, true,  false, false);
-              addRow("PRASPM", blk.R, false, false, false);
-              addRow("BEZA",   blk.B, false, true,  true);
-
-              const kelasFilter = $("t2-filter-kelas")?.value || "ALL";
-              if (kelasFilter === "ALL") {
-                html += `<tr><td colspan="17" class="h-3 bg-transparent"></td></tr>`;
-              }
-            });
-
-            tbody.innerHTML = html;
-          }
-
-          function buildOrUpdateChart(aggP, aggR, kelasFilter, subjectCol){
-            const type = $("t2-chart-type")?.value || "line";
-            const highlight = $("t2-highlight-cdown")?.checked ?? true;
-
-            const dataP = ["A+","A","A-","B+","B","C+","C","D","E","G"].map(g => (aggP.grades[g]||0));
-            const dataR = ["A+","A","A-","B+","B","C+","C","D","E","G"].map(g => (aggR.grades[g]||0));
-
-            lastAgg = { aggP, aggR, kelasFilter, subjectCol };
-
-            const dsP = {
-              label: "PPSA",
-              data: dataP,
-              tension: 0.3,
-              borderWidth: 2,
-              pointRadius: 5,
-              pointHoverRadius: 6
-            };
-            const dsR = {
-              label: "PRASPM",
-              data: dataR,
-              tension: 0.3,
-              borderWidth: 2,
-              pointRadius: 5,
-              pointHoverRadius: 6
-            };
-
-            if (highlight && type === "line") {
-              const idxHi = new Set(["C","D","E","G"].map(g => ["A+","A","A-","B+","B","C+","C","D","E","G"].indexOf(g)));
-              dsP.pointRadius = ["A+","A","A-","B+","B","C+","C","D","E","G"].map((_,i)=> idxHi.has(i) ? 7 : 4);
-              dsR.pointRadius = ["A+","A","A-","B+","B","C+","C","D","E","G"].map((_,i)=> idxHi.has(i) ? 7 : 4);
-            }
-
-            const ctx = $("t2-chart-grade")?.getContext("2d");
-            if(!ctx) return;
-
-            if (t2Chart) t2Chart.destroy();
-
-            t2Chart = new Chart(ctx, {
-              type,
-              data: { labels: ["A+","A","A-","B+","B","C+","C","D","E","G"], datasets: [dsP, dsR] },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { position: "bottom" },
-                  title: { display: true, text: "Perbandingan Gred Pelajar PPSA dan PraSPM" },
-                  tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${Math.round(c.parsed.y)}` } }
-                },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-              }
-            });
-
-            const kelasTxt = (kelasFilter === "ALL") ? "SEMUA KELAS" : kelasFilter;
-            $("t2-chart-note").innerHTML =
-              `Subjek: <b>${esc(getFullSubjectNameNoG(subjectCol))}</b> • Kelas: <b>${esc(kelasTxt)}</b> • (Graf ikut bilangan murid hadir)`;
-          }
-
-          function exportChartPNG(){
-            if(!t2Chart) return alert("Graf belum dijana.");
-            const a = document.createElement("a");
-            const subjek = $("t2-filter-subjek")?.value || "SUBJEK";
-            const kelas  = $("t2-filter-kelas")?.value || "ALL";
-            a.download = `graf_gred_${subjek.replace(/\s+/g,'_')}_${kelas}.png`;
-            a.href = t2Chart.toBase64Image();
-            a.click();
-          }
-
-          function setExamButtons(){
-            document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
-              const isActive = btn.dataset.exam === viewStatus;
-              btn.classList.toggle("active", isActive);
-            });
-          }
-
-          function fillDropdowns() {
-  const rowsP = getRowsPPSA();
-  const rowsR = getRowsPRASPM();
-  const rowsAny = rowsP.length ? rowsP : rowsR;
-
-  // ✅ simpan pilihan semasa user (kalau ada)
-  const selK = $("t2-filter-kelas");
-  const prevKelas = (selK?.value ?? "");
-
-  const kelas = uniqueSorted(rowsAny.map(getClassKey));
-
-  // ✅ bina semula options, tapi kekalkan "Pilih Kelas" di atas
-  selK.innerHTML =
-    `<option value="">Pilih Kelas</option>` +
-    `<option value="ALL">SEMUA KELAS</option>` +
-    kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
-
-  // ✅ restore pilihan (kalau masih wujud), kalau tak → kekal ""
-  const canRestore = Array.from(selK.options).some(o => o.value === prevKelas);
-  selK.value = canRestore ? prevKelas : "";
-
-  // ===== Subjek (buat benda sama supaya tak reset) =====
-  const selS = $("t2-filter-subjek");
-  const prevSubjek = (selS?.value ?? "");
-
-  let subjectCols = uniqueSorted(
-    (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
-      ? window.__TAB2_SUBJECT_COLS
-      : inferSubjectColumns(rowsAny)
-    ).filter(isValidSubjectCol)
-  );
-
-  selS.innerHTML =
-    `<option value="">Pilih Subjek</option>` +
-    subjectCols.map(col => {
-      const label = getFullSubjectNameNoG(col);
-      if(!label) return "";
-      return `<option value="${esc(col)}">${esc(label)}</option>`;
-    }).join("");
-
-  const canRestoreS = Array.from(selS.options).some(o => o.value === prevSubjek);
-  selS.value = canRestoreS ? prevSubjek : "";
-}
-
-
-          function jana(){
-            const subjek = $("t2-filter-subjek").value;
-            const kelas  = $("t2-filter-kelas").value;
-
-            if(!subjek){
-              $("t2-status").innerHTML = `<span class="text-red-600 font-semibold">Sila pilih Subjek.</span>`;
-              renderTableBlocks([]);
-              if (t2Chart) { t2Chart.destroy(); t2Chart = null; }
-              ["t2-kpi-gpmp-ppsa","t2-kpi-gpmp-praspm","t2-kpi-gpmp-beza","t2-kpi-cdown"].forEach(id=>{
-                const el=$(id); if(el) el.textContent="—";
-              });
-              $("t2-chart-note").innerHTML = "";
-              return;
-            }
-
-            const blocks = buildBlocks(subjek, kelas);
-            renderTableBlocks(blocks);
-
-            $("t2-status").innerHTML =
-              `Paparan:
-               • Subjek: <b>${esc(getFullSubjectNameNoG(subjek))}</b>
-               • Kelas: <b>${kelas==="ALL"?"SEMUA":esc(kelas)}</b>`;
-
-            const aggP = computeAggregate(getRowsPPSA(), subjek, kelas);
-            const aggR = computeAggregate(getRowsPRASPM(), subjek, kelas);
-
-            $("t2-kpi-gpmp-ppsa").textContent   = fmtNum(aggP.gpmp, 2);
-            $("t2-kpi-gpmp-praspm").textContent = fmtNum(aggR.gpmp, 2);
-
-            const beza = (isFinite(aggR.gpmp) && isFinite(aggP.gpmp)) ? +(aggR.gpmp - aggP.gpmp).toFixed(2) : NaN;
-            const elBeza = $("t2-kpi-gpmp-beza");
-            elBeza.textContent = isFinite(beza) ? beza.toFixed(2) : "—";
-            elBeza.classList.remove("text-emerald-600","text-rose-600");
-            if (isFinite(beza)) elBeza.classList.add(beza <= 0 ? "text-emerald-600" : "text-rose-600");
-
-            const cP = countCDown(aggP.grades);
-            const cR = countCDown(aggR.grades);
-            const cDiff = cR - cP;
-            const elC = $("t2-kpi-cdown");
-            elC.textContent = (isFinite(cDiff) ? ((cDiff>0?"+":"") + cDiff) : "—");
-            elC.classList.remove("text-rose-600","text-emerald-600");
-            if (isFinite(cDiff)) elC.classList.add(cDiff <= 0 ? "text-emerald-600" : "text-rose-600");
-
-            buildOrUpdateChart(aggP, aggR, kelas, subjek);
-          }
-
-          document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
-            btn.addEventListener("click", ()=>{
-              const next = btn.dataset.exam;
-              viewStatus = (viewStatus === next) ? "ALL" : next;
-              setExamButtons();
-              if($("t2-filter-subjek").value) jana();
-            });
-          });
-
-          $("t2-btn-jana").addEventListener("click", jana);
-
-          $("t2-chart-type").addEventListener("change", ()=>{
-            if(!lastAgg) return;
-            buildOrUpdateChart(lastAgg.aggP, lastAgg.aggR, lastAgg.kelasFilter, lastAgg.subjectCol);
-          });
-          $("t2-highlight-cdown").addEventListener("change", ()=>{
-            if(!lastAgg) return;
-            buildOrUpdateChart(lastAgg.aggP, lastAgg.aggR, lastAgg.kelasFilter, lastAgg.subjectCol);
-          });
-
-          $("t2-btn-export").addEventListener("click", exportChartPNG);
-
-          setExamButtons();
-          fillDropdowns();
-          $("t2-status").innerHTML = `Pilih Subjek dan klik <b>Jana Analisis</b>`;
-        };
-      </script>
     </section>
 
     <!-- TAB 3 -->
