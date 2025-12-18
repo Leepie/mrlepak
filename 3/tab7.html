@@ -145,7 +145,7 @@
           </div>
         </div>
 
-        <!-- KPI kanan -->
+        <!-- KPI kanan (GPS + %LMS) <div class="flex items-center gap-8">-->
         <div class="flex space-x-6">
           <div class="text-center">
             <div class="flex items-center justify-center gap-2">
@@ -181,8 +181,7 @@
 
   <!-- =================== MENU TAB =================== -->
   <div class="analysis-tabs max-w-[1200px] mx-auto px-4 pt-6 pb-4">
-    <!-- ✅ tukar md:grid-cols-4 -> md:grid-cols-5 sebab tambah Tab 3 -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <button onclick="switchTab('gp-sekolah')" id="tab-gp-sekolah" class="tab-active card-hover p-4">
         <div class="tab-emoji mb-1">📊</div>
         <div class="tab-title">GP Sekolah</div>
@@ -195,18 +194,16 @@
         <div class="tab-sub">PPSA vs PraSPM</div>
       </button>
 
-      <!-- ✅ TAB 3 HEADCOUNT -->
-      <button onclick="switchTab('headcount-individu')" id="tab-headcount-individu" class="card-hover p-4">
-        <div class="tab-emoji mb-1">👤</div>
-        <div class="tab-title">Headcount Individu</div>
-        <div class="tab-sub">PPSA vs PraSPM</div>
-      </button>
+      <!-- ===========================
+     TAMBAHAN TAB BUTTON (MENU)
+     =========================== -->
+<!-- LETAK DI DALAM .analysis-tabs grid -->
+<button onclick="switchTab('headcount-individu')" id="tab-headcount-individu" class="card-hover p-4">
+  <div class="tab-emoji mb-1">👤</div>
+  <div class="tab-title">Headcount Individu</div>
+  <div class="tab-sub">PPSA vs PraSPM</div>
+</button>
 
-      <button onclick="switchTab('subjek-teras')" id="tab-subjek-teras" class="card-hover p-4">
-        <div class="tab-emoji mb-1">📚</div>
-        <div class="tab-title">GP Subjek Teras</div>
-        <div class="tab-sub">Subjek utama</div>
-      </button>
 
       <button onclick="switchTab('mp-kritikal')" id="tab-mp-kritikal" class="card-hover p-4">
         <div class="tab-emoji mb-1">⚠️</div>
@@ -407,6 +404,9 @@
               <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600">📊</span>
               Analisis Mata Pelajaran – PPSA vs PraSPM
             </h2>
+          <!--  <p class="text-sm text-gray-500 mt-1">
+              Perbandingan (Gred, %Lulus/%Gagal, GPMP)
+            </p> -->
           </div>
 
           <!-- Toggle peperiksaan (PPSA / PraSPM / BEZA) -->
@@ -426,6 +426,7 @@
         <!-- Bar pilihan -->
         <div class="mt-5 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div class="md:col-span-4">
+<!--            <label class="block text-sm font-semibold text-gray-700 mb-2">Kelas</label> -->
             <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kelas</label>
 
             <select id="t2-filter-kelas"
@@ -577,7 +578,7 @@
           ?.classList.add("hidden");
       </script>
 
-      <!-- TAB 2 SCRIPT (kekal asal Cikgu) -->
+      <!-- TAB 2 SCRIPT -->
       <script>
         window.__initTab2 = function () {
           if (window.__tab2_inited) return;
@@ -652,6 +653,9 @@
             return (Math.round(x * Math.pow(10,dp)) / Math.pow(10,dp)).toFixed(dp);
           }
 
+          /* ===========================
+             WARNA BEZA (UMUM)
+             =========================== */
           function clsDiff(n){
             if (!isFinite(n) || n === 0) return "text-gray-700";
             return (n > 0) ? "text-green-600 font-bold" : "text-red-600 font-bold";
@@ -662,6 +666,13 @@
             return s + n;
           }
 
+          /* ===========================
+             WARNA BEZA (KHAS METRIK)
+             %Lulus: + baik
+             %Gagal: + buruk
+             GPMP  : + buruk (lebih tinggi = lebih teruk)
+             + Tambah ikon ▲/▼
+             =========================== */
           function clsPosGood(n){
             if (!isFinite(n) || n === 0) return "text-gray-700";
             return (n > 0) ? "text-emerald-600 font-bold" : "text-rose-600 font-bold";
@@ -942,6 +953,16 @@
               `Subjek: <b>${esc(getFullSubjectNameNoG(subjectCol))}</b> • Kelas: <b>${esc(kelasTxt)}</b> • (Graf ikut bilangan murid hadir)`;
           }
 
+          function exportChartPNG(){
+            if(!t2Chart) return alert("Graf belum dijana.");
+            const a = document.createElement("a");
+            const subjek = $("t2-filter-subjek")?.value || "SUBJEK";
+            const kelas  = $("t2-filter-kelas")?.value || "ALL";
+            a.download = `graf_gred_${subjek.replace(/\s+/g,'_')}_${kelas}.png`;
+            a.href = t2Chart.toBase64Image();
+            a.click();
+          }
+
           function setExamButtons(){
             document.querySelectorAll(".t2-exam-btn").forEach(btn=>{
               const isActive = btn.dataset.exam === viewStatus;
@@ -950,43 +971,49 @@
           }
 
           function fillDropdowns() {
-            const rowsP = getRowsPPSA();
-            const rowsR = getRowsPRASPM();
-            const rowsAny = rowsP.length ? rowsP : rowsR;
+  const rowsP = getRowsPPSA();
+  const rowsR = getRowsPRASPM();
+  const rowsAny = rowsP.length ? rowsP : rowsR;
 
-            const selK = $("t2-filter-kelas");
-            const prevKelas = (selK?.value ?? "");
-            const kelas = uniqueSorted(rowsAny.map(getClassKey));
+  // ✅ simpan pilihan semasa user (kalau ada)
+  const selK = $("t2-filter-kelas");
+  const prevKelas = (selK?.value ?? "");
 
-            selK.innerHTML =
-              `<option value="">Pilih Kelas</option>` +
-              `<option value="ALL">SEMUA KELAS</option>` +
-              kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
+  const kelas = uniqueSorted(rowsAny.map(getClassKey));
 
-            const canRestore = Array.from(selK.options).some(o => o.value === prevKelas);
-            selK.value = canRestore ? prevKelas : "";
+  // ✅ bina semula options, tapi kekalkan "Pilih Kelas" di atas
+  selK.innerHTML =
+    `<option value="">Pilih Kelas</option>` +
+    `<option value="ALL">SEMUA KELAS</option>` +
+    kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
 
-            const selS = $("t2-filter-subjek");
-            const prevSubjek = (selS?.value ?? "");
+  // ✅ restore pilihan (kalau masih wujud), kalau tak → kekal ""
+  const canRestore = Array.from(selK.options).some(o => o.value === prevKelas);
+  selK.value = canRestore ? prevKelas : "";
 
-            let subjectCols = uniqueSorted(
-              (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
-                ? window.__TAB2_SUBJECT_COLS
-                : inferSubjectColumns(rowsAny)
-              ).filter(isValidSubjectCol)
-            );
+  // ===== Subjek (buat benda sama supaya tak reset) =====
+  const selS = $("t2-filter-subjek");
+  const prevSubjek = (selS?.value ?? "");
 
-            selS.innerHTML =
-              `<option value="">Pilih Subjek</option>` +
-              subjectCols.map(col => {
-                const label = getFullSubjectNameNoG(col);
-                if(!label) return "";
-                return `<option value="${esc(col)}">${esc(label)}</option>`;
-              }).join("");
+  let subjectCols = uniqueSorted(
+    (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
+      ? window.__TAB2_SUBJECT_COLS
+      : inferSubjectColumns(rowsAny)
+    ).filter(isValidSubjectCol)
+  );
 
-            const canRestoreS = Array.from(selS.options).some(o => o.value === prevSubjek);
-            selS.value = canRestoreS ? prevSubjek : "";
-          }
+  selS.innerHTML =
+    `<option value="">Pilih Subjek</option>` +
+    subjectCols.map(col => {
+      const label = getFullSubjectNameNoG(col);
+      if(!label) return "";
+      return `<option value="${esc(col)}">${esc(label)}</option>`;
+    }).join("");
+
+  const canRestoreS = Array.from(selS.options).some(o => o.value === prevSubjek);
+  selS.value = canRestoreS ? prevSubjek : "";
+}
+
 
           function jana(){
             const subjek = $("t2-filter-subjek").value;
@@ -1044,6 +1071,7 @@
           });
 
           $("t2-btn-jana").addEventListener("click", jana);
+
           $("t2-chart-type").addEventListener("change", ()=>{
             if(!lastAgg) return;
             buildOrUpdateChart(lastAgg.aggP, lastAgg.aggR, lastAgg.kelasFilter, lastAgg.subjectCol);
@@ -1053,267 +1081,115 @@
             buildOrUpdateChart(lastAgg.aggP, lastAgg.aggR, lastAgg.kelasFilter, lastAgg.subjectCol);
           });
 
+          $("t2-btn-export").addEventListener("click", exportChartPNG);
+
           setExamButtons();
           fillDropdowns();
           $("t2-status").innerHTML = `Pilih Subjek dan klik <b>Jana Analisis</b>`;
         };
-
-        /* =========================================================
-   TAB 3: HEADCOUNT (TOTAL / HADIR / TH) — PPSA vs PRASPM
-   ========================================================= */
-
-let t3Chart = null;
-
-// util: escape (kalau perlu)
-function _t3_isValidGradeAtoG(g){
-  const x = String(g ?? "").trim().toUpperCase();
-  return gradeValueMapping.hasOwnProperty(x); // A+..G
-}
-
-function _t3_getNameKey(row){
-  // guna NAMA dulu, kalau tiada cuba NO KP; fallback gabung
-  const nama = (row["NAMA"] || row["Nama"] || row["nama"] || "").toString().trim();
-  const kp   = (row["NO KP"] || row["NO. KP"] || row["NO KP/IC"] || row["MYKAD"] || row["No KP"] || row["no kp"] || "").toString().trim();
-  // key: kalau ada KP, KP paling kuat; kalau tidak, guna nama
-  const base = kp || nama;
-  return base ? base.toUpperCase() : "";
-}
-
-function _t3_inferSubjectColumnsFromRows(rows){
-  // guna logik ringkas: ambil semua kolum yang nampak macam subjek (bukan meta)
-  if(!rows || !rows.length) return [];
-
-  const META = new Set([
-    "BIL","NAMA","NO KP","NO. KP","NO KP/IC","MYKAD","KELAS","TINGKATAN","JANTINA","KAUM",
-    "GURU KELAS","SEKOLAH","ID","MURID","NAMA MURID","NAMA_PENUH"
-  ]);
-
-  const keys = Object.keys(rows[0] || {});
-  return keys.filter(k=>{
-    const kk = String(k||"").trim();
-    if(!kk) return false;
-    if(META.has(kk.toUpperCase())) return false;
-    if (/^CATATAN|ULASAN|TARIKH|MASA|NO\.|NOMBOR/i.test(kk)) return false;
-    // elak kolum umum
-    const U = kk.toUpperCase();
-    if (U.includes("KESELURUHAN") || U.includes("PURATA") || U.includes("GPMP")) return false;
-    return true;
-  });
-}
-
-function kiraHeadcount(rows){
-  // Definisi:
-  // TOTAL = bil murid unik (ikut key NAMA/KP)
-  // HADIR = murid yang ada sekurang-kurangnya 1 gred sah A+..G dalam mana-mana subjek
-  // TH    = TOTAL - HADIR (murid yang tiada gred sah; biasanya kosong/TH semua)
-  if(!Array.isArray(rows) || !rows.length){
-    return { total: 0, hadir: 0, th: 0 };
-  }
-
-  // guna subjectColumns yang Tab2 dah siap infer jika ada
-  const subjectCols =
-    (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length)
-      ? window.__TAB2_SUBJECT_COLS
-      : _t3_inferSubjectColumnsFromRows(rows);
-
-  const seen = new Map(); // key -> { hadir:boolean }
-
-  rows.forEach(r=>{
-    const key = _t3_getNameKey(r);
-    if(!key) return;
-
-    if(!seen.has(key)) seen.set(key, { hadir:false });
-
-    // check hadir: ada mana-mana gred A+..G
-    if(!seen.get(key).hadir){
-      for(const col of subjectCols){
-        const g = (r[col] ?? "").toString().trim().toUpperCase();
-        if(_t3_isValidGradeAtoG(g)){
-          seen.get(key).hadir = true;
-          break;
-        }
-      }
-    }
-  });
-
-  const total = seen.size;
-  let hadir = 0;
-  for(const [,v] of seen) if(v.hadir) hadir++;
-  const th = total - hadir;
-
-  return { total, hadir, th };
-}
-
-function _t3_setText(id, v){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.textContent = (v == null ? "—" : String(v));
-}
-
-function _t3_setDiff(id, diff, goodMode){
-  // goodMode:
-  // - untuk TOTAL/HADIR: naik = baik (good)
-  // - untuk TH: naik = buruk (bad)
-  const el = document.getElementById(id);
-  if(!el) return;
-
-  const n = Number(diff);
-  const sign = (n > 0) ? "+" : "";
-  el.textContent = isFinite(n) ? (sign + n) : "0";
-
-  el.classList.remove("text-gray-700","text-emerald-600","text-rose-600","font-bold");
-
-  if(!isFinite(n) || n === 0){
-    el.classList.add("text-gray-700");
-    return;
-  }
-
-  // goodMode = "good" => + hijau, - merah
-  // goodMode = "bad"  => + merah, - hijau
-  if(goodMode === "bad"){
-    el.classList.add(n > 0 ? "text-rose-600" : "text-emerald-600", "font-bold");
-  }else{
-    el.classList.add(n > 0 ? "text-emerald-600" : "text-rose-600", "font-bold");
-  }
-}
-
-function renderTab3Headcount(){
-  const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : [];
-  const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : [];
-
-  const P = kiraHeadcount(rowsP);
-  const R = kiraHeadcount(rowsR);
-
-  // KPI
-  _t3_setText("t3-ppsa-total", P.total);
-  _t3_setText("t3-pra-total",  R.total);
-  _t3_setDiff("t3-diff-total", (R.total - P.total), "good");
-
-  _t3_setText("t3-ppsa-hadir", P.hadir);
-  _t3_setText("t3-pra-hadir",  R.hadir);
-  _t3_setDiff("t3-diff-hadir", (R.hadir - P.hadir), "good");
-
-  _t3_setText("t3-ppsa-th", P.th);
-  _t3_setText("t3-pra-th",  R.th);
-  _t3_setDiff("t3-diff-th", (R.th - P.th), "bad");
-
-  // graf
-  const ctx = document.getElementById("t3-chart-headcount")?.getContext("2d");
-  if(!ctx) return;
-
-  if(t3Chart) t3Chart.destroy();
-
-  t3Chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["TOTAL", "HADIR", "TH"],
-      datasets: [
-        { label: "PPSA",   data: [P.total, P.hadir, P.th] },
-        { label: "PRASPM", data: [R.total, R.hadir, R.th] }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: "bottom" },
-        valueLabelPlugin: { decimals: 0, offsetY: -10 },
-        tooltip: { callbacks:{ label:(c)=>` ${c.dataset.label}: ${Math.round(c.parsed.y)}` } }
-      },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-    }
-  });
-}
-
-/* =========================================================
-   HOOK: panggil Tab3 bila data CSV siap
-   - Tambah panggilan ini dalam loadAndRender() selepas Tab2 init
-   ========================================================= */
-
-// ✅ Cari blok ini dalam loadAndRender():
-// if(typeof window.__initTab2 === "function"){ window.__initTab2(); }
-//
-// ✅ dan TAMBAH selepasnya:
-
       </script>
-
-      
     </section>
 
-    <!-- ================= TAB 3: HEADCOUNT INDIVIDU (SIAP) ================= -->
-    <section id="panel-headcount-individu" class="hidden" hidden>
-      <div class="soft-card p-5 space-y-4">
+    <!-- TAB 3 -->
+    <!-- ===========================
+     TAB 3: HEADCOUNT INDIVIDU
+     =========================== -->
+<section id="panel-headcount-individu" class="hidden" hidden>
 
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
-          <div>
-            <h2 class="text-xl font-extrabold text-gray-900">Headcount Murid (Individu)</h2>
-            <p class="text-sm text-gray-500">Paparkan subjek wajib sahaja — PPSA vs PraSPM (Markah/Gred + Beza)</p>
-          </div>
-          <div id="hc-status" class="text-xs text-gray-500"></div>
-        </div>
+  <div class="soft-card p-5 space-y-4">
 
-        <!-- Bar carian -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <input id="hc-search-nama" type="text" placeholder="Cari Nama Murid"
-            class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
-          <input id="hc-search-kp" type="text" placeholder="Cari NO KP / MyKad"
-            class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
-          <select id="hc-filter-kelas"
-            class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
-            <option value="">Semua Kelas</option>
-          </select>
-          <button id="hc-btn-cari"
-            class="rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 active:scale-[0.99] transition">
-            Cari Murid
-          </button>
-        </div>
-
-        <!-- Info murid -->
-        <div id="hc-murid-info"
-          class="hidden rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
-          <div class="font-extrabold text-gray-900" id="hc-nama">Nama Murid</div>
-          <div class="text-xs text-gray-600 mt-0.5">
-            NO KP: <span id="hc-kp"></span> • Kelas: <span id="hc-kelas"></span>
-          </div>
-        </div>
-
-        <!-- Jadual headcount -->
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-sm border border-gray-200 overflow-hidden rounded-xl">
-            <thead class="bg-indigo-600 text-white">
-              <tr>
-                <th class="px-4 py-3 text-left font-extrabold">Subjek (Wajib)</th>
-                <th class="px-4 py-3 text-center font-extrabold">PPSA</th>
-                <th class="px-4 py-3 text-center font-extrabold">PraSPM</th>
-                <th class="px-4 py-3 text-center font-extrabold">Beza</th>
-                <th class="px-4 py-3 text-center font-extrabold">Catatan</th>
-              </tr>
-            </thead>
-            <tbody id="hc-table-body" class="bg-white">
-              <tr>
-                <td colspan="5" class="px-4 py-6 text-center text-gray-500">
-                  Sila cari murid untuk paparan headcount.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="text-xs text-gray-400">
-          Nota: Beza dikira menggunakan <b>Markah</b> jika wujud, jika tidak → fallback guna nilai <b>Gred</b>.
-        </div>
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <h2 class="text-xl font-extrabold text-gray-900">Headcount Murid (Individu)</h2>
+        <p class="text-sm text-gray-500">
+          Perbandingan markah subjek wajib PPSA vs PraSPM
+        </p>
       </div>
-    </section>
+    </div>
+
+    <!-- BAR CARIAN -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+      <input id="hc-search-nama"
+        type="text"
+        placeholder="Cari Nama Murid"
+        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
+
+      <input id="hc-search-kp"
+        type="text"
+        placeholder="Cari NO KP"
+        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
+
+      <select id="hc-filter-kelas"
+        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+        <option value="">Semua Kelas</option>
+      </select>
+
+      <button id="hc-btn-cari"
+        class="rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition">
+        Cari Murid
+      </button>
+    </div>
+
+    <!-- INFO MURID -->
+    <div id="hc-murid-info"
+      class="hidden rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+      <b id="hc-nama">Nama Murid</b><br>
+      NO KP: <span id="hc-kp"></span> |
+      Kelas: <span id="hc-kelas"></span>
+    </div>
+
+    <!-- JADUAL SUBJEK -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm border">
+        <thead class="bg-indigo-600 text-white">
+          <tr>
+            <th class="px-4 py-3 text-left">Subjek</th>
+            <th class="px-4 py-3 text-center">PPSA</th>
+            <th class="px-4 py-3 text-center">PraSPM</th>
+            <th class="px-4 py-3 text-center">Beza</th>
+            <th class="px-4 py-3 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody id="hc-table-body">
+          <tr>
+            <td colspan="5" class="px-4 py-6 text-center text-gray-500">
+              Sila cari murid untuk paparan headcount.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+<!-- ===========================
+     TAMBAHAN SWITCH TAB
+     =========================== -->
+<script>
+
+
+  panels.forEach(name=>{
+    const panel = document.getElementById("panel-"+name);
+    const btn   = document.getElementById("tab-"+name);
+
+    if(panel){
+      const active = (name === tabName);
+      panel.hidden = !active;
+      panel.classList.toggle("hidden", !active);
+    }
+    if(btn){
+      btn.classList.toggle("tab-active", name === tabName);
+    }
+  });
+
+  try{ localStorage.setItem("xcode_ppsa_praspm_active_tab_v1", tabName); }catch(e){}
+}
+</script>
+
 
     <!-- TAB 4 -->
-    <section id="panel-subjek-teras" class="hidden" hidden>
-      <div class="soft-card p-4">
-        <h2 class="text-lg font-bold"> GP Subjek Teras – PPSA vs PraSPM</h2>
-        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
-      </div>
-    </section>
-
-    <!-- TAB 5 -->
     <section id="panel-mp-kritikal" class="hidden" hidden>
       <div class="soft-card p-4">
         <h2 class="text-lg font-bold"> GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
@@ -1390,7 +1266,7 @@ function loadActiveTab(){
 }
 
 /* ==========================
-   0) SWITCH TAB (✅ tambah headcount-individu)
+   0) SWITCH TAB
    ========================== */
 function switchTab(tabName) {
   const panels = ["gp-sekolah","lms-sekolah","headcount-individu","subjek-teras","mp-kritikal"];
@@ -1403,12 +1279,22 @@ function switchTab(tabName) {
       const isActive = (name === tabName);
       panel.hidden = !isActive;
       panel.classList.toggle("hidden", !isActive);
+
+      // ✅ bila buka Tab 3, init sekali
+      if(isActive && name === "headcount-individu"){
+        if(typeof window.__initTab3 === "function") window.__initTab3();
+      }
+      // ✅ bila buka Tab 2, init sekali
+      if(isActive && name === "lms-sekolah"){
+        if(typeof window.__initTab2 === "function") window.__initTab2();
+      }
     }
     if (tabBtn) tabBtn.classList.toggle("tab-active", name === tabName);
   });
 
   saveActiveTab(tabName);
 }
+
 
 function fillSelect(selectEl, options) {
   if (!selectEl) return;
@@ -1540,28 +1426,25 @@ function parseCsvXCode(csvText){
   subjekRow.forEach((code,i)=>{
     const jenis=(jenisRow[i]||"").toUpperCase();
     const flag=(flagRow[i]||"").trim();
-    if(code && jenis==="M" && (flag==="0" || flag==="1")) subjectFlagMap
-    ={};
-/* sambungan parseCsvXCode */
-    [code.toUpperCase()] = flag;
+    if(code && jenis==="M" && (flag==="0" || flag==="1")) subjectFlagMap[code.toUpperCase()] = flag;
   });
 
   const subjectColumns = headers.filter(h=>{
     if(!h) return false;
-    const upper = h.toUpperCase();
-    const isGred = /\b(G|GRED|GRADE)\b/.test(upper);
-    const isUmum = upper.includes("KESELURUHAN") || upper.includes("PURATA") || upper.includes("GPMP");
+    const upper=h.toUpperCase();
+    const isGred=/\b(G|GRED|GRADE)\b/.test(upper);
+    const isUmum=upper.includes("KESELURUHAN") || upper.includes("PURATA") || upper.includes("GPMP");
     return isGred && !isUmum;
   });
 
   const rows = lines.slice(3).map(line=>{
-    const vals = parseCSVLine(line);
-    const obj  = {};
+    const vals=parseCSVLine(line);
+    const obj={};
     headers.forEach((h,i)=>{ if(h) obj[h] = (vals[i]||"").trim(); });
     return obj;
   });
 
-  return { headers, headerMap, subjectFlagMap, subjectColumns, rows };
+  return {headers,headerMap,subjectFlagMap,subjectColumns,rows};
 }
 
 /* ==========================
@@ -1574,23 +1457,22 @@ function kiraGPS_Wajib(parsed){
   const kelasCol = headerMap["kelas"] || "KELAS";
 
   const wajibColumns = subjectColumns.filter(colName=>{
-    const subjCode = (colName.split(" ")[0] || "").toUpperCase();
-    const flag = subjectFlagMap[subjCode];
-    if (flag === "0") return false; // elektif
-    return true; // 1 atau tiada flag → kira
+    const subjCode=(colName.split(" ")[0]||"").toUpperCase();
+    const flag=subjectFlagMap[subjCode];
+    if(flag==="0") return false; // elektif
+    return true;
   });
 
   let jumlahNilai=0, bilGred=0;
-
   rows.forEach(row=>{
-    const nama  = (row[namaCol]  || "").trim();
-    const kelas = (row[kelasCol] || "").trim();
+    const nama=(row[namaCol]||"").trim();
+    const kelas=(row[kelasCol]||"").trim();
     if(!nama || /^\d+$/.test(nama)) return;
-    if(kelas === "1") return;
+    if(kelas==="1") return;
 
     wajibColumns.forEach(col=>{
-      const g = (row[col] || "").toUpperCase().trim();
-      if (gradeValueMapping.hasOwnProperty(g)){
+      const g=(row[col]||"").toUpperCase().trim();
+      if(gradeValueMapping.hasOwnProperty(g)){
         jumlahNilai += gradeValueMapping[g];
         bilGred++;
       }
@@ -1611,7 +1493,6 @@ function _isValidGradeAtoG(g){
   const x = String(g ?? "").trim().toUpperCase();
   return gradeValueMapping.hasOwnProperty(x); // A+..G
 }
-
 function kiraHeaderKPI_Parsed(parsed){
   const gpsElHeader   = document.getElementById('gpsValue');
   const sijilElHeader = document.getElementById('layakSijilValue');
@@ -1644,7 +1525,7 @@ function kiraHeaderKPI_Parsed(parsed){
   });
 
   rows.forEach(row => {
-    const nama  = (row[namaCol]  || "").trim();
+    const nama  = (row[namaCol] || "").trim();
     const kelas = (row[kelasCol] || "").trim();
     if(!nama || /^\d+$/.test(nama)) return;
     if(kelas==="1") return;
@@ -1682,320 +1563,538 @@ function kiraHeaderKPI_Parsed(parsed){
 }
 
 /* ==========================
-   6C) TAB 3: HEADCOUNT (PPSA vs PRASPM)
-   - kira jumlah MURID unik (ikut NAMA+KELAS+NO KP jika ada)
-   - kira HADIR = ada sekurang-kurangnya 1 gred A+..G
-   - kira TH = semua subjek kosong/TH (tiada gred A+..G)
+   7) PLUGIN LABEL NILAI (FIX: TAB2 BULAT SAHAJA)
    ========================== */
-function buildStudentKey(row, headerMap){
-  const namaCol  = headerMap["nama"]  || "NAMA";
-  const kelasCol = headerMap["kelas"] || "KELAS";
-  const kpCol =
-    headerMap["no kp"] || headerMap["no. kp"] || headerMap["no kp/ic"] ||
-    headerMap["mykad"] || headerMap["no kad pengenalan"] || null;
+const valueLabelPlugin = {
+  id: "valueLabelPlugin",
+  afterDatasetsDraw(chart, args, opts){
+    const { ctx } = chart;
+    if(!ctx) return;
 
-  const nama  = String(row[namaCol]  || "").trim().toUpperCase();
-  const kelas = String(row[kelasCol] || "").trim().toUpperCase();
-  const kp    = kpCol ? String(row[kpCol] || "").trim().toUpperCase() : "";
+    const decimals =
+      (opts && opts.decimals != null) ? opts.decimals :
+      (chart?.canvas?.id === "t2-chart-grade" ? 0 : 2);
 
-  // fallback kalau tiada KP
-  return (kp ? `${kp}|${nama}|${kelas}` : `${nama}|${kelas}`);
-}
+    const offsetY  = (opts && opts.offsetY  != null) ? opts.offsetY  : -12;
 
-function kiraHeadcount_Parsed(parsed){
-  if(!parsed) return { total:0, hadir:0, th:0 };
+    ctx.save();
+    ctx.font = "800 12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillStyle = "#111827";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-  const { headerMap, subjectColumns, rows } = parsed;
+    chart.data.datasets.forEach((ds, di)=>{
+      const meta = chart.getDatasetMeta(di);
+      if(!meta || meta.hidden) return;
 
-  const namaCol  = headerMap["nama"]  || "NAMA";
-  const kelasCol = headerMap["kelas"] || "KELAS";
+      meta.data.forEach((el, i)=>{
+        const v = ds.data[i];
+        if(v == null || Number.isNaN(v)) return;
+        ctx.fillText(Number(v).toFixed(decimals), el.x, el.y + offsetY);
+      });
+    });
 
-  const seen = new Map(); // key -> { hadir:boolean }
-
-  rows.forEach(row=>{
-    const nama  = (row[namaCol]  || "").trim();
-    const kelas = (row[kelasCol] || "").trim();
-    if(!nama || /^\d+$/.test(nama)) return;
-    if(kelas === "1") return;
-
-    const key = buildStudentKey(row, headerMap);
-    if(!seen.has(key)) seen.set(key, { hadir:false });
-
-    // HADIR kalau ada sekurang2 satu gred A+..G dalam mana-mana subjek
-    let adaGred = false;
-    for(const col of subjectColumns){
-      const g = String(row[col] || "").trim().toUpperCase();
-      if(gradeValueMapping.hasOwnProperty(g)){ adaGred = true; break; }
-    }
-    if(adaGred) seen.get(key).hadir = true;
-  });
-
-  const total = seen.size;
-  let hadir = 0;
-  for(const [,v] of seen) if(v.hadir) hadir++;
-
-  const th = Math.max(0, total - hadir);
-  return { total, hadir, th };
-}
+    ctx.restore();
+  }
+};
+if(window.Chart && Chart.register) Chart.register(valueLabelPlugin);
 
 /* ==========================
-   8B) TAB3 UI RENDER + GRAF
+   8) CARTA TAB1
    ========================== */
-let t3Chart = null;
+let chartLine=null, chartBar=null;
+const CHART_LABELS = [
+  ["TOV","(PPSA)"],
+  ["OTI 1","AR 1"],
+  ["OTI 2","AR 2"],
+  ["ETR","(Sasaran)"]
+];
 
-function renderTab3Headcount(ppsParsed, praParsed){
-  // kira
-  const P = kiraHeadcount_Parsed(ppsParsed);
-  const R = kiraHeadcount_Parsed(praParsed);
+  /* ==========================
+   WARNA STANDARD GPS
+   ========================== */
 
-  // beza
-  const dTotal = R.total - P.total;
-  const dHadir = R.hadir - P.hadir;
-  const dTH    = R.th    - P.th;
 
-  // set teks (kalau elemen wujud)
-  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent = val; };
-
-  set("t3-ppsa-total", P.total);
-  set("t3-ppsa-hadir", P.hadir);
-  set("t3-ppsa-th",    P.th);
-
-  set("t3-pra-total", R.total);
-  set("t3-pra-hadir", R.hadir);
-  set("t3-pra-th",    R.th);
-
-  const fmtDiff = (n)=> (n>0?`+${n}`:`${n}`);
-  const cls = (n)=> (n>0 ? "text-emerald-600 font-bold" : (n<0 ? "text-rose-600 font-bold" : "text-gray-700"));
-
-  const diffSet = (id, n)=>{
-    const el=document.getElementById(id);
-    if(!el) return;
-    el.textContent = fmtDiff(n);
-    el.className = cls(n);
-  };
-
-  diffSet("t3-diff-total", dTotal);
-  diffSet("t3-diff-hadir", dHadir);
-  diffSet("t3-diff-th",    dTH);
-
-  // graf
-  const ctx = document.getElementById("t3-chart-headcount")?.getContext("2d");
-  if(!ctx) return;
-
-  if(t3Chart) t3Chart.destroy();
-
-  t3Chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["TOTAL", "HADIR", "TH"],
-      datasets: [
-        { label: "PPSA",   data: [P.total, P.hadir, P.th] },
-        { label: "PRASPM", data: [R.total, R.hadir, R.th] }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: "bottom" },
-        valueLabelPlugin: { decimals: 0, offsetY: -10 },
-        tooltip: { callbacks:{ label:(c)=>` ${c.dataset.label}: ${Math.round(c.parsed.y)}` } }
+function buildCharts(seriesReal, seriesTarget){
+  const ctxL = document.getElementById("chartGpsLine")?.getContext("2d");
+  if(ctxL){
+    if(chartLine) chartLine.destroy();
+    chartLine = new Chart(ctxL, {
+      type:"line",
+      data:{ labels: CHART_LABELS,
+        datasets:[
+          { label:"GPS Sebenar", data:seriesReal, tension:.35, spanGaps:true, pointRadius:6, pointHoverRadius:7 },
+          { label:"Sasaran",    data:seriesTarget, tension:.35, spanGaps:true, borderDash:[6,6], pointRadius:6, pointHoverRadius:7 }
+        ]
       },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-    }
-  });
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{ display:true },
+          valueLabelPlugin:{ decimals:2, offsetY:-14 },
+          tooltip:{ callbacks:{ label:(c)=>` ${c.dataset.label}: ${Number(c.parsed.y).toFixed(2)}` } }
+        },
+        scales:{ y:{ reverse:true, suggestedMin:1, suggestedMax:9 } }
+      }
+    });
+  }
+
+  const ctxB = document.getElementById("chartGpsBar")?.getContext("2d");
+  if(ctxB){
+    if(chartBar) chartBar.destroy();
+    chartBar = new Chart(ctxB, {
+      type:"bar",
+      data:{ labels: CHART_LABELS,
+        datasets:[ { label:"GPS Sebenar", data:seriesReal }, { label:"Sasaran", data:seriesTarget } ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{ display:true },
+          valueLabelPlugin:{ decimals:2, offsetY:-10 },
+          tooltip:{ callbacks:{ label:(c)=>` ${c.dataset.label}: ${Number(c.parsed.y).toFixed(2)}` } }
+        },
+        scales:{ y:{ reverse:true, suggestedMin:1, suggestedMax:9 } }
+      }
+    });
+  }
 }
-  /* ===== sambungan selepas renderTab3Headcount() ===== */
+
+function updateChartsOnly(gpTOV, gpAR1){
+  const seriesReal   = [gpTOV, gpAR1, REAL_GPS.AR2, null];
+  const seriesTarget = [null, TARGET_GPS.OTI1, TARGET_GPS.OTI2, TARGET_GPS.ETR];
+
+  if(chartLine){
+    chartLine.data.datasets[0].data = seriesReal;
+    chartLine.data.datasets[1].data = seriesTarget;
+    chartLine.update();
+  }
+  if(chartBar){
+    chartBar.data.datasets[0].data = seriesReal;
+    chartBar.data.datasets[1].data = seriesTarget;
+    chartBar.update();
+  }
+}
 
 /* ==========================
-   8C) INIT TAB 3 (sekali sahaja)
+   9) UPDATE TABLE
    ========================== */
+function setCell(id, val){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.textContent = (val==null || Number.isNaN(val)) ? "—" : Number(val).toFixed(2);
+}
+
+function updateTableOnly(gpTOV, gpAR1){
+  setCell("tblTOV",  gpTOV);
+  setCell("tblOTI1", TARGET_GPS.OTI1);
+  setCell("tblAR1",  gpAR1);
+  setCell("tblOTI2", TARGET_GPS.OTI2);
+  setCell("tblAR2",  REAL_GPS.AR2);
+  setCell("tblETR",  TARGET_GPS.ETR);
+}
+
+/* ==========================
+   10) INIT DROPDOWNS
+   ========================== */
+function initDropdowns(onChangeFn){
+  const selOTI1 = document.getElementById("selOTI1");
+  const selOTI2 = document.getElementById("selOTI2");
+  const selAR2  = document.getElementById("selAR2");
+  const selETR  = document.getElementById("selETR");
+  const btnR    = document.getElementById("btnResetTarget");
+
+  fillSelect(selOTI1, TARGET_OPTIONS);
+  fillSelect(selOTI2, TARGET_OPTIONS);
+  fillSelect(selAR2,  TARGET_OPTIONS);
+  fillSelect(selETR,  TARGET_OPTIONS);
+
+  setSelValue("selOTI1", TARGET_GPS.OTI1);
+  setSelValue("selOTI2", TARGET_GPS.OTI2);
+  setSelValue("selAR2",  REAL_GPS.AR2);
+  setSelValue("selETR",  TARGET_GPS.ETR);
+
+  const handler = () => { updateStateFromUI(); onChangeFn(); };
+  [selOTI1, selOTI2, selAR2, selETR].forEach(el => el && el.addEventListener("change", handler));
+
+  if(btnR){
+    btnR.addEventListener("click", () => {
+      TARGET_GPS.OTI1 = null;
+      TARGET_GPS.OTI2 = null;
+      TARGET_GPS.ETR  = null;
+      REAL_GPS.AR2     = null;
+
+      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+
+      setSelValue("selOTI1", null);
+      setSelValue("selOTI2", null);
+      setSelValue("selAR2",  null);
+      setSelValue("selETR",  null);
+
+      onChangeFn();
+    });
+  }
+}
+
+/* ==========================
+   11) LOAD + RENDER
+   ========================== */
+async function loadAndRender(){
+  try{
+    const [ppsRes, praRes] = await Promise.all([ fetch(csvUrlPPSA), fetch(csvUrlPraSPM) ]);
+    const [ppsText, praText] = await Promise.all([ ppsRes.text(), praRes.text() ]);
+
+    const ppsParsed = parseCsvXCode(ppsText);
+    const praParsed = parseCsvXCode(praText);
+
+    // ✅ Simpan meta penting untuk Tab 3 (Headcount)
+window.__PPSA_PARSED = ppsParsed;
+window.__PRASPM_PARSED = praParsed;
+
+// simpan flag wajib/elektif + subjectColumns (rujukan konsisten Tab 3)
+window.__SUBJECT_FLAG_MAP = ppsParsed.subjectFlagMap || {};
+window.__SUBJECT_COLUMNS  = ppsParsed.subjectColumns || [];
+
+
+    if(!ppsParsed || !praParsed){ console.error("❌ Parse gagal."); return; }
+
+    window.__CSV_PPSA_ROWS   = ppsParsed.rows || [];
+    window.__CSV_PRASPM_ROWS = praParsed.rows || [];
+    window.__TAB2_SUBJECT_COLS = ppsParsed.subjectColumns || [];
+
+    const gpTOV = kiraGPS_Wajib(ppsParsed);
+    const gpAR1 = kiraGPS_Wajib(praParsed);
+
+    window.__gpTOV = gpTOV;
+    window.__gpAR1 = gpAR1;
+
+    // KPI card Tab1
+    if(gpTOV!=null) document.getElementById("gpsPPSAValue").textContent = gpTOV.toFixed(2);
+    if(gpAR1!=null) document.getElementById("gpsPraSpmValue").textContent = gpAR1.toFixed(2);
+
+    if(gpTOV!=null && gpAR1!=null){
+      const diff = +(gpAR1 - gpTOV).toFixed(2);
+      document.getElementById("perubahanGpsValue").textContent = diff.toFixed(2);
+    } else {
+      document.getElementById("perubahanGpsValue").textContent = "--";
+    }
+
+    // ✅ KPI HEADER ikut exam terkini (PraSPM): GPS + %Layak Sijil
+    kiraHeaderKPI_Parsed(praParsed);
+
+    const seriesReal   = [gpTOV, gpAR1, REAL_GPS.AR2, null];
+    const seriesTarget = [null, TARGET_GPS.OTI1, TARGET_GPS.OTI2, TARGET_GPS.ETR];
+    buildCharts(seriesReal, seriesTarget);
+
+    initDropdowns(() => {
+      updateTableOnly(window.__gpTOV ?? null, window.__gpAR1 ?? null);
+      updateChartsOnly(window.__gpTOV ?? null, window.__gpAR1 ?? null);
+    });
+
+    updateTableOnly(gpTOV, gpAR1);
+
+    if(typeof window.__initTab2 === "function"){
+      window.__initTab2();
+    }
+  if(typeof window.__initTab3 === "function"){
+  window.__initTab3();
+}
+
+  }catch(err){
+    console.error("❌ Ralat CSV:", err);
+  }
+}
+
+/* ==========================
+   INIT
+   ========================== */
+document.getElementById("yearNow").textContent = new Date().getFullYear();
+loadTargetsFromStorage();
+switchTab(loadActiveTab());
+loadAndRender();
+</script>
+<script>
+/* ===========================
+   TAB 3: HEADCOUNT INDIVIDU
+   - Cari murid (Nama / KP / Kelas)
+   - Banding gred subjek WAJIB (PPSA vs PraSPM)
+   - Beza berdasarkan point (A+=0 ... G=9) → negatif = semakin baik
+   =========================== */
 window.__initTab3 = function(){
-  if (window.__tab3_inited) return;
+  if(window.__tab3_inited) return;
   window.__tab3_inited = true;
 
-  // jika Chart.js / plugin belum siap, tak apa (akan siap bila loadAndRender)
-};
+  const $ = (id)=>document.getElementById(id);
 
-/* ==========================
-   0B) SWITCH TAB (tambahan init Tab2/Tab3 bila buka)
-   ========================== */
-const __switchTab_ori = window.switchTab;
-window.switchTab = function(tabName){
-  __switchTab_ori(tabName);
+  const elNamaQ  = $("hc-search-nama");
+  const elKpQ    = $("hc-search-kp");
+  const elKelas  = $("hc-filter-kelas");
+  const elBtn    = $("hc-btn-cari");
+  const elInfo   = $("hc-murid-info");
+  const elNama   = $("hc-nama");
+  const elKP     = $("hc-kp");
+  const elKls    = $("hc-kelas");
+  const elBody   = $("hc-table-body");
 
-  if(tabName === "lms-sekolah" && typeof window.__initTab2 === "function"){
-    window.__initTab2();
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  // ambil parsed (disimpan dari loadAndRender)
+  const PPAR = window.__PPSA_PARSED;
+  const RPAR = window.__PRASPM_PARSED;
+
+  if(!PPAR || !RPAR){
+    elBody.innerHTML = `
+      <tr><td colspan="5" class="px-4 py-6 text-center text-rose-600 font-semibold">
+        Data belum siap dimuat. Sila tunggu CSV siap load.
+      </td></tr>`;
+    return;
   }
-  if(tabName === "subjek-teras" && typeof window.__initTab3 === "function"){
-    window.__initTab3();
-    // kalau data CSV dah ada, render terus
-    if (window.__PPS_PARSED && window.__PRA_PARSED) {
-      renderTab3Headcount(window.__PPS_PARSED, window.__PRA_PARSED);
+
+  const gradeValueMapping = window.gradeValueMapping || {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
+
+  function normKP(x){
+    return String(x ?? "").replace(/\D/g,""); // buang dash/spaces
+  }
+  function getColKey(row, variants){
+    for(const k of variants){
+      if(row && Object.prototype.hasOwnProperty.call(row,k)) return k;
     }
+    // fallback: cuba padanan case-insensitive
+    const keys = Object.keys(row||{});
+    const up = new Map(keys.map(k=>[k.toUpperCase(), k]));
+    for(const k of variants){
+      const hit = up.get(String(k).toUpperCase());
+      if(hit) return hit;
+    }
+    return null;
   }
+
+  function getNama(row){
+    const k = getColKey(row, ["NAMA","Nama","NAMA MURID","NAMA_PENUH","MURID"]);
+    return (k ? row[k] : "")?.toString().trim() || "";
+  }
+  function getKelas(row){
+    const k = getColKey(row, ["KELAS","Kelas","kelas"]);
+    return (k ? row[k] : "")?.toString().trim() || "";
+  }
+  function getKP(row){
+    const k = getColKey(row, ["NO KP","NO. KP","NO KP/IC","MYKAD","IC","NO KAD PENGENALAN"]);
+    return normKP(k ? row[k] : "");
+  }
+
+  function buildKelasOptions(){
+    const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : (PPAR.rows||[]);
+    const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : (RPAR.rows||[]);
+    const all = [...rowsP, ...rowsR];
+
+    const set = new Set();
+    all.forEach(r=>{
+      const kls = getKelas(r);
+      if(kls) set.add(kls);
+    });
+
+    const kelasList = Array.from(set).sort((a,b)=>a.localeCompare(b,"ms"));
+    elKelas.innerHTML = `<option value="">Semua Kelas</option>` + kelasList.map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");
+  }
+
+  // subject wajib → berdasarkan flag (0 = elektif, 1/tiada = wajib)
+  const subjectFlagMap = window.__SUBJECT_FLAG_MAP || {};
+  const subjectColumns = window.__SUBJECT_COLUMNS  || [];
+
+  function subjectCodeFromCol(col){
+    return (String(col||"").split(" ")[0] || "").toUpperCase().trim();
+  }
+
+  function isWajib(code){
+    const f = subjectFlagMap[code];
+    if(f === "0") return false;
+    return true;
+  }
+
+  // bina peta code -> column gred (contoh "BM G")
+  function buildSubjectColMap(cols){
+    const map = new Map();
+    cols.forEach(c=>{
+      const code = subjectCodeFromCol(c);
+      if(!code) return;
+      // ambil yang pertama (kebiasaannya satu saja)
+      if(!map.has(code)) map.set(code, c);
+    });
+    return map;
+  }
+
+  const colMapP = buildSubjectColMap(subjectColumns);
+  const colMapR = buildSubjectColMap(subjectColumns); // guna mapping sama supaya konsisten (PPSA format sama)
+
+  const subjectNameMap = window.subjectNameMap || {};
+  function subjectLabel(code){
+    return subjectNameMap[code] || code;
+  }
+
+  function normGrade(g){
+    const x = String(g ?? "").trim().toUpperCase();
+    if(gradeValueMapping.hasOwnProperty(x)) return x;
+    if(x === "TH" || x === "T/H" || x === "TIDAK HADIR") return "TH";
+    return "";
+  }
+
+  function gradePoint(g){
+    if(!g) return null;
+    if(g === "TH") return null; // TH tak masuk kiraan point
+    if(gradeValueMapping.hasOwnProperty(g)) return gradeValueMapping[g];
+    return null;
+  }
+
+  function diffClass(pointDiff){
+    if(pointDiff == null) return "text-gray-500";
+    if(pointDiff === 0) return "text-gray-700 font-semibold";
+    // NEGATIF = lebih baik
+    return (pointDiff < 0) ? "text-emerald-600 font-extrabold" : "text-rose-600 font-extrabold";
+  }
+
+  function diffText(pointDiff){
+    if(pointDiff == null) return "—";
+    const s = (pointDiff > 0) ? "+" : "";
+    return s + pointDiff;
+  }
+
+  function statusText(pointDiff){
+    if(pointDiff == null) return "Tiada Data";
+    if(pointDiff === 0) return "Kekal";
+    return (pointDiff < 0) ? "Meningkat" : "Menurun"; // point turun = gred naik
+  }
+
+  function statusBadge(pointDiff){
+    const st = statusText(pointDiff);
+    if(st === "Meningkat") return `<span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">▲ Meningkat</span>`;
+    if(st === "Menurun")   return `<span class="px-2 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold">▼ Menurun</span>`;
+    if(st === "Kekal")     return `<span class="px-2 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-bold">Kekal</span>`;
+    return `<span class="px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">Tiada Data</span>`;
+  }
+
+  function findCandidate(rows, qNama, qKP, qKelas){
+    const namaQ = String(qNama||"").trim().toLowerCase();
+    const kpQ   = normKP(qKP||"");
+    const klsQ  = String(qKelas||"").trim();
+
+    const filtered = rows.filter(r=>{
+      const nm = getNama(r).toLowerCase();
+      const kp = getKP(r);
+      const kl = getKelas(r);
+
+      if(klsQ && kl !== klsQ) return false;
+      if(namaQ && !nm.includes(namaQ)) return false;
+      if(kpQ && kp !== kpQ) return false;
+      return true;
+    });
+
+    return filtered.length ? filtered[0] : null; // ambil 1st match
+  }
+
+  function renderMurid(rowP, rowR){
+    // pilih info utama: utamakan rowR kalau ada (PraSPM)
+    const base = rowR || rowP;
+
+    const nama = base ? getNama(base) : "";
+    const kp   = base ? getKP(base) : "";
+    const kls  = base ? getKelas(base) : "";
+
+    if(!base){
+      elInfo.classList.add("hidden");
+      elBody.innerHTML = `
+        <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">
+          Murid tidak ditemui. Cuba semak Nama/KP/Kelas.
+        </td></tr>`;
+      return;
+    }
+
+    elInfo.classList.remove("hidden");
+    elNama.textContent = nama || "—";
+    elKP.textContent   = kp   || "—";
+    elKls.textContent  = kls  || "—";
+
+    // senarai subjek wajib (ikut subjectColumns/flag)
+    const wajibCodes = Array.from(colMapP.keys())
+      .filter(code => isWajib(code))
+      .sort((a,b)=>a.localeCompare(b,"ms"));
+
+    if(!wajibCodes.length){
+      elBody.innerHTML = `
+        <tr><td colspan="5" class="px-4 py-6 text-center text-rose-600 font-semibold">
+          Tiada subjek wajib dikesan dalam CSV (semak flag/format).
+        </td></tr>`;
+      return;
+    }
+
+    let html = "";
+
+    wajibCodes.forEach(code=>{
+      const colP = colMapP.get(code);
+      const colR = colMapR.get(code);
+
+      const gP = normGrade(rowP && colP ? rowP[colP] : "");
+      const gR = normGrade(rowR && colR ? rowR[colR] : "");
+
+      const pP = gradePoint(gP);
+      const pR = gradePoint(gR);
+
+      const diff = (pP != null && pR != null) ? (pR - pP) : null;
+
+      const showP = gP ? (gP === "TH" ? "TH" : gP) : "—";
+      const showR = gR ? (gR === "TH" ? "TH" : gR) : "—";
+
+      html += `
+        <tr class="border-t">
+          <td class="px-4 py-3 font-bold text-gray-800">${esc(subjectLabel(code))}</td>
+          <td class="px-4 py-3 text-center font-extrabold text-blue-700">${esc(showP)}</td>
+          <td class="px-4 py-3 text-center font-extrabold text-indigo-700">${esc(showR)}</td>
+          <td class="px-4 py-3 text-center ${diffClass(diff)}">${esc(diffText(diff))}</td>
+          <td class="px-4 py-3 text-center">${statusBadge(diff)}</td>
+        </tr>`;
+    });
+
+    elBody.innerHTML = html;
+  }
+
+  function cari(){
+    const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : (PPAR.rows||[]);
+    const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : (RPAR.rows||[]);
+
+    const qNama  = elNamaQ.value;
+    const qKP    = elKpQ.value;
+    const qKelas = elKelas.value;
+
+    // strategi: jika KP diisi → cari tepat KP dahulu
+    // kemudian padankan pasangan PPSA/PraSPM menggunakan KP jika ada
+    let rowP = findCandidate(rowsP, qNama, qKP, qKelas);
+    let rowR = findCandidate(rowsR, qNama, qKP, qKelas);
+
+    // kalau jumpa satu pihak sahaja, cuba cari pasangan guna KP/nama+kelas
+    if(!rowP && rowR){
+      const kp = getKP(rowR);
+      const nm = getNama(rowR);
+      const kl = getKelas(rowR);
+      rowP = findCandidate(rowsP, nm, kp, kl);
+    }
+    if(!rowR && rowP){
+      const kp = getKP(rowP);
+      const nm = getNama(rowP);
+      const kl = getKelas(rowP);
+      rowR = findCandidate(rowsR, nm, kp, kl);
+    }
+
+    renderMurid(rowP, rowR);
+  }
+
+  // init dropdown kelas
+  buildKelasOptions();
+
+  // event
+  if(elBtn) elBtn.addEventListener("click", cari);
+  if(elNamaQ) elNamaQ.addEventListener("keydown", (e)=>{ if(e.key==="Enter") cari(); });
+  if(elKpQ)   elKpQ.addEventListener("keydown", (e)=>{ if(e.key==="Enter") cari(); });
 };
+</script>
 
-/* ==========================
-   11B) LOAD + RENDER (sambungan kecil)
-   - simpan parsed untuk Tab3
-   - panggil renderTab3Headcount bila perlu
-   ========================== */
-// ✅ Letak 3 baris ini dalam loadAndRender() selepas ppsParsed/praParsed berjaya diparse:
-/// window.__PPS_PARSED = ppsParsed;
-/// window.__PRA_PARSED = praParsed;
-/// if (loadActiveTab() === "subjek-teras") renderTab3Headcount(ppsParsed, praParsed);
-
-/* ==========================
-   12) (OPTIONAL) Bina HTML Tab3 (kalau belum ada)
-   - Pastikan elemen-elemen ID ini wujud dalam panel Tab 3:
-   ========================== */
-/*
-<div class="soft-card p-4">
-  <div class="flex items-start justify-between gap-4">
-    <div>
-      <h2 class="text-lg font-bold">Headcount – PPSA vs PraSPM</h2>
-      <p class="text-sm text-gray-500 mt-1">Jumlah murid unik, hadir (ada sekurang-kurangnya 1 gred A+..G) dan TH.</p>
-    </div>
-  </div>
-
-  <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-    <div class="kpi-card px-4 py-3">
-      <div class="text-[11px] text-gray-500 uppercase tracking-wide">TOTAL (PPSA | PRASPM | BEZA)</div>
-      <div class="mt-1 text-2xl font-extrabold">
-        <span id="t3-ppsa-total">—</span>
-        <span class="text-gray-400">|</span>
-        <span id="t3-pra-total">—</span>
-        <span class="text-gray-400">|</span>
-        <span id="t3-diff-total" class="text-gray-700">0</span>
-      </div>
-    </div>
-
-    <div class="kpi-card px-4 py-3">
-      <div class="text-[11px] text-gray-500 uppercase tracking-wide">HADIR (PPSA | PRASPM | BEZA)</div>
-      <div class="mt-1 text-2xl font-extrabold">
-        <span id="t3-ppsa-hadir">—</span>
-        <span class="text-gray-400">|</span>
-        <span id="t3-pra-hadir">—</span>
-        <span class="text-gray-400">|</span>
-        <span id="t3-diff-hadir" class="text-gray-700">0</span>
-      </div>
-    </div>
-
-    <div class="kpi-card px-4 py-3">
-      <div class="text-[11px] text-gray-500 uppercase tracking-wide">TH (PPSA | PRASPM | BEZA)</div>
-      <div class="mt-1 text-2xl font-extrabold">
-        <span id="t3-ppsa-th">—</span>
-        <span class="text-gray-400">|</span>
-        <span id="t3-pra-th">—</span>
-        <span class="text-gray-400">|</span>
-        <span id="t3-diff-th" class="text-gray-700">0</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="soft-card p-4 mt-5">
-    <div class="font-bold text-gray-800 mb-2">Graf Headcount</div>
-    <div class="chart-wrap">
-      <canvas id="t3-chart-headcount"></canvas>
-    </div>
-  </div>
-</div>
-*/
-
-<!-- ================= TAB 3: GP SUBJEK TERAS ================= -->
-<section id="panel-subjek-teras" class="hidden" hidden>
-  <div class="soft-card overflow-hidden">
-
-    <!-- Header Tab 3 -->
-    <div class="px-5 py-4 border-b bg-gradient-to-r from-sky-50 via-white to-indigo-50">
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
-        <div>
-          <h2 class="text-xl font-extrabold text-gray-900">Headcount – PPSA vs PraSPM</h2>
-          <p class="text-sm text-gray-500">Jumlah murid unik • Hadir • TH (Perbandingan 2 CSV)</p>
-        </div>
-        <div class="flex flex-wrap gap-2 text-xs">
-          <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100">Headcount = murid unik</span>
-          <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Hadir: ada ≥ 1 gred A+..G</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Content Tab 3 -->
-    <div class="p-5 space-y-5">
-
-      <!-- KPI Row -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <!-- TOTAL -->
-        <div class="kpi-card px-4 py-3">
-          <div class="flex items-start justify-between">
-            <div class="w-full">
-              <div class="text-[11px] text-gray-500 uppercase tracking-wide">TOTAL (PPSA | PRASPM | BEZA)</div>
-              <div class="mt-1 text-2xl font-extrabold">
-                <span id="t3-ppsa-total">—</span>
-                <span class="text-gray-400 mx-1">|</span>
-                <span id="t3-pra-total">—</span>
-                <span class="text-gray-400 mx-1">|</span>
-                <span id="t3-diff-total" class="text-gray-700">0</span>
-              </div>
-              <div class="mt-1 text-xs text-gray-500">Murid unik dalam fail</div>
-            </div>
-            <div class="h-10 w-10 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-700">👥</div>
-          </div>
-        </div>
-
-        <!-- HADIR -->
-        <div class="kpi-card px-4 py-3">
-          <div class="flex items-start justify-between">
-            <div class="w-full">
-              <div class="text-[11px] text-gray-500 uppercase tracking-wide">HADIR (PPSA | PRASPM | BEZA)</div>
-              <div class="mt-1 text-2xl font-extrabold">
-                <span id="t3-ppsa-hadir">—</span>
-                <span class="text-gray-400 mx-1">|</span>
-                <span id="t3-pra-hadir">—</span>
-                <span class="text-gray-400 mx-1">|</span>
-                <span id="t3-diff-hadir" class="text-gray-700">0</span>
-              </div>
-              <div class="mt-1 text-xs text-gray-500">Ada sekurang-kurangnya 1 gred A+..G</div>
-            </div>
-            <div class="h-10 w-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700">✅</div>
-          </div>
-        </div>
-
-        <!-- TH -->
-        <div class="kpi-card px-4 py-3">
-          <div class="flex items-start justify-between">
-            <div class="w-full">
-              <div class="text-[11px] text-gray-500 uppercase tracking-wide">TH (PPSA | PRASPM | BEZA)</div>
-              <div class="mt-1 text-2xl font-extrabold">
-                <span id="t3-ppsa-th">—</span>
-                <span class="text-gray-400 mx-1">|</span>
-                <span id="t3-pra-th">—</span>
-                <span class="text-gray-400 mx-1">|</span>
-                <span id="t3-diff-th" class="text-gray-700">0</span>
-              </div>
-              <div class="mt-1 text-xs text-gray-500">Tidak hadir (tiada gred sah / hanya TH)</div>
-            </div>
-            <div class="h-10 w-10 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-700">⛔</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Graf -->
-      <div class="soft-card p-4">
-        <div class="flex items-center justify-between mb-2">
-          <div class="font-bold text-gray-800">Graf Headcount</div>
-          <div class="text-xs text-gray-400">Bar</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="t3-chart-headcount"></canvas>
-        </div>
-        <div class="mt-2 text-xs text-gray-500">
-          Nota: Total = bilangan murid unik. Hadir = murid yang mempunyai ≥ 1 gred A+..G (mana-mana subjek).
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
+</body>
+</html>
