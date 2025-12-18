@@ -1073,12 +1073,384 @@
 
 
     <!-- TAB 3 -->
-    <section id="panel-subjek-teras" class="hidden" hidden>
-      <div class="soft-card p-4">
-        <h2 class="text-lg font-bold"> GP Subjek Teras – PPSA vs PraSPM</h2>
-        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
+    <!-- ========= TAB 3: HEADCOUNT INDIVIDU (PPSA vs PraSPM) ========= -->
+<section id="tab3" class="tab-content hidden">
+  <div class="space-y-5">
+
+    <!-- Header -->
+    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">TAB 3 — Individu: Markah (Gred) PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500">Carian murid berdasarkan Nama / K/P, tapis mengikut Kelas, dan semak perbezaan markah subjek wajib.</p>
       </div>
-    </section>
+
+      <!-- Controls -->
+      <div class="grid w-full grid-cols-1 gap-2 md:w-auto md:grid-cols-3">
+        <div class="relative">
+          <input id="t3-search"
+                 type="text"
+                 placeholder="Cari Nama / K/P..."
+                 class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-200" />
+        </div>
+
+        <select id="t3-filter-kelas"
+                class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-200">
+          <option value="ALL">SEMUA KELAS</option>
+        </select>
+
+        <div class="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm">
+          <span class="text-gray-600">Subjek</span>
+          <span id="t3-subject-mode" class="font-semibold text-gray-900">WAJIB</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main layout -->
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+
+      <!-- Left: Student list -->
+      <div class="lg:col-span-5 rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+          <div class="text-sm font-semibold text-gray-900">Senarai Murid</div>
+          <div id="t3-count" class="text-xs text-gray-500">0 murid</div>
+        </div>
+
+        <div class="max-h-[520px] overflow-auto">
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 bg-white z-10 border-b border-gray-100">
+              <tr class="text-left">
+                <th class="px-4 py-2 font-semibold text-gray-700">Nama</th>
+                <th class="px-4 py-2 font-semibold text-gray-700">K/P</th>
+                <th class="px-4 py-2 font-semibold text-gray-700">Kelas</th>
+              </tr>
+            </thead>
+            <tbody id="t3-student-rows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right: Student detail -->
+      <div class="lg:col-span-7 rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div class="border-b border-gray-100 px-4 py-3">
+          <div id="t3-selected-title" class="text-sm font-semibold text-gray-900">Pilih murid untuk paparan butiran</div>
+          <div id="t3-selected-sub" class="mt-1 text-xs text-gray-500"></div>
+        </div>
+
+        <div class="p-4 space-y-4">
+          <!-- Summary chips -->
+          <div id="t3-summary" class="flex flex-wrap gap-2"></div>
+
+          <!-- Detail table -->
+          <div class="overflow-auto rounded-xl border border-gray-100">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 border-b border-gray-100">
+                <tr class="text-left">
+                  <th class="px-3 py-2 font-semibold text-gray-700">Subjek Wajib</th>
+                  <th class="px-3 py-2 font-semibold text-gray-700">PPSA</th>
+                  <th class="px-3 py-2 font-semibold text-gray-700">PraSPM</th>
+                  <th class="px-3 py-2 font-semibold text-gray-700">Beza</th>
+                  <th class="px-3 py-2 font-semibold text-gray-700">Status</th>
+                </tr>
+              </thead>
+              <tbody id="t3-detail-rows">
+                <tr>
+                  <td class="px-3 py-6 text-gray-400" colspan="5">Belum ada pilihan murid.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-xs text-gray-500">
+            Nota: Beza hanya dikira jika PPSA dan PraSPM kedua-duanya ada markah. Jika salah satu tiada, ruangan dikosongkan.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<script>
+/* ========= TAB 3: INDIVIDU (MARKAH + GRED) PPSA vs PraSPM =========
+   Panggil: initTab3(ppsaRows, praspmRows);
+   - ppsaRows / praspmRows: array of objects (PapaParse results data)
+   - KP digunakan sebagai kunci gabung (fallback: Nama+Kelas jika KP tiada)
+*/
+
+/* --- util: cari nama kolum fleksibel --- */
+function pickCol(headers, candidates) {
+  const H = headers.map(h => String(h || "").trim());
+  for (const c of candidates) {
+    const idx = H.findIndex(h => h.toUpperCase() === c.toUpperCase());
+    if (idx >= 0) return H[idx];
+  }
+  // fallback partial match
+  for (const c of candidates) {
+    const idx = H.findIndex(h => h.toUpperCase().includes(c.toUpperCase()));
+    if (idx >= 0) return H[idx];
+  }
+  return null;
+}
+
+/* --- util: normalisasi KP --- */
+function normKP(v) {
+  return String(v || "").replace(/[^0-9]/g, "").trim(); // buang dash/spaces
+}
+
+/* --- util: parse markah (nombor) --- */
+function parseMark(v) {
+  if (v === null || v === undefined) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  // abaikan TH/TIADA/-
+  const u = s.toUpperCase();
+  if (u === "TH" || u === "TIADA" || u === "-" || u === "NA" || u === "N/A") return null;
+  const num = Number(s.replace(",", "."));
+  if (Number.isFinite(num)) return num;
+  return null;
+}
+
+/* --- mapping markah -> gred (boleh ikut standard sekolah Cikgu) --- */
+function markToGrade(mark) {
+  if (mark === null) return "";
+  // Jika Cikgu dah ada gradeBands global, guna itu.
+  // gradeBands contoh: [{min:90, grade:"A+"},{min:80,grade:"A"},...]
+  const bands = (window.gradeBands && Array.isArray(window.gradeBands)) ? window.gradeBands : [
+    { min: 90, grade: "A+" },
+    { min: 80, grade: "A"  },
+    { min: 70, grade: "B"  },
+    { min: 60, grade: "C"  },
+    { min: 50, grade: "D"  },
+    { min: 40, grade: "E"  },
+    { min: 0,  grade: "F"  },
+  ];
+  for (const b of bands) if (mark >= b.min) return b.grade;
+  return "";
+}
+
+/* --- format markah (gred) --- */
+function fmtMarkGrade(mark) {
+  if (mark === null) return "";               // kosong ikut arahan
+  const g = markToGrade(mark);
+  // jika markah integer, papar tanpa .0
+  const m = Number.isInteger(mark) ? String(mark) : String(mark.toFixed(1));
+  return g ? `${m} (${g})` : m;
+}
+
+/* --- status beza --- */
+function diffStatus(ppsaMark, praMark) {
+  if (ppsaMark === null || praMark === null) return { diff: null, icon: "", cls: "text-gray-400" };
+  const d = praMark - ppsaMark;
+  if (d > 0)  return { diff: d, icon: "▲", cls: "text-green-600" };
+  if (d < 0)  return { diff: d, icon: "▼", cls: "text-red-600" };
+  return { diff: 0, icon: "➖", cls: "text-gray-500" };
+}
+
+/* --- dapatkan senarai subjek wajib --- */
+function getWajibSubjectColsSafe(headers) {
+  // Jika Cikgu ada fungsi sedia ada getWajibColumns(), guna itu.
+  if (typeof window.getWajibColumns === "function") {
+    try {
+      const cols = window.getWajibColumns();
+      if (Array.isArray(cols) && cols.length) return cols;
+    } catch(e){}
+  }
+
+  // Jika Cikgu ada subjectColumns global, guna itu (tapis metadata)
+  const metaLikely = ["NAMA","NAME","K/P","KP","KAD","IC","NO KAD","NO. KAD","KELAS","CLASS","TINGKATAN","JANTINA","GENDER","BIL","ID"];
+  const all = (window.subjectColumns && Array.isArray(window.subjectColumns) && window.subjectColumns.length)
+    ? window.subjectColumns
+    : headers.filter(h => !metaLikely.some(k => String(h).toUpperCase().includes(k)));
+
+  return all;
+}
+
+/* --- bina index murid dari rows --- */
+function buildIndex(rows) {
+  const headers = rows && rows.length ? Object.keys(rows[0]) : [];
+  const colNama  = pickCol(headers, ["NAMA", "NAME", "NAMA MURID"]);
+  const colKP    = pickCol(headers, ["NO. KAD PENGENALAN", "NO KAD PENGENALAN", "K/P", "KP", "IC"]);
+  const colKelas = pickCol(headers, ["KELAS", "CLASS", "TINGKATAN / KELAS", "KELAS SEMASA", "INSTITUSI / KELAS SEMASA"]);
+
+  const map = new Map();
+
+  rows.forEach(r => {
+    const nama  = String(r[colNama] || "").trim();
+    const kpRaw = r[colKP];
+    const kp    = normKP(kpRaw);
+    const kelas = String(r[colKelas] || "").trim();
+
+    const key = kp || `${nama}__${kelas}`; // fallback jika KP kosong
+    if (!key.trim()) return;
+
+    map.set(key, {
+      key,
+      nama: nama || "(Tiada Nama)",
+      kp: kp || "",
+      kelas: kelas || "",
+      row: r
+    });
+  });
+
+  return { map, headers, colNama, colKP, colKelas };
+}
+
+/* --- init utama TAB 3 --- */
+function initTab3(ppsaRows, praspmRows) {
+  const ppsa = buildIndex(ppsaRows || []);
+  const pra  = buildIndex(praspmRows || []);
+
+  // gabung semua key
+  const allKeys = new Set([...ppsa.map.keys(), ...pra.map.keys()]);
+  const merged = [];
+
+  allKeys.forEach(key => {
+    const a = ppsa.map.get(key);
+    const b = pra.map.get(key);
+
+    merged.push({
+      key,
+      nama: (a && a.nama) || (b && b.nama) || "(Tiada Nama)",
+      kp: (a && a.kp) || (b && b.kp) || "",
+      kelas: (a && a.kelas) || (b && b.kelas) || "",
+      rowPPSA: (a && a.row) || null,
+      rowPRA:  (b && b.row) || null
+    });
+  });
+
+  // susun nama
+  merged.sort((x,y) => (x.nama || "").localeCompare((y.nama || ""), "ms"));
+
+  // subjek wajib: guna header PPSA jika ada, kalau tidak guna header Pra
+  const headersRef = (ppsa.headers && ppsa.headers.length) ? ppsa.headers : pra.headers;
+  const wajibCols = getWajibSubjectColsSafe(headersRef);
+
+  // fill dropdown kelas
+  const kelasSet = new Set(merged.map(m => m.kelas).filter(Boolean));
+  const kelasList = Array.from(kelasSet).sort((a,b) => a.localeCompare(b, "ms"));
+
+  const elKelas = document.getElementById("t3-filter-kelas");
+  const elSearch = document.getElementById("t3-search");
+  const elRows = document.getElementById("t3-student-rows");
+  const elCount = document.getElementById("t3-count");
+
+  // reset option (kekal “SEMUA KELAS”)
+  elKelas.innerHTML = `<option value="ALL">SEMUA KELAS</option>` + kelasList.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join("");
+
+  // render list
+  function renderList() {
+    const q = (elSearch.value || "").trim().toLowerCase();
+    const fKelas = elKelas.value || "ALL";
+
+    const filtered = merged.filter(m => {
+      const okKelas = (fKelas === "ALL") ? true : (m.kelas === fKelas);
+      if (!okKelas) return false;
+
+      if (!q) return true;
+      const hay = `${m.nama} ${m.kp} ${m.kelas}`.toLowerCase();
+      return hay.includes(q);
+    });
+
+    elCount.textContent = `${filtered.length} murid`;
+
+    elRows.innerHTML = filtered.map(m => {
+      return `
+        <tr class="border-b border-gray-50 hover:bg-gray-50 cursor-pointer" data-key="${escapeHtml(m.key)}">
+          <td class="px-4 py-2 text-gray-900 font-medium">${escapeHtml(m.nama)}</td>
+          <td class="px-4 py-2 text-gray-700">${escapeHtml(m.kp || "")}</td>
+          <td class="px-4 py-2 text-gray-700">${escapeHtml(m.kelas || "")}</td>
+        </tr>
+      `;
+    }).join("");
+
+    // click handler rows
+    Array.from(elRows.querySelectorAll("tr[data-key]")).forEach(tr => {
+      tr.addEventListener("click", () => {
+        const key = tr.getAttribute("data-key");
+        const rec = merged.find(x => x.key === key);
+        if (rec) renderDetail(rec);
+      });
+    });
+  }
+
+  // render detail murid
+  function renderDetail(rec) {
+    const title = document.getElementById("t3-selected-title");
+    const sub = document.getElementById("t3-selected-sub");
+    const tbody = document.getElementById("t3-detail-rows");
+    const summary = document.getElementById("t3-summary");
+
+    title.textContent = rec.nama;
+    sub.textContent = `${rec.kp ? "K/P: " + rec.kp + " • " : ""}${rec.kelas ? "Kelas: " + rec.kelas : ""}`;
+
+    let naik=0, turun=0, kekal=0, kosong=0;
+
+    const rowsHtml = wajibCols.map(col => {
+      const a = rec.rowPPSA ? parseMark(rec.rowPPSA[col]) : null;
+      const b = rec.rowPRA  ? parseMark(rec.rowPRA[col])  : null;
+
+      const s = diffStatus(a, b);
+      if (a === null || b === null) kosong++;
+      else if (s.diff > 0) naik++;
+      else if (s.diff < 0) turun++;
+      else kekal++;
+
+      const ppsaTxt = fmtMarkGrade(a);
+      const praTxt  = fmtMarkGrade(b);
+
+      const diffTxt = (s.diff === null) ? "" : (Number.isInteger(s.diff) ? String(s.diff) : s.diff.toFixed(1));
+
+      return `
+        <tr class="border-b border-gray-50">
+          <td class="px-3 py-2 text-gray-900 font-medium">${escapeHtml(col)}</td>
+          <td class="px-3 py-2 text-gray-700">${escapeHtml(ppsaTxt)}</td>
+          <td class="px-3 py-2 text-gray-700">${escapeHtml(praTxt)}</td>
+          <td class="px-3 py-2 ${s.diff === null ? "text-gray-400" : (s.diff>0 ? "text-green-600" : (s.diff<0 ? "text-red-600" : "text-gray-600"))} font-semibold">
+            ${escapeHtml(diffTxt)}
+          </td>
+          <td class="px-3 py-2 font-semibold ${s.cls}">
+            ${s.icon ? s.icon : ""}
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    tbody.innerHTML = rowsHtml || `<tr><td class="px-3 py-6 text-gray-400" colspan="5">Tiada subjek untuk dipaparkan.</td></tr>`;
+
+    summary.innerHTML = `
+      ${chip("Meningkat", naik, "text-green-700 bg-green-50 border-green-100")}
+      ${chip("Menurun", turun, "text-red-700 bg-red-50 border-red-100")}
+      ${chip("Kekal", kekal, "text-gray-700 bg-gray-50 border-gray-100")}
+      ${chip("Kosong", kosong, "text-amber-700 bg-amber-50 border-amber-100")}
+      ${chip("Subjek Wajib", wajibCols.length, "text-blue-700 bg-blue-50 border-blue-100")}
+    `;
+  }
+
+  // hooks
+  elSearch.addEventListener("input", renderList);
+  elKelas.addEventListener("change", renderList);
+
+  // mula render
+  renderList();
+}
+
+/* --- UI helper --- */
+function chip(label, val, cls) {
+  return `<span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${cls}">
+    <span>${escapeHtml(label)}</span>
+    <span class="rounded-full bg-white/70 px-2 py-0.5">${escapeHtml(String(val))}</span>
+  </span>`;
+}
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+</script>
+
 
     <!-- TAB 4 -->
     <section id="panel-mp-kritikal" class="hidden" hidden>
