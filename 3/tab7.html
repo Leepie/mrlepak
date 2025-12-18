@@ -1091,7 +1091,7 @@
     </section>
 
     <!-- TAB 3 -->
-    <!-- ===========================
+<!-- ===========================
      TAB 3: HEADCOUNT INDIVIDU
      =========================== -->
 <section id="panel-headcount-individu" class="hidden" hidden>
@@ -1103,41 +1103,48 @@
       <div>
         <h2 class="text-xl font-extrabold text-gray-900">Headcount Murid (Individu)</h2>
         <p class="text-sm text-gray-500">
-          Perbandingan markah subjek wajib PPSA vs PraSPM
+          Perbandingan markah & gred subjek wajib PPSA vs PraSPM
         </p>
       </div>
     </div>
 
-    <!-- BAR CARIAN -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+    <!-- MENU ATAS -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
 
-      <input id="hc-search-nama"
-        type="text"
-        placeholder="Cari Nama Murid"
-        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
+      <!-- KELAS -->
+      <div>
+        <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kelas</label>
+        <select id="hc-filter-kelas"
+          class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="">Pilih Kelas</option>
+        </select>
+      </div>
 
-      <input id="hc-search-kp"
-        type="text"
-        placeholder="Cari NO KP"
-        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200" />
+      <!-- NAMA MURID (auto ikut kelas) -->
+      <div class="md:col-span-2">
+        <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Nama Murid</label>
+        <select id="hc-filter-murid"
+          class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="">Pilih Nama Murid</option>
+        </select>
+      </div>
 
-      <select id="hc-filter-kelas"
-        class="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
-        <option value="">Semua Kelas</option>
-      </select>
+      <!-- BUTANG -->
+      <div>
+        <button id="hc-btn-cari"
+          class="w-full rounded-2xl px-5 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition">
+          Cari Murid
+        </button>
+      </div>
 
-      <button id="hc-btn-cari"
-        class="rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition">
-        Cari Murid
-      </button>
     </div>
 
     <!-- INFO MURID -->
     <div id="hc-murid-info"
-      class="hidden rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+      class="hidden rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
       <b id="hc-nama">Nama Murid</b><br>
-      NO KP: <span id="hc-kp"></span> |
-      Kelas: <span id="hc-kelas"></span>
+      NO KP: <span id="hc-kp">—</span> |
+      Kelas: <span id="hc-kelas">—</span>
     </div>
 
     <!-- JADUAL SUBJEK -->
@@ -1146,8 +1153,8 @@
         <thead class="bg-indigo-600 text-white">
           <tr>
             <th class="px-4 py-3 text-left">Subjek</th>
-            <th class="px-4 py-3 text-center">PPSA</th>
-            <th class="px-4 py-3 text-center">PraSPM</th>
+            <th class="px-4 py-3 text-center">PPSA<br><span class="text-xs font-normal opacity-90">Markah • Gred</span></th>
+            <th class="px-4 py-3 text-center">PraSPM<br><span class="text-xs font-normal opacity-90">Markah • Gred</span></th>
             <th class="px-4 py-3 text-center">Beza</th>
             <th class="px-4 py-3 text-center">Status</th>
           </tr>
@@ -1155,7 +1162,7 @@
         <tbody id="hc-table-body">
           <tr>
             <td colspan="5" class="px-4 py-6 text-center text-gray-500">
-              Sila cari murid untuk paparan headcount.
+              Sila pilih Kelas & Nama Murid.
             </td>
           </tr>
         </tbody>
@@ -1164,6 +1171,7 @@
 
   </div>
 </section>
+
 <!-- ===========================
      TAMBAHAN SWITCH TAB
      =========================== -->
@@ -1796,30 +1804,29 @@ loadAndRender();
 </script>
 <script>
 /* ===========================
-   TAB 3: HEADCOUNT INDIVIDU
-   - Cari murid (Nama / KP / Kelas)
-   - Banding gred subjek WAJIB (PPSA vs PraSPM)
-   - Beza berdasarkan point (A+=0 ... G=9) → negatif = semakin baik
+   TAB 3: HEADCOUNT INDIVIDU (VERSI BARU)
+   - Dropdown Kelas → Dropdown Nama Murid (auto ikut kelas)
+   - Jadual: Subjek nama penuh
+   - PPSA: Markah + Gred
+   - PraSPM: Markah + Gred
+   - Beza: beza point (PraSPM - PPSA), negatif = lebih baik
    =========================== */
 window.__initTab3 = function(){
   if(window.__tab3_inited) return;
   window.__tab3_inited = true;
 
   const $ = (id)=>document.getElementById(id);
+  const esc = (s)=>String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-  const elNamaQ  = $("hc-search-nama");
-  const elKpQ    = $("hc-search-kp");
-  const elKelas  = $("hc-filter-kelas");
-  const elBtn    = $("hc-btn-cari");
-  const elInfo   = $("hc-murid-info");
-  const elNama   = $("hc-nama");
-  const elKP     = $("hc-kp");
-  const elKls    = $("hc-kelas");
-  const elBody   = $("hc-table-body");
+  const elKelas = $("hc-filter-kelas");
+  const elMurid = $("hc-filter-murid");
+  const elBtn   = $("hc-btn-cari");
+  const elInfo  = $("hc-murid-info");
+  const elNama  = $("hc-nama");
+  const elKP    = $("hc-kp");
+  const elKls   = $("hc-kelas");
+  const elBody  = $("hc-table-body");
 
-  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-  // ambil parsed (disimpan dari loadAndRender)
   const PPAR = window.__PPSA_PARSED;
   const RPAR = window.__PRASPM_PARSED;
 
@@ -1832,15 +1839,14 @@ window.__initTab3 = function(){
   }
 
   const gradeValueMapping = window.gradeValueMapping || {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
+  const subjectNameMap = window.subjectNameMap || {};
+  const subjectFlagMap = window.__SUBJECT_FLAG_MAP || {};
+  const subjectColumns = window.__SUBJECT_COLUMNS  || []; // ini kolum gred (BM G, BI G, ...)
 
-  function normKP(x){
-    return String(x ?? "").replace(/\D/g,""); // buang dash/spaces
-  }
+  function normKP(x){ return String(x ?? "").replace(/\D/g,""); }
+
   function getColKey(row, variants){
-    for(const k of variants){
-      if(row && Object.prototype.hasOwnProperty.call(row,k)) return k;
-    }
-    // fallback: cuba padanan case-insensitive
+    for(const k of variants){ if(row && Object.prototype.hasOwnProperty.call(row,k)) return k; }
     const keys = Object.keys(row||{});
     const up = new Map(keys.map(k=>[k.toUpperCase(), k]));
     for(const k of variants){
@@ -1849,7 +1855,6 @@ window.__initTab3 = function(){
     }
     return null;
   }
-
   function getNama(row){
     const k = getColKey(row, ["NAMA","Nama","NAMA MURID","NAMA_PENUH","MURID"]);
     return (k ? row[k] : "")?.toString().trim() || "";
@@ -1859,57 +1864,30 @@ window.__initTab3 = function(){
     return (k ? row[k] : "")?.toString().trim() || "";
   }
   function getKP(row){
-    const k = getColKey(row, ["NO KP","NO. KP","NO KP/IC","MYKAD","IC","NO KAD PENGENALAN"]);
+    const k = getColKey(row, ["NO KP","NO. KP","NO KP/IC","MYKAD","IC","NO KAD PENGENALAN","NO K/P","NO KP/ K/P"]);
     return normKP(k ? row[k] : "");
   }
 
-  function buildKelasOptions(){
-    const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : (PPAR.rows||[]);
-    const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : (RPAR.rows||[]);
-    const all = [...rowsP, ...rowsR];
-
-    const set = new Set();
-    all.forEach(r=>{
-      const kls = getKelas(r);
-      if(kls) set.add(kls);
-    });
-
-    const kelasList = Array.from(set).sort((a,b)=>a.localeCompare(b,"ms"));
-    elKelas.innerHTML = `<option value="">Semua Kelas</option>` + kelasList.map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");
-  }
-
-  // subject wajib → berdasarkan flag (0 = elektif, 1/tiada = wajib)
-  const subjectFlagMap = window.__SUBJECT_FLAG_MAP || {};
-  const subjectColumns = window.__SUBJECT_COLUMNS  || [];
-
+  // ambil CODE subjek dari "BM G" → "BM"
   function subjectCodeFromCol(col){
     return (String(col||"").split(" ")[0] || "").toUpperCase().trim();
   }
-
   function isWajib(code){
     const f = subjectFlagMap[code];
-    if(f === "0") return false;
-    return true;
+    if(f === "0") return false; // elektif
+    return true; // 1 / tiada = wajib
   }
-
-  // bina peta code -> column gred (contoh "BM G")
-  function buildSubjectColMap(cols){
-    const map = new Map();
-    cols.forEach(c=>{
-      const code = subjectCodeFromCol(c);
-      if(!code) return;
-      // ambil yang pertama (kebiasaannya satu saja)
-      if(!map.has(code)) map.set(code, c);
-    });
-    return map;
-  }
-
-  const colMapP = buildSubjectColMap(subjectColumns);
-  const colMapR = buildSubjectColMap(subjectColumns); // guna mapping sama supaya konsisten (PPSA format sama)
-
-  const subjectNameMap = window.subjectNameMap || {};
   function subjectLabel(code){
     return subjectNameMap[code] || code;
+  }
+
+  // cari kolum untuk sesuatu subjek & jenis (M atau G) dalam parsed exam
+  function findColByCodeJenis(parsed, code, jenis){
+    // contoh header: "BM M" / "BM G"
+    const headers = parsed?.headers || [];
+    const target = `${code} ${jenis}`.toUpperCase();
+    const hit = headers.find(h => String(h||"").toUpperCase().trim() === target);
+    return hit || null;
   }
 
   function normGrade(g){
@@ -1918,10 +1896,9 @@ window.__initTab3 = function(){
     if(x === "TH" || x === "T/H" || x === "TIDAK HADIR") return "TH";
     return "";
   }
-
   function gradePoint(g){
     if(!g) return null;
-    if(g === "TH") return null; // TH tak masuk kiraan point
+    if(g === "TH") return null;
     if(gradeValueMapping.hasOwnProperty(g)) return gradeValueMapping[g];
     return null;
   }
@@ -1929,22 +1906,18 @@ window.__initTab3 = function(){
   function diffClass(pointDiff){
     if(pointDiff == null) return "text-gray-500";
     if(pointDiff === 0) return "text-gray-700 font-semibold";
-    // NEGATIF = lebih baik
     return (pointDiff < 0) ? "text-emerald-600 font-extrabold" : "text-rose-600 font-extrabold";
   }
-
   function diffText(pointDiff){
     if(pointDiff == null) return "—";
     const s = (pointDiff > 0) ? "+" : "";
     return s + pointDiff;
   }
-
   function statusText(pointDiff){
     if(pointDiff == null) return "Tiada Data";
     if(pointDiff === 0) return "Kekal";
-    return (pointDiff < 0) ? "Meningkat" : "Menurun"; // point turun = gred naik
+    return (pointDiff < 0) ? "Meningkat" : "Menurun";
   }
-
   function statusBadge(pointDiff){
     const st = statusText(pointDiff);
     if(st === "Meningkat") return `<span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">▲ Meningkat</span>`;
@@ -1953,56 +1926,98 @@ window.__initTab3 = function(){
     return `<span class="px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">Tiada Data</span>`;
   }
 
-  function findCandidate(rows, qNama, qKP, qKelas){
-    const namaQ = String(qNama||"").trim().toLowerCase();
-    const kpQ   = normKP(qKP||"");
-    const klsQ  = String(qKelas||"").trim();
+  // bina senarai kelas dari gabungan PPSA+PraSPM
+  function buildKelasOptions(){
+    const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : (PPAR.rows||[]);
+    const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : (RPAR.rows||[]);
+    const all = [...rowsP, ...rowsR];
 
-    const filtered = rows.filter(r=>{
-      const nm = getNama(r).toLowerCase();
-      const kp = getKP(r);
-      const kl = getKelas(r);
-
-      if(klsQ && kl !== klsQ) return false;
-      if(namaQ && !nm.includes(namaQ)) return false;
-      if(kpQ && kp !== kpQ) return false;
-      return true;
+    const set = new Set();
+    all.forEach(r=>{
+      const kls = getKelas(r);
+      if(kls && kls !== "1") set.add(kls);
     });
 
-    return filtered.length ? filtered[0] : null; // ambil 1st match
+    const kelasList = Array.from(set).sort((a,b)=>a.localeCompare(b,"ms"));
+    elKelas.innerHTML = `<option value="">Pilih Kelas</option>` + kelasList.map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");
+  }
+
+  // bila pilih kelas → isi dropdown murid ikut kelas
+  function updateMuridDropdown(){
+    const kelasDipilih = elKelas.value;
+    elMurid.innerHTML = `<option value="">Pilih Nama Murid</option>`;
+    if(!kelasDipilih) return;
+
+    // utamakan PraSPM supaya nama/kelas lebih “latest”
+    const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : (RPAR.rows||[]);
+    const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : (PPAR.rows||[]);
+
+    const candidates = [...rowsR, ...rowsP]
+      .filter(r => getKelas(r) === kelasDipilih)
+      .filter(r => {
+        const nm = getNama(r);
+        return nm && !/^\d+$/.test(nm);
+      });
+
+    // dedupe by KP kalau ada, kalau tiada → by Nama
+    const seen = new Set();
+    const list = [];
+
+    candidates.forEach(r=>{
+      const kp = getKP(r);
+      const nm = getNama(r);
+      const key = kp ? `KP:${kp}` : `NM:${nm.toUpperCase()}`;
+      if(seen.has(key)) return;
+      seen.add(key);
+      list.push({ nama:nm, kp:kp });
+    });
+
+    list.sort((a,b)=>a.nama.localeCompare(b.nama,"ms"));
+
+    // value simpan KP kalau ada, kalau tiada simpan nama
+    list.forEach(x=>{
+      const val = x.kp ? `KP:${x.kp}` : `NM:${x.nama}`;
+      const label = x.kp ? `${x.nama}` : `${x.nama}`;
+      elMurid.insertAdjacentHTML("beforeend", `<option value="${esc(val)}">${esc(label)}</option>`);
+    });
+  }
+
+  function findRowBySelected(rows, selectedVal, kelasDipilih){
+    if(!selectedVal) return null;
+    const [kind, raw] = selectedVal.split(":");
+    if(kind === "KP"){
+      return rows.find(r => getKelas(r) === kelasDipilih && getKP(r) === raw) || null;
+    }
+    // NM
+    return rows.find(r => getKelas(r) === kelasDipilih && getNama(r).toUpperCase() === String(raw||"").toUpperCase()) || null;
   }
 
   function renderMurid(rowP, rowR){
-    // pilih info utama: utamakan rowR kalau ada (PraSPM)
     const base = rowR || rowP;
-
-    const nama = base ? getNama(base) : "";
-    const kp   = base ? getKP(base) : "";
-    const kls  = base ? getKelas(base) : "";
-
     if(!base){
       elInfo.classList.add("hidden");
       elBody.innerHTML = `
         <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">
-          Murid tidak ditemui. Cuba semak Nama/KP/Kelas.
+          Murid tidak ditemui. Cuba pilih semula Nama Murid.
         </td></tr>`;
       return;
     }
 
     elInfo.classList.remove("hidden");
-    elNama.textContent = nama || "—";
-    elKP.textContent   = kp   || "—";
-    elKls.textContent  = kls  || "—";
+    elNama.textContent = getNama(base) || "—";
+    elKP.textContent   = getKP(base)   || "—";
+    elKls.textContent  = getKelas(base)|| "—";
 
-    // senarai subjek wajib (ikut subjectColumns/flag)
-    const wajibCodes = Array.from(colMapP.keys())
-      .filter(code => isWajib(code))
+    const wajibCodes = subjectColumns
+      .map(subjectCodeFromCol)
+      .filter(code => code && isWajib(code))
+      .filter((v,i,a)=>a.indexOf(v)===i)
       .sort((a,b)=>a.localeCompare(b,"ms"));
 
     if(!wajibCodes.length){
       elBody.innerHTML = `
         <tr><td colspan="5" class="px-4 py-6 text-center text-rose-600 font-semibold">
-          Tiada subjek wajib dikesan dalam CSV (semak flag/format).
+          Tiada subjek wajib dikesan (semak flag/format CSV).
         </td></tr>`;
       return;
     }
@@ -2010,25 +2025,28 @@ window.__initTab3 = function(){
     let html = "";
 
     wajibCodes.forEach(code=>{
-      const colP = colMapP.get(code);
-      const colR = colMapR.get(code);
+      const colPM = findColByCodeJenis(PPAR, code, "M");
+      const colPG = findColByCodeJenis(PPAR, code, "G");
+      const colRM = findColByCodeJenis(RPAR, code, "M");
+      const colRG = findColByCodeJenis(RPAR, code, "G");
 
-      const gP = normGrade(rowP && colP ? rowP[colP] : "");
-      const gR = normGrade(rowR && colR ? rowR[colR] : "");
+      const mP = rowP && colPM ? String(rowP[colPM] ?? "").trim() : "";
+      const gP = normGrade(rowP && colPG ? rowP[colPG] : "");
+      const mR = rowR && colRM ? String(rowR[colRM] ?? "").trim() : "";
+      const gR = normGrade(rowR && colRG ? rowR[colRG] : "");
 
       const pP = gradePoint(gP);
       const pR = gradePoint(gR);
-
       const diff = (pP != null && pR != null) ? (pR - pP) : null;
 
-      const showP = gP ? (gP === "TH" ? "TH" : gP) : "—";
-      const showR = gR ? (gR === "TH" ? "TH" : gR) : "—";
+      const showP = (mP || gP) ? `${esc(mP || "—")} • ${esc(gP || "—")}` : "—";
+      const showR = (mR || gR) ? `${esc(mR || "—")} • ${esc(gR || "—")}` : "—";
 
       html += `
         <tr class="border-t">
           <td class="px-4 py-3 font-bold text-gray-800">${esc(subjectLabel(code))}</td>
-          <td class="px-4 py-3 text-center font-extrabold text-blue-700">${esc(showP)}</td>
-          <td class="px-4 py-3 text-center font-extrabold text-indigo-700">${esc(showR)}</td>
+          <td class="px-4 py-3 text-center font-extrabold text-blue-700">${showP}</td>
+          <td class="px-4 py-3 text-center font-extrabold text-indigo-700">${showR}</td>
           <td class="px-4 py-3 text-center ${diffClass(diff)}">${esc(diffText(diff))}</td>
           <td class="px-4 py-3 text-center">${statusBadge(diff)}</td>
         </tr>`;
@@ -2038,44 +2056,52 @@ window.__initTab3 = function(){
   }
 
   function cari(){
+    const kelasDipilih = elKelas.value;
+    const muridVal = elMurid.value;
+
+    if(!kelasDipilih || !muridVal){
+      alert("Sila pilih Kelas & Nama Murid!");
+      return;
+    }
+
     const rowsP = Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : (PPAR.rows||[]);
     const rowsR = Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : (RPAR.rows||[]);
 
-    const qNama  = elNamaQ.value;
-    const qKP    = elKpQ.value;
-    const qKelas = elKelas.value;
+    const rowR = findRowBySelected(rowsR, muridVal, kelasDipilih);
+    const rowP = findRowBySelected(rowsP, muridVal, kelasDipilih);
 
-    // strategi: jika KP diisi → cari tepat KP dahulu
-    // kemudian padankan pasangan PPSA/PraSPM menggunakan KP jika ada
-    let rowP = findCandidate(rowsP, qNama, qKP, qKelas);
-    let rowR = findCandidate(rowsR, qNama, qKP, qKelas);
+    // jika salah satu tiada, cuba padan guna KP dari yang ada
+    let finalP = rowP, finalR = rowR;
 
-    // kalau jumpa satu pihak sahaja, cuba cari pasangan guna KP/nama+kelas
-    if(!rowP && rowR){
-      const kp = getKP(rowR);
-      const nm = getNama(rowR);
-      const kl = getKelas(rowR);
-      rowP = findCandidate(rowsP, nm, kp, kl);
+    if(!finalP && finalR){
+      const kp = getKP(finalR);
+      if(kp) finalP = rowsP.find(r => getKelas(r)===kelasDipilih && getKP(r)===kp) || null;
     }
-    if(!rowR && rowP){
-      const kp = getKP(rowP);
-      const nm = getNama(rowP);
-      const kl = getKelas(rowP);
-      rowR = findCandidate(rowsR, nm, kp, kl);
+    if(!finalR && finalP){
+      const kp = getKP(finalP);
+      if(kp) finalR = rowsR.find(r => getKelas(r)===kelasDipilih && getKP(r)===kp) || null;
     }
 
-    renderMurid(rowP, rowR);
+    renderMurid(finalP, finalR);
   }
 
-  // init dropdown kelas
+  // INIT
   buildKelasOptions();
+  updateMuridDropdown();
 
-  // event
-  if(elBtn) elBtn.addEventListener("click", cari);
-  if(elNamaQ) elNamaQ.addEventListener("keydown", (e)=>{ if(e.key==="Enter") cari(); });
-  if(elKpQ)   elKpQ.addEventListener("keydown", (e)=>{ if(e.key==="Enter") cari(); });
+  elKelas.addEventListener("change", ()=>{
+    updateMuridDropdown();
+    elInfo.classList.add("hidden");
+    elBody.innerHTML = `
+      <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">
+        Sila pilih Nama Murid.
+      </td></tr>`;
+  });
+
+  elBtn.addEventListener("click", cari);
 };
 </script>
+
 
 </body>
 </html>
