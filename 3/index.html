@@ -223,6 +223,22 @@
   border-bottom: 4px solid #4f46e5 !important;
 }
 
+    /* rapatkan ruang sebelum footer */
+.main-content,
+.page-content,
+.container,
+section:last-of-type{
+  margin-bottom: 12px !important;
+  padding-bottom: 12px !important;
+}
+footer{
+  margin-top: 12px !important;
+  padding-top: 10px !important;
+}
+.wrapper{
+  min-height: calc(100vh - 60px);
+}
+
   </style>
 
   <script>
@@ -748,15 +764,48 @@ const SUBJECT_NAME_MAP =
 function getFullSubjectNameNoG(subjectCol){
   const x = normalizeSubjectCol(subjectCol);
   if(!x) return "";
-  const parts = x.split(" ");
-  const code  = (parts[0] || "").toUpperCase();
 
-  // elak option pelik "G" sahaja
-  if(code === "G" && parts.length === 1) return "";
+  // buang kes khas option pelik "G" sahaja
+  if(x.toUpperCase() === "G") return "";
 
-  return SUBJECT_NAME_MAP[code] || code;  // ✅ sekarang akan jadi "PENDIDIKAN ISLAM" bukan "PAI"
+  // pecahkan token
+  const parts = x.split(" ").filter(Boolean);
+  if(!parts.length) return "";
+
+  // ✅ buang token jenis di hujung (G / GRED / GRADE / MARKAH / M)
+  const last = (parts[parts.length - 1] || "").toUpperCase();
+  const jenisSet = new Set(["G","GRED","GRADE","MARKAH","M"]);
+
+  let baseParts = parts.slice();
+  if(jenisSet.has(last)) baseParts = parts.slice(0, -1);
+
+  const base = baseParts.join(" ").trim();
+  if(!base) return "";
+
+  // ✅ Jika base adalah kod (BM/BI/SEJ/MT...)
+  const maybeCode = base.toUpperCase();
+  if (SUBJECT_NAME_MAP[maybeCode]) return SUBJECT_NAME_MAP[maybeCode];
+
+  // ✅ Jika base sudah nama penuh, pulangkan terus
+  return maybeCode;
 }
 
+
+  // ==========================
+  // ✅ SUSUNAN RASMI SUBJEK (Tab 2)
+  // ikut SUBJECT_ORDER (full name)
+  // ==========================
+  function subjectOrderIndexByCol(subjectCol){
+    const label = (getFullSubjectNameNoG(subjectCol) || "").toUpperCase().trim();
+    const idx = SUBJECT_ORDER.indexOf(label);
+    return idx === -1 ? 999 : idx; // tak tersenarai → bawah sekali
+  }
+
+  function sortSubjectColsByOfficialOrder(cols){
+    return (cols || []).slice().sort((a,b)=>{
+      return subjectOrderIndexByCol(a) - subjectOrderIndexByCol(b);
+    });
+  }
 
   function isValidSubjectCol(subjectCol){
     const x = normalizeSubjectCol(subjectCol);
@@ -805,12 +854,19 @@ function getFullSubjectNameNoG(subjectCol){
       kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
     selK.value = Array.from(selK.options).some(o => o.value === prevKelas) ? prevKelas : "";
 
-    let subjectCols = uniqueSorted(
-      (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length
+        let subjectCols = (
+      (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length)
         ? window.__TAB2_SUBJECT_COLS
         : inferSubjectColumns(rowsAny)
-      ).filter(isValidSubjectCol)
-    );
+    )
+    .filter(isValidSubjectCol);
+
+    // ✅ buang duplicate tapi JANGAN A-Z
+    subjectCols = Array.from(new Set(subjectCols.map(x => normalizeSubjectCol(x))));
+
+    // ✅ susun ikut SUBJECT_ORDER (ikut label penuh)
+    subjectCols = sortSubjectColsByOfficialOrder(subjectCols);
+
 
     selS.innerHTML =
       `<option value="">Pilih Subjek</option>` +
@@ -2254,58 +2310,7 @@ function renderMurid(rowP, rowR){
 };
 </script>
 
-<script>
-                (function() {
-                    // ✅ Teks
-                    const REPLACEMENT_TEXT = "© 2025 Hakcipta Terpelihara XCode Mr LePaK";
 
-                    // 
-                    document.addEventListener("contextmenu", e => e.preventDefault());
-
-                    // (Ctrl+C, Ctrl+U, F12, dll.)
-                    document.addEventListener("keydown", function(e) {
-                        if (e.key === "F12") {
-                            e.preventDefault();
-                            return;
-                        }
-                        if (e.ctrlKey || e.metaKey) {
-                            const k = e.key.toLowerCase();
-                            const blocked = ["c", "v", "x", "u", "s"]; // tambah jika perlu
-                            const shiftReq = (e.shiftKey && (k === "i")); // Ctrl+Shift+I
-                            if (blocked.includes(k) || shiftReq) {
-                                e.preventDefault();
-                            }
-                        }
-                    });
-
-                    // Override 
-                    document.addEventListener("copy", function(e) {
-                        if (e.clipboardData) {
-                            e.clipboardData.setData('text/plain', REPLACEMENT_TEXT);
-                            e.clipboardData.setData('text/html', '<p>' + REPLACEMENT_TEXT + '</p>');
-                            e.preventDefault();
-                        } else if (window.clipboardData) {
-                            window.clipboardData.setData('Text', REPLACEMENT_TEXT);
-                            e.preventDefault();
-                        }
-                    });
-
-                    // Override Paste → tampal 
-                    document.addEventListener("paste", function(e) {
-                        e.preventDefault();
-                        const active = document.activeElement;
-                        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
-                            active.value = REPLACEMENT_TEXT;
-                            return;
-                        }
-                        const sel = window.getSelection();
-                        if (!sel.rangeCount) return;
-                        const range = sel.getRangeAt(0);
-                        range.deleteContents();
-                        range.insertNode(document.createTextNode(REPLACEMENT_TEXT));
-                    });
-                })();
-</script>
 
 </body>
 </html>
