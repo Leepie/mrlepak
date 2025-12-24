@@ -66,14 +66,16 @@
 
       <!-- PPSA + PraSPM Buttons -->
       <section class="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4">
-        <a href="https://leepie.github.io/mrlepak/1/index.html"
+        <!-- HANYA UBAH href -->
+        <a href="index.html?page=ppsa"
            class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 
                   text-base sm:text-lg font-semibold bg-blue-600 hover:bg-blue-700
                   text-white shadow-lg shadow-blue-600/20 transition">
           <span class="mr-2">PPSA</span>
         </a>
 
-        <a href="https://leepie.github.io/mrlepak/2/index.html"
+        <!-- HANYA UBAH href -->
+        <a href="index.html?page=praspm"
            class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 
                   text-base sm:text-lg font-semibold bg-violet-600 hover:bg-violet-700
                   text-white shadow-lg shadow-violet-600/20 transition">
@@ -83,7 +85,8 @@
 
       <!-- RED FULL-WIDTH BUTTON (NEW) -->
       <section class="mt-6">
-        <a href="https://leepie.github.io/mrlepak/3/index.html"
+        <!-- HANYA UBAH href -->
+        <a href="index.html?page=vs"
            class="block w-full text-center px-5 py-4 rounded-xl 
                   bg-red-600 hover:bg-red-700 active:scale-[.99]
                   text-white font-semibold shadow-lg shadow-red-600/30 transition">
@@ -99,7 +102,34 @@
   </div>
 
   <script>
+    // kekal asal
     document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+    // =========================
+    // ROUTER untuk GitHub Pages
+    // =========================
+    (function () {
+      const page = new URLSearchParams(window.location.search).get('page');
+      if (!page) return; // tiada page → kekal di Utama
+
+      const routes = {
+        ppsa:   "./1/index.html",
+        praspm: "./2/index.html",
+        vs:     "./3/index.html",
+        utama:  "./index.html"
+      };
+
+      const target = routes[page];
+      if (!target) return; // page tak sah → biar di Utama
+
+      // elak loop: kalau target sama dengan page semasa, jangan redirect
+      const currentPath = window.location.pathname.replace(/\/+$/, '');
+      const targetPath  = new URL(target, window.location.href).pathname.replace(/\/+$/, '');
+      if (currentPath === targetPath) return;
+
+      // redirect
+      window.location.replace(target);
+    })();
   </script>
 
 </body>
