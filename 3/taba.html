@@ -1406,25 +1406,73 @@ function getFullSubjectNameNoG(subjectCol){
 <!--PELIK -->
 
 <!-- ===========================
-     COMBAT ZONE: SENARAI MURID
+     COMBAT ZONE: MURID KRITIKAL (TAB ZON)
      =========================== -->
 <div class="soft-card overflow-hidden mt-6">
 
-  <div class="px-4 py-3 border-b bg-rose-50 flex items-center justify-between">
+  <!-- Header -->
+  <div class="px-4 py-3 border-b bg-rose-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div class="font-bold text-gray-800">
       Combat Zone – Murid Kritikal
     </div>
 
-    <select id="cz-topN"
-      class="rounded-xl border px-3 py-1 text-sm"
-      onchange="renderCombatZoneMurid()">
-      <option value="5">Top 5</option>
-      <option value="10">Top 10</option>
-      <option value="20">Top 20</option>
-      <option value="ALL">Semua</option>
-    </select>
+    <div class="flex items-center gap-2">
+      <select id="cz-topN"
+        class="rounded-xl border px-3 py-1 text-sm bg-white"
+        onchange="renderCombatZoneMurid()">
+        <option value="5">Top 5</option>
+        <option value="10">Top 10</option>
+        <option value="20">Top 20</option>
+        <option value="ALL">Semua</option>
+      </select>
+    </div>
   </div>
 
+  <!-- TAB ZON -->
+  <div class="px-4 py-3 border-b bg-white">
+    <div class="flex flex-wrap gap-2">
+      <!-- Nota: data-zone mesti sama dengan label zon dalam data -->
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-rose-600 text-white"
+        data-zone="Kualiti 1"
+        onclick="setCombatZoneTab(this)">
+        Kualiti 1
+      </button>
+
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50"
+        data-zone="Kualiti 2"
+        onclick="setCombatZoneTab(this)">
+        Kualiti 2
+      </button>
+
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50"
+        data-zone="Pertahanan 1"
+        onclick="setCombatZoneTab(this)">
+        Pertahanan 1
+      </button>
+
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50"
+        data-zone="Pertahanan 2"
+        onclick="setCombatZoneTab(this)">
+        Pertahanan 2
+      </button>
+
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50"
+        data-zone="Kuantiti"
+        onclick="setCombatZoneTab(this)">
+        Kuantiti
+      </button>
+    </div>
+
+    <!-- simpan zon semasa -->
+    <input type="hidden" id="cz-activeZone" value="Kualiti 1">
+  </div>
+
+  <!-- Table -->
   <div class="overflow-x-auto">
     <table class="min-w-full text-sm">
       <thead class="bg-rose-600 text-white">
@@ -1436,13 +1484,41 @@ function getFullSubjectNameNoG(subjectCol){
           <th class="px-3 py-2 text-center">GP PPSA</th>
           <th class="px-3 py-2 text-center">GP PraSPM</th>
           <th class="px-3 py-2 text-center">Beza</th>
-          <th class="px-3 py-2 text-center">Zon</th>
         </tr>
       </thead>
       <tbody id="cz-murid-body"></tbody>
     </table>
   </div>
+
+  <!-- Footer kecil -->
+  <div class="px-4 py-2 border-t bg-white text-xs text-gray-500">
+    Paparan mengikut zon: <span id="cz-activeZoneLabel" class="font-semibold text-gray-700">Kualiti 1</span>
+  </div>
 </div>
+
+<script>
+  // Tukar tab zon + render semula
+  function setCombatZoneTab(btn){
+    const zone = btn.getAttribute("data-zone") || "Kualiti 1";
+    document.getElementById("cz-activeZone").value = zone;
+
+    // styling aktif tab
+    document.querySelectorAll(".cz-tab").forEach(b=>{
+      b.classList.remove("bg-rose-600","text-white");
+      b.classList.add("bg-white","text-gray-700");
+    });
+    btn.classList.remove("bg-white","text-gray-700");
+    btn.classList.add("bg-rose-600","text-white");
+
+    // label bawah
+    const lbl = document.getElementById("cz-activeZoneLabel");
+    if(lbl) lbl.textContent = zone;
+
+    // render data ikut tab
+    renderCombatZoneMurid();
+  }
+</script>
+
 
 
         <!--TAMAT PELIK-->
@@ -2840,8 +2916,13 @@ window.__initTab4 = function(){
 };
 
 
- function renderCombatZoneMurid(){
-  const topNVal = document.getElementById("cz-topN").value;
+function renderCombatZoneMurid(){
+
+  // 1) Zon aktif dari TAB
+  const activeZone = document.getElementById("cz-activeZone")?.value || "Kualiti 1";
+
+  // 2) Top N
+  const topNVal = document.getElementById("cz-topN")?.value || "10";
   const limit = (topNVal === "ALL") ? Infinity : parseInt(topNVal,10);
 
   const rowsP = window.__CSV_PPSA_ROWS || [];
@@ -2852,7 +2933,7 @@ window.__initTab4 = function(){
 
   if(!PPAR || !RPAR) return;
 
-  const namaCol = PPAR.headerMap["nama"] || "NAMA";
+  const namaCol  = PPAR.headerMap["nama"]  || "NAMA";
   const kelasCol = PPAR.headerMap["kelas"] || "KELAS";
 
   const getKP = r =>
@@ -2863,35 +2944,38 @@ window.__initTab4 = function(){
     let sum=0, cnt=0;
     parsed.subjectColumns.forEach(col=>{
       const code = col.split(" ")[0].toUpperCase();
-      if(parsed.subjectFlagMap[code]==="0") return;
+      if(parsed.subjectFlagMap[code]==="0") return; // elektif abaikan
       const g = (row[col]||"").toUpperCase();
       if(gradeValueMapping[g]!=null){
         sum+=gradeValueMapping[g]; cnt++;
       }
     });
-    return cnt? +(sum/cnt).toFixed(2):null;
+    return cnt ? +(sum/cnt).toFixed(2) : null;
   };
 
+  // Map PPSA utk padanan
   const mapP = new Map();
   rowsP.forEach(r=>{
-    const key = getKP(r) || (r[namaCol]+"|"+r[kelasCol]);
+    const key = getKP(r) || ((r[namaCol]||"")+"|"+(r[kelasCol]||""));
     mapP.set(key,r);
   });
 
+  // Bina list murid (PraSPM sebagai asas)
   const list=[];
   rowsR.forEach(r=>{
-    const key = getKP(r) || (r[namaCol]+"|"+r[kelasCol]);
+    const key = getKP(r) || ((r[namaCol]||"")+"|"+(r[kelasCol]||""));
     const rp = mapP.get(key);
 
     const gpP = kiraGP(rp,PPAR);
     const gpR = kiraGP(r,RPAR);
     if(gpR==null) return;
 
-    const diff = (gpP!=null)? +(gpP-gpR).toFixed(2):null;
-    const zon = gpR<=2.33?"Kualiti 1":
-                gpR<=4?"Kualiti 2":
-                gpR<=6?"Pertahanan 1":
-                gpR<=8?"Pertahanan 2":"Kuantiti";
+    const diff = (gpP!=null) ? +(gpP-gpR).toFixed(2) : null;
+
+    const zon = gpR<=2.33 ? "Kualiti 1" :
+                gpR<=4    ? "Kualiti 2" :
+                gpR<=6    ? "Pertahanan 1" :
+                gpR<=8    ? "Pertahanan 2" : "Kuantiti";
 
     list.push({
       nama:r[namaCol],
@@ -2901,30 +2985,35 @@ window.__initTab4 = function(){
     });
   });
 
-  list.sort((a,b)=>b.gpR-a.gpR);
+  // 3) TAPIS ikut TAB ZON (INI YANG BETUL)
+  const filtered = list.filter(m => (m.zon||"").trim() === activeZone);
 
+  // 4) Sorting (kekal ikut gpR menurun)
+  filtered.sort((a,b)=> (b.gpR||0) - (a.gpR||0));
+
+  // Render
   const body=document.getElementById("cz-murid-body");
   body.innerHTML="";
 
-  list.slice(0,limit).forEach((m,i)=>{
-    const icon = m.diff==null?"—":
-      m.diff>0?`<span class="text-emerald-600 font-bold">▲ ${m.diff}</span>`:
-               `<span class="text-rose-600 font-bold">▼ ${Math.abs(m.diff)}</span>`;
+  filtered.slice(0,limit).forEach((m,i)=>{
+    const icon = m.diff==null ? "—" :
+      m.diff>0 ? `<span class="text-emerald-600 font-bold">▲ ${m.diff}</span>` :
+                 `<span class="text-rose-600 font-bold">▼ ${Math.abs(m.diff)}</span>`;
 
     body.insertAdjacentHTML("beforeend",`
       <tr class="border-t">
-        <td class="text-center">${i+1}</td>
-        <td>${m.nama}</td>
-        <td class="text-center">${m.kp||"—"}</td>
-        <td class="text-center">${m.kelas}</td>
-        <td class="text-center">${m.gpP??"—"}</td>
-        <td class="text-center font-bold">${m.gpR}</td>
-        <td class="text-center">${icon}</td>
-        <td class="text-center font-semibold">${m.zon}</td>
+        <td class="px-3 py-2 text-center">${i+1}</td>
+        <td class="px-3 py-2">${m.nama || "—"}</td>
+        <td class="px-3 py-2 text-center">${m.kp || "—"}</td>
+        <td class="px-3 py-2 text-center">${m.kelas || "—"}</td>
+        <td class="px-3 py-2 text-center">${m.gpP ?? "—"}</td>
+        <td class="px-3 py-2 text-center font-bold">${m.gpR}</td>
+        <td class="px-3 py-2 text-center">${icon}</td>
       </tr>
     `);
   });
 }
+
 
   
 </script>
