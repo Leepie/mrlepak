@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>X-CODE Mr LePaK</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+  if (window.Chart) {
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+    Chart.defaults.plugins.legend.labels.boxWidth  = 12;
+    Chart.defaults.plugins.legend.labels.boxHeight = 12;
+  }
+  </script>
+
+  <style>
+    .bg-hero {
+      background: radial-gradient(1200px 600px at 10% 0%, rgba(59,130,246,.15), transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(168,85,247,.12), transparent 60%),
+                  linear-gradient(180deg, #f8fafc, #eef2ff);
+    }
+    @media (prefers-color-scheme: dark) {
+      .bg-hero {
+        background: radial-gradient(1200px 600px at 10% 0%, rgba(59,130,246,.25), transparent 60%),
+                    radial-gradient(900px 500px at 90% 10%, rgba(168,85,247,.22), transparent 60%),
+                    linear-gradient(180deg, #0b1020, #0a0f1d);
+      }
+    }
+    .glass {
+      backdrop-filter: saturate(140%) blur(10px);
+      background: rgba(255,255,255,.72);
+    }
+    @media (prefers-color-scheme: dark) {
+      .glass {
+        background: rgba(13,17,23,.6);
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-hero text-slate-800 dark:text-slate-100">
+
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <main class="w-full max-w-3xl glass rounded-2xl shadow-xl border border-white/40 dark:border-white/10 p-6 sm:p-10">
+
+      <!-- Header -->
+      <header class="flex flex-col items-center text-center gap-4">
+        <img
+          src="https://raw.githubusercontent.com/Leepie/mrlepak/master/LOGO.jpg"
+          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover"
+        />
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold">Analisis PPSA vs PraSPM</h1>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-1">
+            “Sistem Analisis Prestasi Akademik SMK"
+          </p>
+        </div>
+      </header>
+
+      <div class="my-8 border-t border-slate-200/70 dark:border-white/10"></div>
+
+      <!-- PPSA + PraSPM Buttons -->
+      <section class="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4">
+        <!-- HANYA UBAH href -->
+        <a href="index.html?page=ppsa"
+           class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 
+                  text-base sm:text-lg font-semibold bg-blue-600 hover:bg-blue-700
+                  text-white shadow-lg shadow-blue-600/20 transition">
+          <span class="mr-2">PPSA</span>
+        </a>
+
+        <!-- HANYA UBAH href -->
+        <a href="index.html?page=praspm"
+           class="group flex-1 inline-flex items-center justify-center rounded-xl px-5 py-4 
+                  text-base sm:text-lg font-semibold bg-violet-600 hover:bg-violet-700
+                  text-white shadow-lg shadow-violet-600/20 transition">
+          <span class="mr-2">PraSPM</span>
+        </a>
+      </section>
+
+      <!-- RED FULL-WIDTH BUTTON (NEW) -->
+      <section class="mt-6">
+        <!-- HANYA UBAH href -->
+        <a href="index.html?page=vs"
+           class="block w-full text-center px-5 py-4 rounded-xl 
+                  bg-red-600 hover:bg-red-700 active:scale-[.99]
+                  text-white font-semibold shadow-lg shadow-red-600/30 transition">
+          PPSA vs PraSPM
+        </a>
+      </section>
+
+      <footer class="mt-10 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        &copy; <span id="yearNow"></span> XCode Mr LePaK – Analisis PPSA vs PraSPM
+      </footer>
+
+    </main>
+  </div>
+
+  <script>
+    // kekal asal
+    document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+    // =========================
+    // ROUTER untuk GitHub Pages
+    // =========================
+    (function () {
+      const page = new URLSearchParams(window.location.search).get('page');
+      if (!page) return; // tiada page → kekal di Utama
+
+      const routes = {
+        ppsa:   "./1/index.html",
+        praspm: "./2/index.html",
+        vs:     "./3/index.html",
+        utama:  "./index.html"
+      };
+
+      const target = routes[page];
+      if (!target) return; // page tak sah → biar di Utama
+
+      // elak loop: kalau target sama dengan page semasa, jangan redirect
+      const currentPath = window.location.pathname.replace(/\/+$/, '');
+      const targetPath  = new URL(target, window.location.href).pathname.replace(/\/+$/, '');
+      if (currentPath === targetPath) return;
+
+      // redirect
+      window.location.replace(target);
+    })();
+  </script>
+
+</body>
+</html>
