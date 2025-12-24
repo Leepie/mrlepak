@@ -1782,6 +1782,10 @@ const subjectGroupMap = {
   "Teknik & Vokasional": ["SK","SRT","PER","PNG","PA","SS","RC","SPER"]
 };
 
+  // ✅ expose ke window supaya Tab 4 boleh baca
+window.SUBJECT_ORDER = SUBJECT_ORDER;
+window.subjectGroupMap = subjectGroupMap;
+
 /* ==========================
    4) CSV PARSER (quote)
    ========================== */
