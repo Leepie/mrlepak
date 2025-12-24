@@ -768,6 +768,27 @@ const SUBJECT_NAME_MAP =
     ? subjectNameMap
     : (window.subjectNameMap || {});
 
+  // ✅ reverse map: NAMA PENUH -> KOD (BM/BI/M/PAI...)
+const SUBJECT_CODE_BY_NAME = (() => {
+  const m = {};
+  Object.keys(SUBJECT_NAME_MAP || {}).forEach(code => {
+    const name = String(SUBJECT_NAME_MAP[code] || "").toUpperCase().trim();
+    if(name) m[name] = code.toUpperCase();
+  });
+  return m;
+})();
+
+function normalizeSubjectCode(code){
+  const c = String(code||"").toUpperCase().trim();
+  // alias biasa (jaga-jaga kalau CSV guna kod lain)
+  if(c === "MAT") return "M";
+  if(c === "MATH") return "M";
+  if(c === "SEJARAH") return "SEJ";
+  if(c === "SAINS") return "SN";
+  return c;
+}
+
+
 function getFullSubjectNameNoG(subjectCol){
   const x = normalizeSubjectCol(subjectCol);
   if(!x) return "";
@@ -2265,9 +2286,31 @@ const SUBJECT_NAME_MAP =
     return normKP(k ? row[k] : "");
   }
 
-  function subjectCodeFromCol(col){
-    return (String(col||"").split(" ")[0] || "").toUpperCase().trim();
-  }
+ function subjectCodeFromCol(col){
+  const raw = String(col || "").trim();
+  if(!raw) return "";
+
+  // buang token jenis di hujung: "G" / "GRED" / "GRADE" / "MARKAH" / "M"
+  const parts = raw.split(/\s+/).filter(Boolean);
+  const last  = (parts[parts.length - 1] || "").toUpperCase();
+  const jenisSet = new Set(["G","GRED","GRADE","MARKAH","M"]);
+
+  const baseParts = jenisSet.has(last) ? parts.slice(0, -1) : parts.slice();
+  const base = baseParts.join(" ").trim();                 // contoh: "BM" atau "BAHASA MELAYU"
+  if(!base) return "";
+
+  // 1) kalau memang kod pendek (BM/BI/M/SN/MT/PAI...)
+  const maybeCode = normalizeSubjectCode(base.split(/\s+/)[0]); // jika base "BM" -> BM
+  if (SUBJECT_NAME_MAP[maybeCode]) return maybeCode;
+
+  // 2) kalau nama penuh (BAHASA MELAYU) -> tukar kepada kod
+  const nameKey = base.toUpperCase();
+  if (SUBJECT_CODE_BY_NAME[nameKey]) return SUBJECT_CODE_BY_NAME[nameKey];
+
+  // 3) fallback: token pertama (sebab mungkin format lain)
+  return normalizeSubjectCode(base.split(/\s+/)[0]);
+}
+
   function isWajib(code){
     const f = subjectFlagMap[code];
     if(f === "0") return false;
