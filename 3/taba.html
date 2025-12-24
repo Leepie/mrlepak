@@ -1370,6 +1370,55 @@ function getFullSubjectNameNoG(subjectCol){
     <div class="soft-card overflow-hidden">
       <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
         <div class="font-bold text-gray-800">Ranking Subjek Kritikal</div>
+
+<!--PELIK -->
+
+<!-- ===========================
+     COMBAT ZONE: SENARAI MURID
+     =========================== -->
+<div class="soft-card overflow-hidden mt-6">
+
+  <div class="px-4 py-3 border-b bg-rose-50 flex items-center justify-between">
+    <div class="font-bold text-gray-800">
+      Combat Zone – Murid Kritikal
+    </div>
+
+    <select id="cz-topN"
+      class="rounded-xl border px-3 py-1 text-sm"
+      onchange="renderCombatZoneMurid()">
+      <option value="5">Top 5</option>
+      <option value="10">Top 10</option>
+      <option value="20">Top 20</option>
+      <option value="ALL">Semua</option>
+    </select>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-rose-600 text-white">
+        <tr>
+          <th class="px-3 py-2 text-center">#</th>
+          <th class="px-3 py-2 text-left">Nama Murid</th>
+          <th class="px-3 py-2 text-center">No. KP</th>
+          <th class="px-3 py-2 text-center">Kelas</th>
+          <th class="px-3 py-2 text-center">GP PPSA</th>
+          <th class="px-3 py-2 text-center">GP PraSPM</th>
+          <th class="px-3 py-2 text-center">Beza</th>
+          <th class="px-3 py-2 text-center">Zon</th>
+        </tr>
+      </thead>
+      <tbody id="cz-murid-body"></tbody>
+    </table>
+  </div>
+</div>
+
+
+        <!--TAMAT PELIK-->
+
+
+
+
+        
         <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
       </div>
 
@@ -2785,6 +2834,92 @@ window.__initTab4 = function(){
   $("t4-status").innerHTML = `Pilih filter dan klik <b>Jana Analisis</b>.`;
 };
 </script>
+
+  function renderCombatZoneMurid(){
+  const topNVal = document.getElementById("cz-topN").value;
+  const limit = (topNVal === "ALL") ? Infinity : parseInt(topNVal,10);
+
+  const rowsP = window.__CSV_PPSA_ROWS || [];
+  const rowsR = window.__CSV_PRASPM_ROWS || [];
+
+  const PPAR = window.__PPSA_PARSED;
+  const RPAR = window.__PRASPM_PARSED;
+
+  if(!PPAR || !RPAR) return;
+
+  const namaCol = PPAR.headerMap["nama"] || "NAMA";
+  const kelasCol = PPAR.headerMap["kelas"] || "KELAS";
+
+  const getKP = r =>
+    (r["NO KP"] || r["NO. KP"] || r["MYKAD"] || "").replace(/\D/g,"");
+
+  const kiraGP = (row, parsed)=>{
+    if(!row) return null;
+    let sum=0, cnt=0;
+    parsed.subjectColumns.forEach(col=>{
+      const code = col.split(" ")[0].toUpperCase();
+      if(parsed.subjectFlagMap[code]==="0") return;
+      const g = (row[col]||"").toUpperCase();
+      if(gradeValueMapping[g]!=null){
+        sum+=gradeValueMapping[g]; cnt++;
+      }
+    });
+    return cnt? +(sum/cnt).toFixed(2):null;
+  };
+
+  const mapP = new Map();
+  rowsP.forEach(r=>{
+    const key = getKP(r) || (r[namaCol]+"|"+r[kelasCol]);
+    mapP.set(key,r);
+  });
+
+  const list=[];
+  rowsR.forEach(r=>{
+    const key = getKP(r) || (r[namaCol]+"|"+r[kelasCol]);
+    const rp = mapP.get(key);
+
+    const gpP = kiraGP(rp,PPAR);
+    const gpR = kiraGP(r,RPAR);
+    if(gpR==null) return;
+
+    const diff = (gpP!=null)? +(gpP-gpR).toFixed(2):null;
+    const zon = gpR<=2.33?"Kualiti 1":
+                gpR<=4?"Kualiti 2":
+                gpR<=6?"Pertahanan 1":
+                gpR<=8?"Pertahanan 2":"Kuantiti";
+
+    list.push({
+      nama:r[namaCol],
+      kp:getKP(r),
+      kelas:r[kelasCol],
+      gpP, gpR, diff, zon
+    });
+  });
+
+  list.sort((a,b)=>b.gpR-a.gpR);
+
+  const body=document.getElementById("cz-murid-body");
+  body.innerHTML="";
+
+  list.slice(0,limit).forEach((m,i)=>{
+    const icon = m.diff==null?"—":
+      m.diff>0?`<span class="text-emerald-600 font-bold">▲ ${m.diff}</span>`:
+               `<span class="text-rose-600 font-bold">▼ ${Math.abs(m.diff)}</span>`;
+
+    body.insertAdjacentHTML("beforeend",`
+      <tr class="border-t">
+        <td class="text-center">${i+1}</td>
+        <td>${m.nama}</td>
+        <td class="text-center">${m.kp||"—"}</td>
+        <td class="text-center">${m.kelas}</td>
+        <td class="text-center">${m.gpP??"—"}</td>
+        <td class="text-center font-bold">${m.gpR}</td>
+        <td class="text-center">${icon}</td>
+        <td class="text-center font-semibold">${m.zon}</td>
+      </tr>
+    `);
+  });
+}
 
 
 </body>
