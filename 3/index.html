@@ -311,7 +311,7 @@ footer{
 
   <!-- =================== MENU TAB =================== -->
   <div class="analysis-tabs max-w-[1200px] mx-auto px-4 pt-6 pb-4">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       <button onclick="switchTab('gp-sekolah')" id="tab-gp-sekolah" class="tab-active card-hover p-4">
         <div class="tab-emoji mb-1">📊</div>
         <div class="tab-title">GP Sekolah</div>
@@ -335,6 +335,13 @@ footer{
 </button>
 
 
+<button onclick="switchTab('cz-murid')" id="tab-cz-murid" class="card-hover p-4">
+  <div class="tab-emoji mb-1">🧨</div>
+  <div class="tab-title">Murid Kritikal</div>
+  <div class="tab-sub">Combat Zone</div>
+</button>
+
+      
       <button onclick="switchTab('mp-kritikal')" id="tab-mp-kritikal" class="card-hover p-4">
         <div class="tab-emoji mb-1">⚠️</div>
         <div class="tab-title">GP MP Kritikal</div>
@@ -760,6 +767,27 @@ const SUBJECT_NAME_MAP =
   (typeof subjectNameMap !== "undefined" && subjectNameMap)
     ? subjectNameMap
     : (window.subjectNameMap || {});
+
+  // ✅ reverse map: NAMA PENUH -> KOD (BM/BI/M/PAI...)
+const SUBJECT_CODE_BY_NAME = (() => {
+  const m = {};
+  Object.keys(SUBJECT_NAME_MAP || {}).forEach(code => {
+    const name = String(SUBJECT_NAME_MAP[code] || "").toUpperCase().trim();
+    if(name) m[name] = code.toUpperCase();
+  });
+  return m;
+})();
+
+function normalizeSubjectCode(code){
+  const c = String(code||"").toUpperCase().trim();
+  // alias biasa (jaga-jaga kalau CSV guna kod lain)
+  if(c === "MAT") return "M";
+  if(c === "MATH") return "M";
+  if(c === "SEJARAH") return "SEJ";
+  if(c === "SAINS") return "SN";
+  return c;
+}
+
 
 function getFullSubjectNameNoG(subjectCol){
   const x = normalizeSubjectCol(subjectCol);
@@ -1273,6 +1301,118 @@ function getFullSubjectNameNoG(subjectCol){
 
 </section>
 
+
+<!-- ================= TAB 5: MURID KRITIKAL (COMBAT ZONE) ================= -->
+<section id="panel-cz-murid" class="hidden" hidden>
+  <div class="soft-card p-5 space-y-4">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+      <div>
+        <h2 class="text-xl font-extrabold text-gray-900">Combat Zone – Murid Kritikal</h2>
+        <p class="text-sm text-gray-500">Senarai murid mengikut zon (Kualiti 1 → Kuantiti)</p>
+      </div>
+      <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
+    </div>
+
+    <!-- ✅ PASTE BLOK COMBAT ZONE DI SINI -->
+    <!-- (Kita pindahkan blok asal dari Tab 4 ke sini) -->
+<!--PELIK -->
+
+<!-- ===========================
+     COMBAT ZONE: MURID KRITIKAL (TAB ZON)
+     =========================== -->
+<div class="soft-card overflow-hidden mt-6">
+
+  <!-- Header -->
+  <div class="px-4 py-3 border-b bg-rose-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="font-bold text-gray-800">
+      Combat Zone – Murid Kritikal
+    </div>
+
+    <div class="flex items-center gap-2">
+      <select id="cz-topN"
+        class="rounded-xl border px-3 py-1 text-sm bg-white"
+        onchange="renderCombatZoneMurid()">
+        <option value="5">Top 5</option>
+        <option value="10">Top 10</option>
+        <option value="20">Top 20</option>
+        <option value="ALL">Semua</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- TAB ZON -->
+  <div class="px-4 py-3 border-b bg-white">
+    <div class="flex flex-wrap gap-2">
+      <!-- Nota: data-zone mesti sama dengan label zon dalam data -->
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-rose-600 text-white"
+        data-zone="Kualiti 1"
+        onclick="setCombatZoneTab(this)">
+        Kualiti 1
+      </button>
+
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50"
+        data-zone="Kualiti 2"
+        onclick="setCombatZoneTab(this)">
+        Kualiti 2
+      </button>
+
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50"
+        data-zone="Pertahanan 1"
+        onclick="setCombatZoneTab(this)">
+        Pertahanan 1
+      </button>
+
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50"
+        data-zone="Pertahanan 2"
+        onclick="setCombatZoneTab(this)">
+        Pertahanan 2
+      </button>
+
+      <button type="button"
+        class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50"
+        data-zone="Kuantiti"
+        onclick="setCombatZoneTab(this)">
+        Kuantiti
+      </button>
+    </div>
+
+    <!-- simpan zon semasa -->
+    <input type="hidden" id="cz-activeZone" value="Kualiti 1">
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-rose-600 text-white">
+        <tr>
+          <th class="px-3 py-2 text-center">#</th>
+          <th class="px-3 py-2 text-left">Nama Murid</th>
+          <th class="px-3 py-2 text-center">No. KP</th>
+          <th class="px-3 py-2 text-center">Kelas</th>
+          <th class="px-3 py-2 text-center">GP PPSA</th>
+          <th class="px-3 py-2 text-center">GP PraSPM</th>
+          <th class="px-3 py-2 text-center">Beza</th>
+        </tr>
+      </thead>
+      <tbody id="cz-murid-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Footer kecil -->
+  <div class="px-4 py-2 border-t bg-white text-xs text-gray-500">
+    Paparan mengikut zon: <span id="cz-activeZoneLabel" class="font-semibold text-gray-700">Kualiti 1</span>
+  </div>
+</div>
+
+        <!--TAMAT PELIK-->
+  </div>
+</section>
+
+    
 <!-- ===========================
      TAMBAHAN SWITCH TAB
      =========================== -->
@@ -1280,12 +1420,141 @@ function getFullSubjectNameNoG(subjectCol){
 
 
     <!-- TAB 4 -->
-    <section id="panel-mp-kritikal" class="hidden" hidden>
-      <div class="soft-card p-4">
-        <h2 class="text-lg font-bold"> GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
-        <p class="text-sm text-gray-500 mt-1">Panel ini placeholder.</p>
+   <!-- TAB 4: GP MP KRITIKAL -->
+<section id="panel-mp-kritikal" class="hidden" hidden>
+
+  <div class="soft-card p-5 space-y-4">
+
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+      <div>
+        <h2 class="text-xl font-extrabold text-gray-900">GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500">
+          Ranking subjek ikut keutamaan intervensi (GPMP ↑, %Gagal ↑, C ke bawah ↑)
+        </p>
       </div>
-    </section>
+
+      <div class="flex flex-wrap gap-2 text-xs">
+        <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">Lebih kritikal = lebih atas</span>
+        <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Negatif beza = semakin baik</span>
+      </div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+
+      <!-- KELAS -->
+      <div class="md:col-span-4">
+        <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kelas</label>
+        <select id="t4-filter-kelas"
+          class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="">Pilih Kelas</option>
+          <option value="ALL">SEMUA KELAS</option>
+        </select>
+      </div>
+
+      <!-- KUMPULAN -->
+      <div class="md:col-span-5">
+        <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kumpulan Subjek</label>
+        <select id="t4-filter-kumpulan"
+          class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="ALL">SEMUA KUMPULAN</option>
+          <option value="Bahasa">Bahasa</option>
+          <option value="Kemanusiaan">Kemanusiaan</option>
+          <option value="Sains & Matematik">Sains & Matematik</option>
+          <option value="Teknik & Vokasional">Teknik & Vokasional</option>
+        </select>
+      </div>
+
+      <!-- BUTANG -->
+      <div class="md:col-span-3">
+        <button id="t4-btn-jana"
+          class="w-full rounded-2xl px-5 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition">
+          Jana Analisis
+        </button>
+      </div>
+
+    </div>
+
+    <!-- STATUS -->
+    <div id="t4-status" class="text-sm text-gray-500"></div>
+
+    <!-- KPI RINGKAS -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div class="kpi-card px-4 py-3">
+        <div class="text-[11px] text-gray-500 uppercase tracking-wide">Bil Subjek Dianalisis</div>
+        <div class="mt-1 text-2xl font-extrabold text-indigo-600" id="t4-kpi-count">—</div>
+        <div class="mt-1 text-xs text-gray-500">ikut filter semasa</div>
+      </div>
+
+      <div class="kpi-card px-4 py-3">
+        <div class="text-[11px] text-gray-500 uppercase tracking-wide">Subjek Paling Kritikal</div>
+        <div class="mt-1 text-lg font-extrabold text-rose-600" id="t4-kpi-top">—</div>
+        <div class="mt-1 text-xs text-gray-500">ranking #1</div>
+      </div>
+
+      <div class="kpi-card px-4 py-3">
+        <div class="text-[11px] text-gray-500 uppercase tracking-wide">GPMP Terburuk (PraSPM)</div>
+        <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t4-kpi-worst-gpmp">—</div>
+        <div class="mt-1 text-xs text-gray-500">lebih tinggi lebih lemah</div>
+      </div>
+
+      <div class="kpi-card px-4 py-3">
+        <div class="text-[11px] text-gray-500 uppercase tracking-wide">%Gagal Tertinggi (PraSPM)</div>
+        <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t4-kpi-worst-fail">—</div>
+        <div class="mt-1 text-xs text-gray-500">ikut hadir sahaja</div>
+      </div>
+    </div>
+
+    <!-- JADUAL -->
+    <div class="soft-card overflow-hidden">
+      <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+        <div class="font-bold text-gray-800">Ranking Subjek Kritikal</div>
+
+
+
+
+
+
+        
+        <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-[1100px] w-full text-sm">
+          <thead class="bg-indigo-600 text-white">
+            <tr>
+              <th class="px-4 py-3 text-center font-extrabold">#</th>
+              <th class="px-4 py-3 text-left font-extrabold">Subjek</th>
+              <th class="px-3 py-3 text-center font-extrabold">GPMP PPSA</th>
+              <th class="px-3 py-3 text-center font-extrabold">GPMP PraSPM</th>
+              <th class="px-3 py-3 text-center font-extrabold">Beza<br>(Pra−PPSA)</th>
+              <th class="px-3 py-3 text-center font-extrabold">%Gagal PPSA</th>
+              <th class="px-3 py-3 text-center font-extrabold">%Gagal PraSPM</th>
+              <th class="px-3 py-3 text-center font-extrabold">Beza %Gagal</th>
+              <th class="px-3 py-3 text-center font-extrabold">C↓ PPSA</th>
+              <th class="px-3 py-3 text-center font-extrabold">C↓ PraSPM</th>
+              <th class="px-3 py-3 text-center font-extrabold">Beza C↓</th>
+              <th class="px-4 py-3 text-center font-extrabold">Status</th>
+            </tr>
+          </thead>
+          <tbody id="t4-tbody" class="bg-white"></tbody>
+        </table>
+      </div>
+
+
+
+
+      
+    </div>
+
+    <div class="text-xs text-gray-400">
+      Nota: “C↓” = bil murid gred <b>C, D, E, G</b> (ikut hadir). TH tidak dikira.
+    </div>
+
+  </div>
+</section>
+
 
   </main>
 
@@ -1359,7 +1628,9 @@ function loadActiveTab(){
    0) SWITCH TAB
    ========================== */
 function switchTab(tabName) {
-  const panels = ["gp-sekolah","lms-sekolah","headcount-individu","mp-kritikal"];
+ // const panels = ["gp-sekolah","lms-sekolah","headcount-individu","mp-kritikal"];
+  const panels = ["gp-sekolah","lms-sekolah","headcount-individu","cz-murid","mp-kritikal"];
+
 
   panels.forEach(name => {
     const panel = document.getElementById("panel-" + name);
@@ -1378,6 +1649,17 @@ function switchTab(tabName) {
       if(isActive && name === "lms-sekolah"){
         if(typeof window.__initTab2 === "function") window.__initTab2();
       }
+// ✅ bila buka Tab 4 (Combat Zone Murid), render terus
+if(isActive && name === "cz-murid"){
+  if(typeof renderCombatZoneMurid === "function") renderCombatZoneMurid();
+}
+
+      
+      // ✅ bila buka Tab 5, init sekali
+      if(isActive && name === "mp-kritikal"){
+        if(typeof window.__initTab4 === "function") window.__initTab4();
+      }
+
     }
     if (tabBtn) tabBtn.classList.toggle("tab-active", name === tabName);
   });
@@ -1499,6 +1781,10 @@ const subjectGroupMap = {
   "Sains & Matematik": ["M","SN","MT","FIZ","BIO","KIM"],
   "Teknik & Vokasional": ["SK","SRT","PER","PNG","PA","SS","RC","SPER"]
 };
+
+  // ✅ expose ke window supaya Tab 4 boleh baca
+window.SUBJECT_ORDER = SUBJECT_ORDER;
+window.subjectGroupMap = subjectGroupMap;
 
 /* ==========================
    4) CSV PARSER (quote)
@@ -1909,9 +2195,13 @@ window.__SUBJECT_COLUMNS  = ppsParsed.subjectColumns || [];
     if(typeof window.__initTab2 === "function"){
       window.__initTab2();
     }
-  if(typeof window.__initTab3 === "function"){
-  window.__initTab3();
-}
+    if(typeof window.__initTab3 === "function"){
+      window.__initTab3();
+    }
+    if(typeof window.__initTab4 === "function"){
+      window.__initTab4();
+    }
+
 
   }catch(err){
     console.error("❌ Ralat CSV:", err);
@@ -1970,9 +2260,10 @@ const SUBJECT_NAME_MAP =
   // ✅ ORDER RASMI (ambil global SUBJECT_ORDER)
   function subjectOrderIndex(code){
   const fullName = (SUBJECT_NAME_MAP[code] || code).toUpperCase();
-  const idx = SUBJECT_ORDER.indexOf(fullName);
+  const idx = (window.SUBJECT_ORDER || SUBJECT_ORDER || []).indexOf(fullName);
   return idx === -1 ? 999 : idx;
 }
+
 
   function normKP(x){ return String(x ?? "").replace(/\D/g,""); }
 
@@ -1999,9 +2290,31 @@ const SUBJECT_NAME_MAP =
     return normKP(k ? row[k] : "");
   }
 
-  function subjectCodeFromCol(col){
-    return (String(col||"").split(" ")[0] || "").toUpperCase().trim();
-  }
+ function subjectCodeFromCol(col){
+  const raw = String(col || "").trim();
+  if(!raw) return "";
+
+  // buang token jenis di hujung: "G" / "GRED" / "GRADE" / "MARKAH" / "M"
+  const parts = raw.split(/\s+/).filter(Boolean);
+  const last  = (parts[parts.length - 1] || "").toUpperCase();
+  const jenisSet = new Set(["G","GRED","GRADE","MARKAH","M"]);
+
+  const baseParts = jenisSet.has(last) ? parts.slice(0, -1) : parts.slice();
+  const base = baseParts.join(" ").trim();                 // contoh: "BM" atau "BAHASA MELAYU"
+  if(!base) return "";
+
+  // 1) kalau memang kod pendek (BM/BI/M/SN/MT/PAI...)
+  const maybeCode = normalizeSubjectCode(base.split(/\s+/)[0]); // jika base "BM" -> BM
+  if (SUBJECT_NAME_MAP[maybeCode]) return maybeCode;
+
+  // 2) kalau nama penuh (BAHASA MELAYU) -> tukar kepada kod
+  const nameKey = base.toUpperCase();
+  if (SUBJECT_CODE_BY_NAME[nameKey]) return SUBJECT_CODE_BY_NAME[nameKey];
+
+  // 3) fallback: token pertama (sebab mungkin format lain)
+  return normalizeSubjectCode(base.split(/\s+/)[0]);
+}
+
   function isWajib(code){
     const f = subjectFlagMap[code];
     if(f === "0") return false;
@@ -2147,11 +2460,7 @@ const SUBJECT_NAME_MAP =
     return rows.find(r => getKelas(r) === kelasDipilih && getNama(r).toUpperCase() === String(raw||"").toUpperCase()) || null;
   }
 
-  function subjectLabel(code){
-  // paksa full name
-  const full = (subjectNameMap[code] || code || "").toString().trim();
-  return full.toUpperCase();
-}
+
 
 function bezaBadge(diff){
   // diff = (point PraSPM - point PPSA)
@@ -2310,7 +2619,474 @@ function renderMurid(rowP, rowR){
 };
 </script>
 
+<script>
+/* ===========================
+   TAB 4: GP MP KRITIKAL
+   =========================== */
+window.__initTab4 = function(){
+  if(window.__tab4_inited){
+    if(typeof window.__tab4_refresh === "function") window.__tab4_refresh();
+    return;
+  }
+  window.__tab4_inited = true;
 
+  const $ = (id)=>document.getElementById(id);
+  const esc = (s)=>String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  const GRADE_ORDER = ["A+","A","A-","B+","B","C+","C","D","E","G"];
+  const GPMP_POINT  = {"A+":0,"A":1,"A-":2,"B+":3,"B":4,"C+":5,"C":6,"D":7,"E":8,"G":9};
+
+  function normalizeGrade(g){
+    const x = String(g ?? "").trim().toUpperCase();
+    if (GPMP_POINT.hasOwnProperty(x)) return x;
+    if (x === "TH" || x === "T/H" || x === "TIDAK HADIR") return "TH";
+    return "";
+  }
+
+  // mapping nama subjek
+  const SUBJECT_NAME_MAP =
+    (typeof subjectNameMap !== "undefined" && subjectNameMap)
+      ? subjectNameMap
+      : (window.subjectNameMap || {});
+
+  function normalizeSubjectCol(s){ return String(s ?? "").trim().replace(/\s+/g, " "); }
+
+  function getFullSubjectNameNoG(subjectCol){
+    const x = normalizeSubjectCol(subjectCol);
+    if(!x) return "";
+    if(x.toUpperCase() === "G") return "";
+
+    const parts = x.split(" ").filter(Boolean);
+    if(!parts.length) return "";
+    const last = (parts[parts.length - 1] || "").toUpperCase();
+    const jenisSet = new Set(["G","GRED","GRADE","MARKAH","M"]);
+    let baseParts = parts.slice();
+    if(jenisSet.has(last)) baseParts = parts.slice(0, -1);
+    const base = baseParts.join(" ").trim();
+    if(!base) return "";
+
+    const maybeCode = base.toUpperCase();
+    if (SUBJECT_NAME_MAP[maybeCode]) return SUBJECT_NAME_MAP[maybeCode];
+    return maybeCode;
+  }
+
+  // ORDER RASMI (guna SUBJECT_ORDER global)
+  function subjectOrderIndexByCol(subjectCol){
+    const label = (getFullSubjectNameNoG(subjectCol) || "").toUpperCase().trim();
+    const idx = (window.SUBJECT_ORDER || []).indexOf(label);
+    return idx === -1 ? 999 : idx;
+  }
+
+  function getRowsPPSA(){ return Array.isArray(window.__CSV_PPSA_ROWS) ? window.__CSV_PPSA_ROWS : []; }
+  function getRowsPRASPM(){ return Array.isArray(window.__CSV_PRASPM_ROWS) ? window.__CSV_PRASPM_ROWS : []; }
+
+  function getClassKey(row){
+    return (row["KELAS"] || row["Kelas"] || row["kelas"] || "").toString().trim();
+  }
+
+  function inferSubjectColumns(rows){
+    // guna subjectColumns asal dari parse (lebih tepat) jika ada
+    if (Array.isArray(window.__TAB2_SUBJECT_COLS) && window.__TAB2_SUBJECT_COLS.length) {
+      return window.__TAB2_SUBJECT_COLS.slice();
+    }
+    // fallback: scan keys
+    if (!rows || !rows.length) return [];
+    const keys = Object.keys(rows[0] || {});
+    return keys.filter(k => /\b(G|GRED|GRADE)\b/i.test(String(k||"")));
+  }
+
+  function isValidSubjectCol(subjectCol){
+    const x = normalizeSubjectCol(subjectCol);
+    if(!x) return false;
+    if(x.toUpperCase() === "G") return false;
+    if(x === "-") return false;
+    return true;
+  }
+
+  function uniqueSorted(arr){
+    return Array.from(new Set(arr.filter(Boolean))).sort((a,b)=>a.localeCompare(b,"ms"));
+  }
+
+  // kumpulan -> codes
+  const GROUP_MAP = window.subjectGroupMap || {};
+  function subjectCodeFromCol(col){
+    return (String(col||"").split(" ")[0] || "").toUpperCase().trim();
+  }
+
+  function filterByGroup(subjectCols, groupName){
+    if(!groupName || groupName === "ALL") return subjectCols;
+
+    const codes = (GROUP_MAP[groupName] || []).map(x=>String(x||"").toUpperCase());
+    if(!codes.length) return subjectCols;
+
+    return subjectCols.filter(col => codes.includes(subjectCodeFromCol(col)));
+  }
+
+  function computeAggregate(rows, subjectCol, kelasFilter){
+    const agg = { hadir:0, th:0, grades:Object.fromEntries(GRADE_ORDER.map(g=>[g,0])) };
+
+    rows.forEach(r=>{
+      const kelas = getClassKey(r);
+      if (!kelas) return;
+      if (kelasFilter && kelasFilter !== "ALL" && kelas !== kelasFilter) return;
+
+      const g = normalizeGrade(r[subjectCol]);
+      if (!g) return;
+      if (g === "TH"){ agg.th++; return; }
+      if (!GRADE_ORDER.includes(g)) return;
+
+      agg.hadir++;
+      agg.grades[g]++;
+    });
+
+    // %gagal
+    const gagal = (agg.grades["G"]||0);
+    agg.pctGagal = agg.hadir ? (gagal/agg.hadir)*100 : 0;
+
+    // gpmp
+    let jumlahPoint=0, jumlahKira=0;
+    GRADE_ORDER.forEach(gr=>{
+      const c=agg.grades[gr]||0;
+      if(c){ jumlahPoint += GPMP_POINT[gr]*c; jumlahKira += c; }
+    });
+    agg.gpmp = jumlahKira ? (jumlahPoint/jumlahKira) : NaN;
+
+    // C ke bawah (ikut definisi Tab 2)
+    agg.cdown = (agg.grades["C"]||0) + (agg.grades["D"]||0) + (agg.grades["E"]||0) + (agg.grades["G"]||0);
+
+    return agg;
+  }
+
+  function fmtNum(x, dp=2){ if(!isFinite(x)) return "—"; return (+x).toFixed(dp); }
+  function fmtPct(x){ if(!isFinite(x)) return "0.0%"; return (+x).toFixed(1) + "%"; }
+
+  function diffCls(n, goodWhenNegative=false){
+    if(!isFinite(n) || n===0) return "text-gray-700";
+    // utk GPMP dan %gagal: NEGATIF = baik
+    if(goodWhenNegative){
+      return (n < 0) ? "text-emerald-600 font-extrabold" : "text-rose-600 font-extrabold";
+    }
+    return (n > 0) ? "text-rose-600 font-extrabold" : "text-emerald-600 font-extrabold";
+  }
+
+  function diffArrow(n, goodWhenNegative=false){
+    if(!isFinite(n) || n===0) return "";
+    const up = n > 0;
+    const cls = goodWhenNegative
+      ? (up ? "text-rose-600" : "text-emerald-600")
+      : (up ? "text-emerald-600" : "text-rose-600");
+    return `<span class="mr-1 ${cls} font-extrabold">${up ? "▲" : "▼"}</span>`;
+  }
+
+  function scoreCritical(bezaGpmp, bezaFail, bezaCdown){
+    // skor ringkas: lagi tinggi = lagi kritikal
+    // utamakan GPMP naik (lebih lemah), kemudian %gagal naik, kemudian Cdown naik
+    const s1 = isFinite(bezaGpmp) ? (bezaGpmp * 100) : 0; // berat tinggi
+    const s2 = isFinite(bezaFail) ? (bezaFail * 10) : 0;
+    const s3 = isFinite(bezaCdown) ? (bezaCdown * 1) : 0;
+    return s1 + s2 + s3;
+  }
+
+  function buildKelasOptions(){
+    const rowsP = getRowsPPSA();
+    const rowsR = getRowsPRASPM();
+    const rowsAny = rowsP.length ? rowsP : rowsR;
+
+    const sel = $("t4-filter-kelas");
+    if(!sel) return;
+
+    const prev = sel.value ?? "";
+    const kelas = uniqueSorted(rowsAny.map(getClassKey));
+
+    sel.innerHTML =
+      `<option value="">Pilih Kelas</option>` +
+      `<option value="ALL">SEMUA KELAS</option>` +
+      kelas.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
+
+    sel.value = Array.from(sel.options).some(o=>o.value===prev) ? prev : "ALL";
+  }
+
+  function renderTable(list){
+    const tbody = $("t4-tbody");
+    if(!tbody) return;
+
+    if(!list || !list.length){
+      tbody.innerHTML = `<tr><td colspan="12" class="px-4 py-6 text-center text-gray-500">Tiada data untuk dipaparkan.</td></tr>`;
+      return;
+    }
+
+    let html = "";
+    list.forEach((x, i)=>{
+      const zebra = (i % 2) ? "bg-gray-50/60" : "bg-white";
+
+      const dGp = x.bezaGpmp;
+      const dF  = x.bezaFail;
+      const dC  = x.bezaCdown;
+
+      // status ringkas
+      let statusHTML = `<span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200 text-[11px] font-bold">Neutral</span>`;
+      if (isFinite(dGp) && dGp > 0) statusHTML = `<span class="px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100 text-[11px] font-bold">Kritikal</span>`;
+      if (isFinite(dGp) && dGp <= 0 && ((isFinite(dF) && dF < 0) || (isFinite(dC) && dC < 0))) {
+        statusHTML = `<span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] font-bold">Baik</span>`;
+      }
+
+      html += `
+        <tr class="border-t ${zebra}">
+          <td class="px-4 py-3 text-center font-extrabold text-gray-800">${i+1}</td>
+          <td class="px-4 py-3 font-extrabold text-gray-900">${esc(x.subjek)}</td>
+
+          <td class="px-3 py-3 text-center text-blue-700 font-bold">${fmtNum(x.gpmpP,2)}</td>
+          <td class="px-3 py-3 text-center text-indigo-700 font-bold">${fmtNum(x.gpmpR,2)}</td>
+          <td class="px-3 py-3 text-center ${diffCls(dGp, true)}">
+            ${diffArrow(dGp, true)}${isFinite(dGp) ? (dGp>0?"+":"") + dGp.toFixed(2) : "—"}
+          </td>
+
+          <td class="px-3 py-3 text-center text-gray-800 font-semibold">${fmtPct(x.failP)}</td>
+          <td class="px-3 py-3 text-center text-gray-800 font-semibold">${fmtPct(x.failR)}</td>
+          <td class="px-3 py-3 text-center ${diffCls(dF, true)}">
+            ${diffArrow(dF, true)}${isFinite(dF) ? (dF>0?"+":"") + dF.toFixed(1) + "%" : "—"}
+          </td>
+
+          <td class="px-3 py-3 text-center font-semibold">${isFinite(x.cdownP) ? x.cdownP : "—"}</td>
+          <td class="px-3 py-3 text-center font-semibold">${isFinite(x.cdownR) ? x.cdownR : "—"}</td>
+          <td class="px-3 py-3 text-center ${diffCls(dC, true)}">
+            ${diffArrow(dC, true)}${isFinite(dC) ? (dC>0?"+":"") + dC : "—"}
+          </td>
+
+          <td class="px-4 py-3 text-center">${statusHTML}</td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  function jana(){
+    const ready =
+      (Array.isArray(window.__CSV_PPSA_ROWS) && window.__CSV_PPSA_ROWS.length) ||
+      (Array.isArray(window.__CSV_PRASPM_ROWS) && window.__CSV_PRASPM_ROWS.length);
+
+    if(!ready){
+      $("t4-status").innerHTML = `<span class="text-gray-500">Memuat data CSV…</span>`;
+      renderTable([]);
+      return;
+    }
+
+    const kelas   = $("t4-filter-kelas")?.value || "ALL";
+    const kump    = $("t4-filter-kumpulan")?.value || "ALL";
+
+    // subject columns (gred)
+    const rowsAny = getRowsPPSA().length ? getRowsPPSA() : getRowsPRASPM();
+    let subjectCols = inferSubjectColumns(rowsAny).filter(isValidSubjectCol);
+
+    // buang duplicate (normalize)
+    subjectCols = Array.from(new Set(subjectCols.map(c=>normalizeSubjectCol(c))));
+
+    // filter kumpulan
+    subjectCols = filterByGroup(subjectCols, kump);
+
+    // susun ikut SUBJECT_ORDER
+    subjectCols.sort((a,b)=>subjectOrderIndexByCol(a)-subjectOrderIndexByCol(b));
+
+    const list = [];
+    subjectCols.forEach(col=>{
+      const label = getFullSubjectNameNoG(col);
+      if(!label) return;
+
+      const aggP = computeAggregate(getRowsPPSA(),   col, kelas);
+      const aggR = computeAggregate(getRowsPRASPM(), col, kelas);
+
+      // jika langsung tiada data hadir untuk kedua-dua exam -> skip
+      const adaP = (aggP && aggP.hadir > 0);
+      const adaR = (aggR && aggR.hadir > 0);
+      if(!adaP && !adaR) return;
+
+      const bezaGpmp = (isFinite(aggR.gpmp) && isFinite(aggP.gpmp)) ? +(aggR.gpmp - aggP.gpmp).toFixed(2) : NaN;
+      const bezaFail = (isFinite(aggR.pctGagal) && isFinite(aggP.pctGagal)) ? +(aggR.pctGagal - aggP.pctGagal).toFixed(1) : NaN;
+      const bezaC    = (isFinite(aggR.cdown) && isFinite(aggP.cdown)) ? (aggR.cdown - aggP.cdown) : NaN;
+
+      const score = scoreCritical(bezaGpmp, bezaFail, bezaC);
+
+      list.push({
+        col,
+        subjek: label,
+        gpmpP: aggP.gpmp, gpmpR: aggR.gpmp, bezaGpmp,
+        failP: aggP.pctGagal, failR: aggR.pctGagal, bezaFail,
+        cdownP: aggP.cdown, cdownR: aggR.cdown, bezaCdown: bezaC,
+        score
+      });
+    });
+
+    // ranking: score desc (lagi kritikal lagi atas)
+    list.sort((a,b)=>{
+      // jika kedua score sama, guna bezaGpmp besar dulu
+      const s = (b.score - a.score);
+      if(s !== 0) return s;
+      const g = ((b.bezaGpmp||0) - (a.bezaGpmp||0));
+      if(g !== 0) return g;
+      return a.subjek.localeCompare(b.subjek,"ms");
+    });
+
+    // KPI
+    $("t4-kpi-count").textContent = list.length ? String(list.length) : "0";
+    $("t4-kpi-top").textContent   = list.length ? list[0].subjek : "—";
+
+    // worst gpmp prasp
+    const worstGp = list
+      .filter(x=>isFinite(x.gpmpR))
+      .sort((a,b)=> (b.gpmpR - a.gpmpR))[0];
+    $("t4-kpi-worst-gpmp").textContent = worstGp ? worstGp.gpmpR.toFixed(2) : "—";
+
+    // worst fail prasp
+    const worstFail = list
+      .filter(x=>isFinite(x.failR))
+      .sort((a,b)=> (b.failR - a.failR))[0];
+    $("t4-kpi-worst-fail").textContent = worstFail ? (worstFail.failR.toFixed(1) + "%") : "—";
+
+    const kelasTxt = (kelas === "ALL") ? "SEMUA KELAS" : esc(kelas);
+    const kumpTxt  = (kump === "ALL") ? "SEMUA KUMPULAN" : esc(kump);
+    $("t4-status").innerHTML = `Paparan: • Kelas: <b>${kelasTxt}</b> • Kumpulan: <b>${kumpTxt}</b>`;
+
+    renderTable(list);
+  }
+
+  // expose refresh
+  window.__tab4_refresh = function(){
+    const ok =
+      (Array.isArray(window.__CSV_PPSA_ROWS) && window.__CSV_PPSA_ROWS.length) ||
+      (Array.isArray(window.__CSV_PRASPM_ROWS) && window.__CSV_PRASPM_ROWS.length);
+    if(!ok) return;
+    buildKelasOptions();
+  };
+
+  // listeners
+  $("t4-btn-jana")?.addEventListener("click", jana);
+
+  // mula
+  buildKelasOptions();
+  $("t4-status").innerHTML = `Pilih filter dan klik <b>Jana Analisis</b>.`;
+};
+
+
+function renderCombatZoneMurid(){
+
+  // 1) Zon aktif dari TAB
+  const activeZone = document.getElementById("cz-activeZone")?.value || "Kualiti 1";
+
+  // 2) Top N
+  const topNVal = document.getElementById("cz-topN")?.value || "10";
+  const limit = (topNVal === "ALL") ? Infinity : parseInt(topNVal,10);
+
+  const rowsP = window.__CSV_PPSA_ROWS || [];
+  const rowsR = window.__CSV_PRASPM_ROWS || [];
+
+  const PPAR = window.__PPSA_PARSED;
+  const RPAR = window.__PRASPM_PARSED;
+
+  if(!PPAR || !RPAR) return;
+
+  const namaCol  = PPAR.headerMap["nama"]  || "NAMA";
+  const kelasCol = PPAR.headerMap["kelas"] || "KELAS";
+
+  const getKP = r =>
+    (r["NO KP"] || r["NO. KP"] || r["MYKAD"] || "").replace(/\D/g,"");
+
+  const kiraGP = (row, parsed)=>{
+    if(!row) return null;
+    let sum=0, cnt=0;
+    parsed.subjectColumns.forEach(col=>{
+      const code = col.split(" ")[0].toUpperCase();
+      if(parsed.subjectFlagMap[code]==="0") return; // elektif abaikan
+      const g = (row[col]||"").toUpperCase();
+      if(gradeValueMapping[g]!=null){
+        sum+=gradeValueMapping[g]; cnt++;
+      }
+    });
+    return cnt ? +(sum/cnt).toFixed(2) : null;
+  };
+
+  // Map PPSA utk padanan
+  const mapP = new Map();
+  rowsP.forEach(r=>{
+    const key = getKP(r) || ((r[namaCol]||"")+"|"+(r[kelasCol]||""));
+    mapP.set(key,r);
+  });
+
+  // Bina list murid (PraSPM sebagai asas)
+  const list=[];
+  rowsR.forEach(r=>{
+    const key = getKP(r) || ((r[namaCol]||"")+"|"+(r[kelasCol]||""));
+    const rp = mapP.get(key);
+
+    const gpP = kiraGP(rp,PPAR);
+    const gpR = kiraGP(r,RPAR);
+    if(gpR==null) return;
+
+    const diff = (gpP!=null) ? +(gpP-gpR).toFixed(2) : null;
+
+    const zon = gpR<=2.33 ? "Kualiti 1" :
+                gpR<=4    ? "Kualiti 2" :
+                gpR<=6    ? "Pertahanan 1" :
+                gpR<=8    ? "Pertahanan 2" : "Kuantiti";
+
+    list.push({
+      nama:r[namaCol],
+      kp:getKP(r),
+      kelas:r[kelasCol],
+      gpP, gpR, diff, zon
+    });
+  });
+
+  // 3) TAPIS ikut TAB ZON (INI YANG BETUL)
+  const filtered = list.filter(m => (m.zon||"").trim() === activeZone);
+
+  // 4) Sorting (kekal ikut gpR menurun)
+  filtered.sort((a,b)=> (b.gpR||0) - (a.gpR||0));
+
+  // Render
+  const body=document.getElementById("cz-murid-body");
+  body.innerHTML="";
+
+  filtered.slice(0,limit).forEach((m,i)=>{
+    const icon = m.diff==null ? "—" :
+      m.diff>0 ? `<span class="text-emerald-600 font-bold">▲ ${m.diff}</span>` :
+                 `<span class="text-rose-600 font-bold">▼ ${Math.abs(m.diff)}</span>`;
+
+    body.insertAdjacentHTML("beforeend",`
+      <tr class="border-t">
+        <td class="px-3 py-2 text-center">${i+1}</td>
+        <td class="px-3 py-2">${m.nama || "—"}</td>
+        <td class="px-3 py-2 text-center">${m.kp || "—"}</td>
+        <td class="px-3 py-2 text-center">${m.kelas || "—"}</td>
+        <td class="px-3 py-2 text-center">${m.gpP ?? "—"}</td>
+        <td class="px-3 py-2 text-center font-bold">${m.gpR}</td>
+        <td class="px-3 py-2 text-center">${icon}</td>
+      </tr>
+    `);
+  });
+}
+
+function setCombatZoneTab(btn){
+  const zone = btn.getAttribute("data-zone") || "Kualiti 1";
+  document.getElementById("cz-activeZone").value = zone;
+
+  document.querySelectorAll(".cz-tab").forEach(b=>{
+    b.classList.remove("bg-rose-600","text-white");
+    b.classList.add("bg-white","text-gray-700");
+  });
+  btn.classList.remove("bg-white","text-gray-700");
+  btn.classList.add("bg-rose-600","text-white");
+
+  const lbl = document.getElementById("cz-activeZoneLabel");
+  if(lbl) lbl.textContent = zone;
+
+  renderCombatZoneMurid();
+}
+
+  
+</script>
+
+ 
 
 </body>
 </html>
