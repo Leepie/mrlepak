@@ -1371,6 +1371,38 @@ function getFullSubjectNameNoG(subjectCol){
       <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
         <div class="font-bold text-gray-800">Ranking Subjek Kritikal</div>
 
+
+
+
+
+
+        
+        <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-[1100px] w-full text-sm">
+          <thead class="bg-indigo-600 text-white">
+            <tr>
+              <th class="px-4 py-3 text-center font-extrabold">#</th>
+              <th class="px-4 py-3 text-left font-extrabold">Subjek</th>
+              <th class="px-3 py-3 text-center font-extrabold">GPMP PPSA</th>
+              <th class="px-3 py-3 text-center font-extrabold">GPMP PraSPM</th>
+              <th class="px-3 py-3 text-center font-extrabold">Beza<br>(Pra−PPSA)</th>
+              <th class="px-3 py-3 text-center font-extrabold">%Gagal PPSA</th>
+              <th class="px-3 py-3 text-center font-extrabold">%Gagal PraSPM</th>
+              <th class="px-3 py-3 text-center font-extrabold">Beza %Gagal</th>
+              <th class="px-3 py-3 text-center font-extrabold">C↓ PPSA</th>
+              <th class="px-3 py-3 text-center font-extrabold">C↓ PraSPM</th>
+              <th class="px-3 py-3 text-center font-extrabold">Beza C↓</th>
+              <th class="px-4 py-3 text-center font-extrabold">Status</th>
+            </tr>
+          </thead>
+          <tbody id="t4-tbody" class="bg-white"></tbody>
+        </table>
+      </div>
+
+
 <!--PELIK -->
 
 <!-- ===========================
@@ -1415,34 +1447,7 @@ function getFullSubjectNameNoG(subjectCol){
 
         <!--TAMAT PELIK-->
 
-
-
-
-        
-        <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="min-w-[1100px] w-full text-sm">
-          <thead class="bg-indigo-600 text-white">
-            <tr>
-              <th class="px-4 py-3 text-center font-extrabold">#</th>
-              <th class="px-4 py-3 text-left font-extrabold">Subjek</th>
-              <th class="px-3 py-3 text-center font-extrabold">GPMP PPSA</th>
-              <th class="px-3 py-3 text-center font-extrabold">GPMP PraSPM</th>
-              <th class="px-3 py-3 text-center font-extrabold">Beza<br>(Pra−PPSA)</th>
-              <th class="px-3 py-3 text-center font-extrabold">%Gagal PPSA</th>
-              <th class="px-3 py-3 text-center font-extrabold">%Gagal PraSPM</th>
-              <th class="px-3 py-3 text-center font-extrabold">Beza %Gagal</th>
-              <th class="px-3 py-3 text-center font-extrabold">C↓ PPSA</th>
-              <th class="px-3 py-3 text-center font-extrabold">C↓ PraSPM</th>
-              <th class="px-3 py-3 text-center font-extrabold">Beza C↓</th>
-              <th class="px-4 py-3 text-center font-extrabold">Status</th>
-            </tr>
-          </thead>
-          <tbody id="t4-tbody" class="bg-white"></tbody>
-        </table>
-      </div>
+      
     </div>
 
     <div class="text-xs text-gray-400">
@@ -2833,9 +2838,9 @@ window.__initTab4 = function(){
   buildKelasOptions();
   $("t4-status").innerHTML = `Pilih filter dan klik <b>Jana Analisis</b>.`;
 };
-</script>
 
-  function renderCombatZoneMurid(){
+
+ function renderCombatZoneMurid(){
   const topNVal = document.getElementById("cz-topN").value;
   const limit = (topNVal === "ALL") ? Infinity : parseInt(topNVal,10);
 
@@ -2921,6 +2926,10 @@ window.__initTab4 = function(){
   });
 }
 
+  
+</script>
+
+ 
 
 </body>
 </html>
