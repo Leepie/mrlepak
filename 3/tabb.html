@@ -1790,6 +1790,32 @@ const subjectNameMap = {
   "RC": "REKA CIPTA",
   "SPER": "SAINS PERTANIAN"
 };
+
+ // ✅ expose mapping supaya semua tab boleh guna
+window.subjectNameMap = subjectNameMap;
+
+// ✅ helper global (Tab 3 perlukan)
+function normalizeSubjectCode(code){
+  const c = String(code||"").toUpperCase().trim();
+  if(c === "MAT") return "M";
+  if(c === "MATH") return "M";
+  if(c === "SEJARAH") return "SEJ";
+  if(c === "SAINS") return "SN";
+  return c;
+}
+window.normalizeSubjectCode = normalizeSubjectCode;
+
+// ✅ reverse map global: NAMA PENUH -> KOD (Tab 3 perlukan)
+window.SUBJECT_CODE_BY_NAME = (() => {
+  const m = {};
+  Object.keys(subjectNameMap || {}).forEach(code => {
+    const name = String(subjectNameMap[code] || "").toUpperCase().trim();
+    if(name) m[name] = code.toUpperCase();
+  });
+  return m;
+})();
+
+  
 // ✅ ORDER RASMI SUBJEK (PRIORITI)
 const SUBJECT_ORDER = [
   "BAHASA MELAYU",
@@ -2348,7 +2374,8 @@ const SUBJECT_NAME_MAP =
 
   // 2) kalau nama penuh (BAHASA MELAYU) -> tukar kepada kod
   const nameKey = base.toUpperCase();
-  if (SUBJECT_CODE_BY_NAME[nameKey]) return SUBJECT_CODE_BY_NAME[nameKey];
+ // if (SUBJECT_CODE_BY_NAME[nameKey]) return SUBJECT_CODE_BY_NAME[nameKey];
+if (window.SUBJECT_CODE_BY_NAME && window.SUBJECT_CODE_BY_NAME[nameKey]) return window.SUBJECT_CODE_BY_NAME[nameKey];
 
   // 3) fallback: token pertama (sebab mungkin format lain)
   return normalizeSubjectCode(base.split(/\s+/)[0]);
