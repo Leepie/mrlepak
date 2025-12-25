@@ -1313,9 +1313,48 @@ function getFullSubjectNameNoG(subjectCol){
       <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
     </div>
 
-    <!-- ✅ PASTE BLOK COMBAT ZONE DI SINI -->
-    <!-- (Kita pindahkan blok asal dari Tab 4 ke sini) -->
-<!--PELIK -->
+   <!-- ✅ TAMBAH KAD RINGKAS DI SINI (IMEJ 2) -->
+    <div id="cz-summary-cards"
+      class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-2">
+
+      <div class="rounded-xl border bg-yellow-50 px-4 py-3">
+        <div class="text-sm font-semibold text-yellow-700">🏆 Kualiti 1</div>
+        <div id="cz-k1" class="text-xl font-bold text-yellow-800 mt-1">0</div>
+        <div id="cz-k1-p" class="text-xs text-yellow-600 leading-tight">0%</div>
+      </div>
+
+      <div class="rounded-xl border bg-gray-50 px-4 py-3">
+        <div class="text-sm font-semibold text-gray-700">🥈 Kualiti 2</div>
+        <div id="cz-k2" class="text-xl font-bold text-gray-800 mt-1">0</div>
+        <div id="cz-k2-p" class="text-xs text-gray-600 leading-tight">0%</div>
+      </div>
+
+      <div class="rounded-xl border bg-blue-50 px-4 py-3">
+        <div class="text-sm font-semibold text-blue-700">🛡️ Pertahanan 1</div>
+        <div id="cz-p1" class="text-xl font-bold text-blue-800 mt-1">0</div>
+        <div id="cz-p1-p" class="text-xs text-blue-600 leading-tight">0%</div>
+      </div>
+
+      <div class="rounded-xl border bg-orange-50 px-4 py-3">
+        <div class="text-sm font-semibold text-orange-700">⚠️ Pertahanan 2</div>
+        <div id="cz-p2" class="text-xl font-bold text-orange-800 mt-1">0</div>
+        <div id="cz-p2-p" class="text-xs text-orange-600 leading-tight">0%</div>
+      </div>
+
+      <div class="rounded-xl border bg-red-50 px-4 py-3">
+        <div class="text-sm font-semibold text-red-700">📊 Kuantiti</div>
+        <div id="cz-q" class="text-xl font-bold text-red-800 mt-1">0</div>
+        <div id="cz-q-p" class="text-xs text-red-600 leading-tight">0%</div>
+      </div>
+
+      <div class="rounded-xl border bg-purple-50 px-4 py-3">
+        <div class="text-sm font-semibold text-purple-700">👥 Jumlah Murid</div>
+        <div id="cz-total" class="text-xl font-bold text-purple-800 mt-1">0</div>
+        <div class="text-xs text-purple-600 leading-tight">100%</div>
+      </div>
+
+    </div>
+    <!-- ✅ TAMAT BLOK KAD -->
 
 <!-- ===========================
      COMBAT ZONE: MURID KRITIKAL (TAB ZON)
@@ -3038,6 +3077,9 @@ function renderCombatZoneMurid(){
   });
 
   // 3) TAPIS ikut TAB ZON (INI YANG BETUL)
+  kemaskiniKadCombatZoneDaripadaData(list);
+
+  
   const filtered = list.filter(m => (m.zon||"").trim() === activeZone);
 
   // 4) Sorting (kekal ikut gpR menurun)
@@ -3083,7 +3125,41 @@ function setCombatZoneTab(btn){
   renderCombatZoneMurid();
 }
 
-  
+  function kemaskiniKadCombatZoneDaripadaData(muridDataCZ) {
+  if (!Array.isArray(muridDataCZ) || muridDataCZ.length === 0) return;
+
+  let k1 = 0, k2 = 0, p1 = 0, p2 = 0, q = 0;
+
+  muridDataCZ.forEach(m => {
+    const z = (m.zone || m.zon || m.combatZone || "").toString().trim(); // fallback ikut nama field
+    switch (z) {
+      case "Kualiti 1": k1++; break;
+      case "Kualiti 2": k2++; break;
+      case "Pertahanan 1": p1++; break;
+      case "Pertahanan 2": p2++; break;
+      case "Kuantiti": q++; break;
+    }
+  });
+
+  const total = muridDataCZ.length;
+  if (!total) return;
+
+  // nombor
+  document.getElementById("cz-k1").textContent = k1;
+  document.getElementById("cz-k2").textContent = k2;
+  document.getElementById("cz-p1").textContent = p1;
+  document.getElementById("cz-p2").textContent = p2;
+  document.getElementById("cz-q").textContent  = q;
+  document.getElementById("cz-total").textContent = total;
+
+  // peratus
+  document.getElementById("cz-k1-p").textContent = ((k1/total)*100).toFixed(1) + "%";
+  document.getElementById("cz-k2-p").textContent = ((k2/total)*100).toFixed(1) + "%";
+  document.getElementById("cz-p1-p").textContent = ((p1/total)*100).toFixed(1) + "%";
+  document.getElementById("cz-p2-p").textContent = ((p2/total)*100).toFixed(1) + "%";
+  document.getElementById("cz-q-p").textContent  = ((q/total)*100).toFixed(1) + "%";
+}
+
 </script>
 
  
