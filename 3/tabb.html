@@ -2211,6 +2211,11 @@ async function loadAndRender(){
     const ppsParsed = parseCsvXCode(ppsText);
     const praParsed = parseCsvXCode(praText);
 
+    console.log("HEADERS PPSA:", window.__PPSA_PARSED?.headers);
+    console.log("HEADERS PRASPM:", window.__PRASPM_PARSED?.headers);
+
+    
+
     // ✅ Simpan meta penting untuk Tab 3 (Headcount)
 window.__PPSA_PARSED = ppsParsed;
 window.__PRASPM_PARSED = praParsed;
@@ -2350,10 +2355,30 @@ const SUBJECT_NAME_MAP =
     const k = getColKey(row, ["KELAS","Kelas","kelas"]);
     return (k ? row[k] : "")?.toString().trim() || "";
   }
+//  function getKP(row){
+ //   const k = getColKey(row, ["NO KP","NO. KP","NO KP/IC","MYKAD","IC","NO KAD PENGENALAN","NO K/P","NO KP/ K/P"]);
+  //  return normKP(k ? row[k] : "");
+ // }
+
   function getKP(row){
-    const k = getColKey(row, ["NO KP","NO. KP","NO KP/IC","MYKAD","IC","NO KAD PENGENALAN","NO K/P","NO KP/ K/P"]);
-    return normKP(k ? row[k] : "");
-  }
+  const k = getColKey(row, [
+    // paling biasa
+    "NO KP","NO. KP","NO KP/IC","MYKAD","IC",
+
+    // variasi yang selalu muncul dalam CSV sekolah
+    "NO IC","NO. IC","NO_IC",
+    "NO KAD PENGENALAN","NO. KAD PENGENALAN","NO.KAD PENGENALAN",
+    "NO K/P","NO. K/P","K/P","KP",
+    "NOMBOR KP","NOMBOR K/P","NO PENGENALAN","NO. PENGENALAN",
+    "NO IDENTITI","NO. IDENTITI"
+  ]);
+
+  // ambil nilai mentah
+  const raw = k ? row[k] : "";
+  // buang semua selain digit (kekal 12 digit)
+  return normKP(raw);
+}
+
 
  function subjectCodeFromCol(col){
   const raw = String(col || "").trim();
@@ -3054,8 +3079,28 @@ function renderCombatZoneMurid(){
   const namaCol  = PPAR.headerMap["nama"]  || "NAMA";
   const kelasCol = PPAR.headerMap["kelas"] || "KELAS";
 
-  const getKP = r =>
-    (r["NO KP"] || r["NO. KP"] || r["MYKAD"] || "").replace(/\D/g,"");
+//  const getKP = r =>
+  //  (r["NO KP"] || r["NO. KP"] || r["MYKAD"] || "").replace(/\D/g,"");
+
+  const getKP = (r) => {
+  // cuba cari ikut banyak variasi header
+  const candidates = [
+    "NO KP","NO. KP","NO KP/IC","MYKAD","IC",
+    "NO IC","NO. IC","NO_IC",
+    "NO KAD PENGENALAN","NO. KAD PENGENALAN",
+    "NO K/P","NO. K/P","K/P","KP",
+    "NOMBOR KP","NOMBOR K/P","NO PENGENALAN","NO. PENGENALAN"
+  ];
+
+  for (const k of candidates) {
+    if (r && r[k] != null && String(r[k]).trim() !== "") {
+      return String(r[k]).replace(/\D/g, "");
+    }
+  }
+
+  return "";
+};
+
 
   const kiraGP = (row, parsed)=>{
     if(!row) return null;
