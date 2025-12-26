@@ -3187,16 +3187,22 @@ function setCombatZoneTab(btn){
   const zone = btn.getAttribute("data-zone") || "Kualiti 1";
   document.getElementById("cz-activeZone").value = zone;
 
-  // reset semua tab ikut tema (idle)
-  applyCZTabsIdle();
+  // reset semua tab
+  document.querySelectorAll(".cz-tab").forEach(b=>{
+    b.classList.remove("bg-rose-600","text-white");
+    b.classList.add("bg-white","text-gray-700","hover:bg-gray-50");
+  });
 
-  // aktifkan tab ikut warna kad zon
-  const t = CZ_THEME[zone] || CZ_THEME["Kualiti 1"];
-  btn.classList.add("is-active", "text-white", "border-transparent", ...t.active.split(" "));
+  // aktifkan tab dipilih
+  btn.classList.remove("bg-white","text-gray-700","hover:bg-gray-50");
+  btn.classList.add("bg-rose-600","text-white");
 
-  // render table ikut zon
-  if (typeof renderCombatZoneMurid === "function") renderCombatZoneMurid();
+  // render table
+  if (typeof renderCombatZoneMurid === "function") {
+    renderCombatZoneMurid();
+  }
 }
+
 
 
   function kemaskiniKadCombatZoneDaripadaData(muridDataCZ) {
@@ -3264,9 +3270,7 @@ function applyCZTabsIdle() {
   });
 }
 
-  document.addEventListener("DOMContentLoaded", () => {
-  applyCZTabsIdle();
-});
+
 
 </script>
 
