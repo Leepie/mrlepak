@@ -239,6 +239,9 @@ footer{
   min-height: calc(100vh - 60px);
 }
 
+    .cz-tab{transition:.15s ease}
+.cz-tab.is-active{color:#fff !important;border-color:transparent !important}
+
   </style>
 
   <script>
@@ -1314,6 +1317,7 @@ function getFullSubjectNameNoG(subjectCol){
     </div>
 
    <!-- ✅ TAMBAH KAD RINGKAS DI SINI (IMEJ 2) -->
+   
     <div id="cz-summary-cards"
       class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-2">
 
@@ -2211,6 +2215,11 @@ async function loadAndRender(){
     const ppsParsed = parseCsvXCode(ppsText);
     const praParsed = parseCsvXCode(praText);
 
+    console.log("HEADERS PPSA:", window.__PPSA_PARSED?.headers);
+    console.log("HEADERS PRASPM:", window.__PRASPM_PARSED?.headers);
+
+    
+
     // ✅ Simpan meta penting untuk Tab 3 (Headcount)
 window.__PPSA_PARSED = ppsParsed;
 window.__PRASPM_PARSED = praParsed;
@@ -2350,10 +2359,30 @@ const SUBJECT_NAME_MAP =
     const k = getColKey(row, ["KELAS","Kelas","kelas"]);
     return (k ? row[k] : "")?.toString().trim() || "";
   }
+//  function getKP(row){
+ //   const k = getColKey(row, ["NO KP","NO. KP","NO KP/IC","MYKAD","IC","NO KAD PENGENALAN","NO K/P","NO KP/ K/P"]);
+  //  return normKP(k ? row[k] : "");
+ // }
+
   function getKP(row){
-    const k = getColKey(row, ["NO KP","NO. KP","NO KP/IC","MYKAD","IC","NO KAD PENGENALAN","NO K/P","NO KP/ K/P"]);
-    return normKP(k ? row[k] : "");
-  }
+  const k = getColKey(row, [
+    // paling biasa
+    "NO KP","NO. KP","NO KP/IC","MYKAD","IC",
+
+    // variasi yang selalu muncul dalam CSV sekolah
+    "NO IC","NO. IC","NO_IC",
+    "NO KAD PENGENALAN","NO. KAD PENGENALAN","NO.KAD PENGENALAN",
+    "NO K/P","NO. K/P","K/P","KP",
+    "NOMBOR KP","NOMBOR K/P","NO PENGENALAN","NO. PENGENALAN",
+    "NO IDENTITI","NO. IDENTITI"
+  ]);
+
+  // ambil nilai mentah
+  const raw = k ? row[k] : "";
+  // buang semua selain digit (kekal 12 digit)
+  return normKP(raw);
+}
+
 
  function subjectCodeFromCol(col){
   const raw = String(col || "").trim();
@@ -3054,8 +3083,28 @@ function renderCombatZoneMurid(){
   const namaCol  = PPAR.headerMap["nama"]  || "NAMA";
   const kelasCol = PPAR.headerMap["kelas"] || "KELAS";
 
-  const getKP = r =>
-    (r["NO KP"] || r["NO. KP"] || r["MYKAD"] || "").replace(/\D/g,"");
+//  const getKP = r =>
+  //  (r["NO KP"] || r["NO. KP"] || r["MYKAD"] || "").replace(/\D/g,"");
+
+  const getKP = (r) => {
+  // cuba cari ikut banyak variasi header
+  const candidates = [
+    "NO KP","NO. KP","NO KP/IC","MYKAD","IC",
+    "NO IC","NO. IC","NO_IC",
+    "NO KAD PENGENALAN","NO. KAD PENGENALAN",
+    "NO K/P","NO. K/P","K/P","KP",
+    "NOMBOR KP","NOMBOR K/P","NO PENGENALAN","NO. PENGENALAN"
+  ];
+
+  for (const k of candidates) {
+    if (r && r[k] != null && String(r[k]).trim() !== "") {
+      return String(r[k]).replace(/\D/g, "");
+    }
+  }
+
+  return "";
+};
+
 
   const kiraGP = (row, parsed)=>{
     if(!row) return null;
@@ -3139,18 +3188,23 @@ function setCombatZoneTab(btn){
   const zone = btn.getAttribute("data-zone") || "Kualiti 1";
   document.getElementById("cz-activeZone").value = zone;
 
+  // reset semua tab
   document.querySelectorAll(".cz-tab").forEach(b=>{
     b.classList.remove("bg-rose-600","text-white");
-    b.classList.add("bg-white","text-gray-700");
+    b.classList.add("bg-white","text-gray-700","hover:bg-gray-50");
   });
-  btn.classList.remove("bg-white","text-gray-700");
+
+  // aktifkan tab dipilih
+  btn.classList.remove("bg-white","text-gray-700","hover:bg-gray-50");
   btn.classList.add("bg-rose-600","text-white");
 
-  const lbl = document.getElementById("cz-activeZoneLabel");
-  if(lbl) lbl.textContent = zone;
-
-  renderCombatZoneMurid();
+  // render table
+  if (typeof renderCombatZoneMurid === "function") {
+    renderCombatZoneMurid();
+  }
 }
+
+
 
   function kemaskiniKadCombatZoneDaripadaData(muridDataCZ) {
   if (!Array.isArray(muridDataCZ) || muridDataCZ.length === 0) return;
@@ -3186,6 +3240,38 @@ function setCombatZoneTab(btn){
   document.getElementById("cz-p2-p").textContent = ((p2/total)*100).toFixed(1) + "%";
   document.getElementById("cz-q-p").textContent  = ((q/total)*100).toFixed(1) + "%";
 }
+
+  // ====== Tema warna untuk samakan KAD & TAB ======
+const CZ_THEME = {
+  "Kualiti 1":     { active:"bg-yellow-600", text:"text-yellow-700" },
+  "Kualiti 2":     { active:"bg-gray-700",   text:"text-gray-700" },
+  "Pertahanan 1":  { active:"bg-blue-700",   text:"text-blue-700" },
+  "Pertahanan 2":  { active:"bg-orange-600", text:"text-orange-700" },
+  "Kuantiti":      { active:"bg-red-700",    text:"text-red-700" },
+};
+
+function applyCZTabsIdle() {
+  document.querySelectorAll(".cz-tab").forEach(btn=>{
+    const z = (btn.getAttribute("data-zone")||"").trim();
+    const t = CZ_THEME[z];
+    if(!t) return;
+
+    // reset semua warna aktif/teks putih
+    btn.classList.remove(
+      "is-active","text-white","border-transparent",
+      "bg-yellow-600","bg-gray-700","bg-blue-700","bg-orange-600","bg-red-700"
+    );
+
+    // jadikan idle: putih + border + text ikut warna kad
+    btn.classList.remove(
+      "text-yellow-700","text-gray-700","text-blue-700","text-orange-700","text-red-700"
+    );
+
+    btn.classList.add("bg-white","border","border-gray-200", ...t.text.split(" "), "hover:bg-gray-50");
+  });
+}
+
+
 
 </script>
 
