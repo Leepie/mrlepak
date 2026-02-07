@@ -1705,32 +1705,32 @@ table td:nth-child(2) {
     </div>
 
     <!-- ✅ KAD RINGKAS (contoh struktur - cikgu boleh kekalkan data sedia ada) -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div id="cz-card-kualiti-1" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       <div class="rounded-2xl border p-4" style="background:var(--cz-kualiti-1-bg);border-color:#fde68a">
         <div class="font-bold" style="color:var(--cz-kualiti-1-fg)">🏆 Kualiti 1</div>
         <div class="text-3xl font-extrabold" style="color:var(--cz-kualiti-1-fg)" id="cz-k1">—</div>
         <div class="text-sm" style="color:var(--cz-kualiti-1-fg)" id="cz-k1-p">—</div>
       </div>
 
-      <div class="rounded-2xl border p-4" style="background:var(--cz-kualiti-2-bg);border-color:#e5e7eb">
+      <div id="cz-card-kualiti-2" class="rounded-2xl border p-4" style="background:var(--cz-kualiti-2-bg);border-color:#e5e7eb">
         <div class="font-bold" style="color:var(--cz-kualiti-2-fg)">🥈 Kualiti 2</div>
         <div class="text-3xl font-extrabold" style="color:var(--cz-kualiti-2-fg)" id="cz-k2">—</div>
         <div class="text-sm text-gray-600" id="cz-k2-p">—</div>
       </div>
 
-      <div class="rounded-2xl border p-4" style="background:var(--cz-pertahanan-1-bg);border-color:#dbeafe">
+      <div id="cz-card-pertahanan-1" class="rounded-2xl border p-4" style="background:var(--cz-pertahanan-1-bg);border-color:#dbeafe">
         <div class="font-bold" style="color:var(--cz-pertahanan-1-fg)">🛡️ Pertahanan 1</div>
         <div class="text-3xl font-extrabold" style="color:var(--cz-pertahanan-1-fg)" id="cz-p1">—</div>
         <div class="text-sm" style="color:var(--cz-pertahanan-1-fg)" id="cz-p1-p">—</div>
       </div>
 
-      <div class="rounded-2xl border p-4" style="background:var(--cz-pertahanan-2-bg);border-color:#fed7aa">
+      <div id="cz-card-pertahanan-2" class="rounded-2xl border p-4" style="background:var(--cz-pertahanan-2-bg);border-color:#fed7aa">
         <div class="font-bold" style="color:var(--cz-pertahanan-2-fg)">⚠️ Pertahanan 2</div>
         <div class="text-3xl font-extrabold" style="color:var(--cz-pertahanan-2-fg)" id="cz-p2">—</div>
         <div class="text-sm" style="color:var(--cz-pertahanan-2-fg)" id="cz-p2-p">—</div>
       </div>
 
-      <div class="rounded-2xl border p-4" style="background:var(--cz-kuantiti-bg);border-color:#fecdd3">
+      <div id="cz-card-kuantiti" class="rounded-2xl border p-4" style="background:var(--cz-kuantiti-bg);border-color:#fecdd3">
         <div class="font-bold" style="color:var(--cz-kuantiti-fg)">📊 Kuantiti</div>
         <div class="text-3xl font-extrabold" style="color:var(--cz-kuantiti-fg)" id="cz-q">—</div>
         <div class="text-sm" style="color:var(--cz-kuantiti-fg)" id="cz-q-p">—</div>
@@ -1832,6 +1832,104 @@ table td:nth-child(2) {
       setZon(table.getAttribute("data-zon") || "kualiti-1");
     })();
   </script>
+
+    <!--SINI -->
+    <script>
+(function () {
+  const panel = document.getElementById("panel-cz-murid") || document;
+  const table = document.getElementById("cz-table");
+
+  // ambil semua button zon (tak kisah class apa)
+  const btns = panel.querySelectorAll('button[data-zon]');
+  if (!btns.length || !table) return;
+
+  // mapping zon -> kad
+  const cardByZon = {
+    "kualiti-1": document.getElementById("cz-card-kualiti-1"),
+    "kualiti-2": document.getElementById("cz-card-kualiti-2"),
+    "pertahanan-1": document.getElementById("cz-card-pertahanan-1"),
+    "pertahanan-2": document.getElementById("cz-card-pertahanan-2"),
+    "kuantiti": document.getElementById("cz-card-kuantiti"),
+  };
+
+  // helper: dapatkan warna latar kad
+  function getCardBg(zon) {
+    const card = cardByZon[zon];
+    if (!card) return null;
+    const bg = getComputedStyle(card).backgroundColor;
+    return bg && bg !== "rgba(0, 0, 0, 0)" ? bg : null;
+  }
+
+  // helper: gelapkan bg untuk jadikan bar/button lebih “tegas”
+  function darkenRGB(rgb, factor = 0.18) {
+    // rgb(a) -> gelapkan sikit
+    const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!m) return rgb;
+    let r = +m[1], g = +m[2], b = +m[3];
+    r = Math.max(0, Math.round(r * (1 - factor)));
+    g = Math.max(0, Math.round(g * (1 - factor)));
+    b = Math.max(0, Math.round(b * (1 - factor)));
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  // apply warna zon pada button + bar table
+  function applyZon(zon) {
+    const bgCard = getCardBg(zon) || "rgb(220, 38, 38)"; // fallback
+    const bar = darkenRGB(bgCard, 0.25);
+
+    // set bar/header table (paksa !important)
+    const theadRow = table.querySelector("thead tr");
+    if (theadRow) {
+      theadRow.style.setProperty("background-color", bar, "important");
+    }
+    table.style.setProperty("--cz-bar", bar, "important");
+
+    // set button active: bg ikut bar, yang lain putih
+    btns.forEach(b => {
+      const isActive = (b.dataset.zon === zon);
+
+      // reset dulu
+      b.classList.toggle("is-active", isActive);
+
+      if (isActive) {
+        b.style.setProperty("background-color", bar, "important");
+        b.style.setProperty("color", "#ffffff", "important");
+        b.style.setProperty("border-color", "transparent", "important");
+        b.style.setProperty("box-shadow", "0 10px 18px rgba(16,24,40,.10)", "important");
+      } else {
+        b.style.removeProperty("background-color");
+        b.style.setProperty("background-color", "#ffffff", "important");
+        b.style.setProperty("color", "#374151", "important");
+        b.style.setProperty("border-color", "#e5e7eb", "important");
+        b.style.setProperty("box-shadow", "none", "important");
+      }
+
+      // kemas sikit (kalau button asal tiada style)
+      b.style.setProperty("border-width", "1px", "important");
+      b.style.setProperty("border-style", "solid", "important");
+      b.style.setProperty("border-radius", "14px", "important");
+      b.style.setProperty("padding", "10px 16px", "important");
+      b.style.setProperty("font-weight", "600", "important");
+    });
+  }
+
+  // klik handler
+  btns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const zon = btn.dataset.zon;
+      applyZon(zon);
+
+      // ✅ kalau cikgu ada fungsi render data ikut zon, panggil sini:
+      // window.applyCZTabs?.(zon);
+      // window.renderCombatZoneTable?.(zon);
+    });
+  });
+
+  // init: ambil button yang ada class is-active, kalau tiada guna kualiti-1
+  const activeBtn = Array.from(btns).find(b => b.classList.contains("is-active")) || btns[0];
+  applyZon(activeBtn?.dataset?.zon || "kualiti-1");
+})();
+</script>
 
 </section>
 <!-- ================= /TAB: COMBAT ZONE ================= -->
