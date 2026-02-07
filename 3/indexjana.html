@@ -3863,6 +3863,275 @@ table td:nth-child(2) {
             }
         </script>
 
+<script>
+(function () {
+  // ========= CONFIG =========
+  const ZONES = [
+    { key: "kualiti-1",     label: "Kualiti 1" },
+    { key: "kualiti-2",     label: "Kualiti 2" },
+    { key: "pertahanan-1",  label: "Pertahanan 1" },
+    { key: "pertahanan-2",  label: "Pertahanan 2" },
+    { key: "kuantiti",      label: "Kuantiti" },
+  ];
+
+  // Cari panel Combat Zone (kalau id lain pun OK)
+  function getCZPanel() {
+    return document.getElementById("panel-cz-murid")
+      || document.querySelector('[id*="cz"]')
+      || document.body;
+  }
+
+  // ========= UTIL =========
+  function norm(s){ return String(s||"").replace(/\s+/g," ").trim().toLowerCase(); }
+
+  function isTransparent(bg){
+    return !bg || bg === "transparent" || bg === "rgba(0, 0, 0, 0)";
+  }
+
+  // cari backgroundColor yang betul (naik ke parent kalau anak transparent)
+  function getEffectiveBg(el){
+    let cur = el;
+    for (let i=0; i<10 && cur; i++){
+      const bg = getComputedStyle(cur).backgroundColor;
+      if (!isTransparent(bg)) return bg;
+      cur = cur.parentElement;
+    }
+    return null;
+  }
+
+  // gelapkan sikit supaya sesuai jadi warna bar/tab
+  function darkenRGB(rgb, factor = 0.22){
+    const m = String(rgb||"").match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!m) return rgb;
+    let r = +m[1], g = +m[2], b = +m[3];
+    r = Math.max(0, Math.round(r * (1 - factor)));
+    g = Math.max(0, Math.round(g * (1 - factor)));
+    b = Math.max(0, Math.round(b * (1 - factor)));
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  // ========= FIND CARDS BY TEXT =========
+  function findZoneCards(panel){
+    // Cari semua elemen yang mengandungi label (Kualiti 1, dll) lalu ambil parent kadnya
+    const map = {};
+    const all = panel.querySelectorAll("*");
+    for (const z of ZONES) map[z.key] = null;
+
+    all.forEach(el => {
+      const t = norm(el.textContent);
+      if (!t) return;
+
+      for (const z of ZONES){
+        if (map[z.key]) continue;
+        if (t.includes(norm(z.label))) {
+          // cuba ambil container kad: naik ke parent yang ada border/rounded/padding (heuristic)
+          let cur = el;
+          for (let i=0; i<8 && cur; i++){
+            const cs = getComputedStyle(cur);
+            const bg = cs.backgroundColor;
+            const br = cs.borderRadius;
+            const bd = cs.borderTopWidth;
+            if (!isTransparent(bg) && (parseFloat(br) > 8 || parseFloat(bd) > 0)) {
+              map[z.key] = cur;
+              break;
+            }
+            cur = cur.parentElement;
+          }
+          // fallback: guna parent terdekat
+          if (!map[z.key]) map[z.key] = el.parentElement || el;
+        }
+      }
+    });
+
+    return map;
+  }
+
+  // ========= FIND TAB BUTTONS =========
+  function findZoneTabs(panel){
+    // Cari container tab: biasanya satu baris pill sebelum table
+    // Kita ambil semua clickable yang mengandungi label zon.
+    const candidates = panel.querySelectorAll("button, a, div[role='tab'], li, span");
+    const tabs = [];
+
+    candidates.forEach(el => {
+      const t = norm(el.textContent);
+      if (!t) return;
+
+      for (const z of ZONES){
+        if (t === norm(z.label) || t.includes(norm(z.label))) {
+          // el mesti clickable / nampak macam tab
+          const cs = getComputedStyle(el);
+          const isHidden = cs.display === "none" || cs.visibility === "hidden";
+          if (isHidden) return;
+
+          // el atau parent dia yang clickable
+          let clickable = el;
+          for (let i=0; i<4 && clickable; i++){
+            const tag = clickable.tagName ? clickable.tagName.toLowerCase() : "";
+            const isBtnLike = (tag === "button" || tag === "a") || clickable.onclick || clickable.getAttribute("role")==="tab";
+            if (isBtnLike) break;
+            clickable = clickable.parentElement;
+          }
+
+          tabs.push({ zon: z.key, el: clickable || el });
+          break;
+        }
+      }
+    });
+
+    // buang duplicate (sama element)
+    const seen = new Set();
+    return tabs.filter(x => {
+      if (!x.el) return false;
+      if (seen.has(x.el)) return false;
+      seen.add(x.el);
+      return true;
+    });
+  }
+
+  // ========= FIND TABLE HEADER BAR =========
+  function findCZTable(panel){
+    // Utamakan id kalau ada
+    return document.getElementById("cz-table")
+      || panel.querySelector("table")
+      || null;
+  }
+
+  function setHeaderBarColor(table, color){
+    if (!table) return;
+
+    // 1) thead tr
+    const tr = table.querySelector("thead tr");
+    if (tr) tr.style.setProperty("background-color", color, "important");
+
+    // 2) thead th
+    table.querySelectorAll("thead th").forEach(th => {
+      th.style.setProperty("background-color", color, "important");
+      th.style.setProperty("color", "#fff", "important");
+    });
+
+    // 3) kalau header row guna class di tr dalam thead
+    const thead = table.querySelector("thead");
+    if (thead) {
+      thead.style.setProperty("background-color", color, "important");
+    }
+  }
+
+  // ========= APPLY STYLE =========
+  function styleTab(tabEl, isActive, color){
+    if (!tabEl) return;
+
+    // pastikan teks nampak (isu putih kosong)
+    tabEl.style.setProperty("opacity", "1", "important");
+    tabEl.style.setProperty("visibility", "visible", "important");
+
+    // kemas pill
+    tabEl.style.setProperty("border-radius", "14px", "important");
+    tabEl.style.setProperty("padding", "10px 16px", "important");
+    tabEl.style.setProperty("border-width", "1px", "important");
+    tabEl.style.setProperty("border-style", "solid", "important");
+    tabEl.style.setProperty("font-weight", "700", "important");
+
+    if (isActive){
+      tabEl.style.setProperty("background-color", color, "important");
+      tabEl.style.setProperty("border-color", "transparent", "important");
+      tabEl.style.setProperty("color", "#ffffff", "important");
+      tabEl.style.setProperty("box-shadow", "0 10px 18px rgba(16,24,40,.12)", "important");
+    } else {
+      tabEl.style.setProperty("background-color", "#ffffff", "important");
+      tabEl.style.setProperty("border-color", "#e5e7eb", "important");
+      tabEl.style.setProperty("color", "#374151", "important");
+      tabEl.style.setProperty("box-shadow", "none", "important");
+    }
+  }
+
+  // ========= MAIN BIND =========
+  let bound = false;
+  function bindOrRebind(){
+    const panel = getCZPanel();
+    const table = findCZTable(panel);
+    const cards = findZoneCards(panel);
+    const tabs = findZoneTabs(panel);
+
+    // kalau tab belum wujud (selalunya lepas jana), keluar dulu
+    if (!tabs.length) return;
+
+    // map zon -> bg kad
+    const bgByZon = {};
+    ZONES.forEach(z => {
+      const card = cards[z.key];
+      const bg = card ? getEffectiveBg(card) : null;
+      bgByZon[z.key] = bg;
+    });
+
+    // pilih zon aktif: cari yang ada class active/is-active dulu
+    let activeZon = null;
+    tabs.forEach(t => {
+      const cls = (t.el.className || "").toString().toLowerCase();
+      if (cls.includes("active") || cls.includes("is-active") || cls.includes("selected")) activeZon = t.zon;
+    });
+    if (!activeZon) activeZon = tabs[0].zon;
+
+    function apply(zon){
+      const cardBg = bgByZon[zon] || "rgb(239, 68, 68)"; // fallback
+      const barColor = darkenRGB(cardBg, 0.25);
+
+      // header bar/table ikut warna kad
+      setHeaderBarColor(table, barColor);
+
+      // button tabs ikut warna kad
+      tabs.forEach(t => styleTab(t.el, t.zon === zon, barColor));
+    }
+
+    // pasang click listener sekali sahaja untuk setiap element (guna flag dataset)
+    tabs.forEach(t => {
+      if (!t.el) return;
+      if (t.el.dataset.czBound === "1") return;
+      t.el.dataset.czBound = "1";
+
+      t.el.addEventListener("click", (e) => {
+        // elakkan click ditahan oleh parent
+        // (tak stopPropagation sebab mungkin cikgu ada handler lain)
+        apply(t.zon);
+        // kalau cikgu ada fungsi render table ikut zon, biarkan handler asal jalan.
+      }, true);
+    });
+
+    // apply awal
+    apply(activeZon);
+
+    bound = true;
+  }
+
+  // ========= OBSERVER (punca utama masalah cikgu) =========
+  function start(){
+    // cuba bind awal
+    bindOrRebind();
+
+    const panel = getCZPanel();
+    const obs = new MutationObserver(() => {
+      // setiap kali DOM berubah (lepas Jana Analisis / lepas render table), rebind
+      bindOrRebind();
+    });
+
+    obs.observe(panel, { childList:true, subtree:true });
+
+    // fallback timer (kalau mutation tak trigger)
+    let tries = 0;
+    const t = setInterval(() => {
+      tries++;
+      bindOrRebind();
+      if (bound || tries > 30) clearInterval(t);
+    }, 250);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+})();
+</script>
 
 
     </body>
