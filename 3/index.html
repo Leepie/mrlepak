@@ -390,9 +390,23 @@
             }
 
 
-            /* ❌ Buang bold pada kolum Subjek sahaja */
+/* ❌ Buang bold pada kolum Subjek sahaja */
 table td:nth-child(2) {
   font-weight: 400 !important;   /* normal */
+}
+#panel-mp-kritikal table tbody td {
+  font-weight: 400 !important;
+}
+
+/* paksa normal walaupun JS letak <b> atau span */
+#panel-mp-kritikal table tbody td * {
+  font-weight: 400 !important;
+}
+
+/* ✅ KECUALI badge status (jika guna class ini) */
+#panel-mp-kritikal table tbody .status-badge,
+#panel-mp-kritikal table tbody .badge {
+  font-weight: 700 !important;
 }
 
         </style>
