@@ -1609,136 +1609,168 @@ table td:nth-child(2) {
 
 
 
-                <!-- TAB 4 -->
-                <!-- TAB 4: GP MP KRITIKAL -->
-                <section id="panel-mp-kritikal" class="hidden" hidden>
+<!-- TAB 4: GP MP KRITIKAL -->
+<section id="panel-mp-kritikal" class="hidden" hidden>
 
-                    <div class="soft-card p-5 space-y-4">
+  <div class="soft-card p-5 space-y-4">
 
-                        <!-- HEADER -->
-                        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
-                            <div>
-                                <h2 class="text-xl font-extrabold text-gray-900">GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
-                                <p class="text-sm text-gray-500">
-                                    Ranking subjek ikut keutamaan intervensi (GPMP ↑, %Gagal ↑, C ke bawah ↑)
-                                </p>
-                            </div>
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+      <div>
+        <h2 class="text-xl font-extrabold text-gray-900">GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500">
+          Ranking subjek ikut keutamaan intervensi (GPMP ↑, %Gagal ↑, C ke bawah ↑)
+        </p>
+      </div>
 
-                            <div class="flex flex-wrap gap-2 text-xs">
-                                <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">Lebih kritikal = lebih atas</span>
-                                <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Negatif beza = semakin baik</span>
-                            </div>
-                        </div>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">Lebih kritikal = lebih atas</span>
+        <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Negatif beza = semakin baik</span>
+      </div>
+    </div>
 
-                        <!-- FILTER -->
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+    <!-- FILTER -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
 
-                            <!-- KELAS -->
-                            <div class="md:col-span-4">
-                                <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kelas</label>
-                                <select id="t4-filter-kelas" class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
-                                    <option value="">Pilih Kelas</option>
-                                    <option value="ALL">SEMUA KELAS</option>
-                                </select>
-                            </div>
+      <!-- KELAS -->
+      <div class="md:col-span-4">
+        <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kelas</label>
+        <select id="t4-filter-kelas" class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="">Pilih Kelas</option>
+          <option value="ALL">SEMUA KELAS</option>
+        </select>
+      </div>
 
-                            <!-- KUMPULAN -->
-                            <div class="md:col-span-5">
-                                <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kumpulan Subjek</label>
-                                <select id="t4-filter-kumpulan" class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
-                                    <option value="ALL">SEMUA KUMPULAN</option>
-                                    <option value="Bahasa">Bahasa</option>
-                                    <option value="Kemanusiaan">Kemanusiaan</option>
-                                    <option value="Sains & Matematik">Sains & Matematik</option>
-                                    <option value="Teknik & Vokasional">Teknik & Vokasional</option>
-                                </select>
-                            </div>
+      <!-- KUMPULAN -->
+      <div class="md:col-span-5">
+        <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kumpulan Subjek</label>
+        <select id="t4-filter-kumpulan" class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="ALL">SEMUA KUMPULAN</option>
+          <option value="Bahasa">Bahasa</option>
+          <option value="Kemanusiaan">Kemanusiaan</option>
+          <option value="Sains & Matematik">Sains & Matematik</option>
+          <option value="Teknik & Vokasional">Teknik & Vokasional</option>
+        </select>
+      </div>
 
-                            <!-- BUTANG -->
-                            <div class="md:col-span-3">
-                                <button id="t4-btn-jana" class="w-full rounded-2xl px-5 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition">
-                                    Jana Analisis
-                                </button>
-                            </div>
+      <!-- BUTANG -->
+      <div class="md:col-span-3">
+        <button id="t4-btn-jana" class="w-full rounded-2xl px-5 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition">
+          Jana Analisis
+        </button>
+      </div>
 
-                        </div>
+    </div>
 
-                        <!-- STATUS -->
-                        <div id="t4-status" class="text-sm text-gray-500"></div>
+    <!-- STATUS -->
+    <div id="t4-status" class="text-sm text-gray-500">Pilih filter dan klik <b>Jana Analisis</b>.</div>
 
-                        <!-- KPI RINGKAS -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                            <div class="kpi-card px-4 py-3">
-                                <div class="text-[11px] text-gray-500 uppercase tracking-wide">Bil Subjek Dianalisis</div>
-                                <div class="mt-1 text-2xl font-extrabold text-indigo-600" id="t4-kpi-count">—</div>
-                                <div class="mt-1 text-xs text-gray-500">ikut filter semasa</div>
-                            </div>
+    <!-- ✅ KAWASAN MERAH (HIDE DULU) -->
+    <div id="t4-result" class="hidden space-y-4">
 
-                            <div class="kpi-card px-4 py-3">
-                                <div class="text-[11px] text-gray-500 uppercase tracking-wide">Subjek Paling Kritikal</div>
-                                <div class="mt-1 text-lg font-extrabold text-rose-600" id="t4-kpi-top">—</div>
-                                <div class="mt-1 text-xs text-gray-500">ranking #1</div>
-                            </div>
+      <!-- KPI RINGKAS -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="kpi-card px-4 py-3">
+          <div class="text-[11px] text-gray-500 uppercase tracking-wide">Bil Subjek Dianalisis</div>
+          <div class="mt-1 text-2xl font-extrabold text-indigo-600" id="t4-kpi-count">—</div>
+          <div class="mt-1 text-xs text-gray-500">ikut filter semasa</div>
+        </div>
 
-                            <div class="kpi-card px-4 py-3">
-                                <div class="text-[11px] text-gray-500 uppercase tracking-wide">GPMP Terburuk (PraSPM)</div>
-                                <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t4-kpi-worst-gpmp">—</div>
-                                <div class="mt-1 text-xs text-gray-500">lebih tinggi lebih lemah</div>
-                            </div>
+        <div class="kpi-card px-4 py-3">
+          <div class="text-[11px] text-gray-500 uppercase tracking-wide">Subjek Paling Kritikal</div>
+          <div class="mt-1 text-lg font-extrabold text-rose-600" id="t4-kpi-top">—</div>
+          <div class="mt-1 text-xs text-gray-500">ranking #1</div>
+        </div>
 
-                            <div class="kpi-card px-4 py-3">
-                                <div class="text-[11px] text-gray-500 uppercase tracking-wide">%Gagal Tertinggi (PraSPM)</div>
-                                <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t4-kpi-worst-fail">—</div>
-                                <div class="mt-1 text-xs text-gray-500">ikut hadir sahaja</div>
-                            </div>
-                        </div>
+        <div class="kpi-card px-4 py-3">
+          <div class="text-[11px] text-gray-500 uppercase tracking-wide">GPMP Terburuk (PraSPM)</div>
+          <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t4-kpi-worst-gpmp">—</div>
+          <div class="mt-1 text-xs text-gray-500">lebih tinggi lebih lemah</div>
+        </div>
 
-                        <!-- JADUAL -->
-                        <div class="soft-card overflow-hidden">
-                            <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
-                                <div class="font-bold text-gray-800">Ranking Subjek Kritikal</div>
+        <div class="kpi-card px-4 py-3">
+          <div class="text-[11px] text-gray-500 uppercase tracking-wide">%Gagal Tertinggi (PraSPM)</div>
+          <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t4-kpi-worst-fail">—</div>
+          <div class="mt-1 text-xs text-gray-500">ikut hadir sahaja</div>
+        </div>
+      </div>
 
+      <!-- JADUAL -->
+      <div class="soft-card overflow-hidden">
+        <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+          <div class="font-bold text-gray-800">Ranking Subjek Kritikal</div>
+          <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
+        </div>
 
+        <div class="overflow-x-auto">
+          <table class="min-w-[1100px] w-full text-sm">
+            <thead class="bg-indigo-600 text-white">
+              <tr>
+                <th class="px-4 py-3 text-center font-extrabold">#</th>
+                <th class="px-4 py-3 text-left font-extrabold">Subjek</th>
+                <th class="px-3 py-3 text-center font-extrabold">GPMP PPSA</th>
+                <th class="px-3 py-3 text-center font-extrabold">GPMP PraSPM</th>
+                <th class="px-3 py-3 text-center font-extrabold">Beza<br>(Pra−PPSA)</th>
+                <th class="px-3 py-3 text-center font-extrabold">%Gagal PPSA</th>
+                <th class="px-3 py-3 text-center font-extrabold">%Gagal PraSPM</th>
+                <th class="px-3 py-3 text-center font-extrabold">Beza %Gagal</th>
+                <th class="px-3 py-3 text-center font-extrabold">C↓ PPSA</th>
+                <th class="px-3 py-3 text-center font-extrabold">C↓ PraSPM</th>
+                <th class="px-3 py-3 text-center font-extrabold">Beza C↓</th>
+                <th class="px-4 py-3 text-center font-extrabold">Status</th>
+              </tr>
+            </thead>
+            <tbody id="t4-tbody" class="bg-white"></tbody>
+          </table>
+        </div>
+      </div>
 
+      <div class="text-xs text-gray-400">
+        Nota: “C↓” = bil murid gred <b>C, D, E, G</b> (ikut hadir). TH tidak dikira.
+      </div>
 
+    </div><!-- /#t4-result -->
 
-                                <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
-                            </div>
+  </div>
 
-                            <div class="overflow-x-auto">
-                                <table class="min-w-[1100px] w-full text-sm">
-                                    <thead class="bg-indigo-600 text-white">
-                                        <tr>
-                                            <th class="px-4 py-3 text-center font-extrabold">#</th>
-                                            <th class="px-4 py-3 text-left font-extrabold">Subjek</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">GPMP PPSA</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">GPMP PraSPM</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">Beza<br>(Pra−PPSA)</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">%Gagal PPSA</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">%Gagal PraSPM</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">Beza %Gagal</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">C↓ PPSA</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">C↓ PraSPM</th>
-                                            <th class="px-3 py-3 text-center font-extrabold">Beza C↓</th>
-                                            <th class="px-4 py-3 text-center font-extrabold">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="t4-tbody" class="bg-white"></tbody>
-                                </table>
-                            </div>
+  <!-- ✅ SCRIPT RINGKAS: HIDE MULA-MULA + SHOW LEPAS JANA -->
+  <script>
+    (function(){
+      const $ = (id) => document.getElementById(id);
 
+      // pastikan mula-mula hidden
+      $("t4-result")?.classList.add("hidden");
 
+      // bila klik jana, bila data siap / render berjaya → show
+      // (kalau cikgu dah ada fungsi janaTab4() sedia ada, guna hook di bawah)
+      const btn = $("t4-btn-jana");
+      if(!btn) return;
 
+      btn.addEventListener("click", () => {
+        // NOTE: Kalau Cikgu ada function janaTab4() / generateMPCritical() dll,
+        // panggil function itu dulu, kemudian baru show.
+        // Contoh: window.janaMPKritikal?.();
 
+        // ✅ jika cikgu nak pastikan "t4-tbody" ada row baru show:
+        setTimeout(() => {
+          const hasRow = ($("t4-tbody") && $("t4-tbody").children.length > 0);
+          if (hasRow) {
+            $("t4-result")?.classList.remove("hidden");
+          } else {
+            $("t4-result")?.classList.add("hidden");
+          }
+        }, 50);
+      });
 
-                        </div>
+      // optional: bila tukar filter, hide balik supaya kena klik jana semula
+      ["t4-filter-kelas","t4-filter-kumpulan"].forEach(id=>{
+        $(id)?.addEventListener("change", ()=> $("t4-result")?.classList.add("hidden"));
+      });
+    })();
+  </script>
 
-                        <div class="text-xs text-gray-400">
-                            Nota: “C↓” = bil murid gred <b>C, D, E, G</b> (ikut hadir). TH tidak dikira.
-                        </div>
+</section>
 
-                    </div>
-                </section>
 
 
             </main>
