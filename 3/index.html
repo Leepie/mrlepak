@@ -409,6 +409,13 @@ table td:nth-child(2) {
   font-weight: 700 !important;
 }
 
+/* Kurangkan kebulatan button Combat Zone (aktif) */
+.cz-tab.is-active,
+.cz-tab.active,
+.cz-tab[aria-selected="true"] {
+  border-radius: 8px !important; /* cuba 8px / 10px / 12px */
+}
+
         </style>
 
         <script>
@@ -431,11 +438,11 @@ table td:nth-child(2) {
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div class="flex items-center justify-between gap-6">
                         <div class="flex items-center space-x-4">
-                            <img src="https://raw.githubusercontent.com/Leepie/mrlepak/master/LOGO.jpg" alt="XCODE Mr LePaK" class="h-16 w-16 object-contain rounded-full border" />
+                            <img src="../images/KBs-LOGO.png" alt="XCODE Mr LePaK" class="h-16 w-16 object-contain rounded-full border" />
                             <div>
                                 <h1 class="text-2xl font-bold text-gray-900">PPSA Vs PRASPM</h1>
                                 <p class="text-sm text-gray-600">XCode Analisis</p>
-                                <p class="text-sm font-medium text-gray-800">SMKDK</p>
+                                <p class="text-sm font-medium text-gray-800">SMK KPG BAHAGIA</p>
                                 <div class="flex items-center space-x-2 mt-1">
                                     <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
                                     <span class="text-xs text-gray-600">CSV: PPSA &amp; PRASPM</span>
@@ -1486,37 +1493,37 @@ table td:nth-child(2) {
                         <div id="cz-summary-cards" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-2">
 
                             <div class="rounded-xl border bg-yellow-50 px-4 py-3">
-                                <div class="text-sm font-semibold text-yellow-700">🏆 Kualiti 1</div>
+                                <div class="text-sm font-medium text-yellow-700">🏆 Kualiti 1</div>
                                 <div id="cz-k1" class="text-xl font-bold text-yellow-800 mt-1">0</div>
                                 <div id="cz-k1-p" class="text-xs text-yellow-600 leading-tight">0%</div>
                             </div>
 
                             <div class="rounded-xl border bg-gray-50 px-4 py-3">
-                                <div class="text-sm font-semibold text-gray-700">🥈 Kualiti 2</div>
+                                <div class="text-sm font-medium text-gray-700">🥈 Kualiti 2</div>
                                 <div id="cz-k2" class="text-xl font-bold text-gray-800 mt-1">0</div>
                                 <div id="cz-k2-p" class="text-xs text-gray-600 leading-tight">0%</div>
                             </div>
 
                             <div class="rounded-xl border bg-blue-50 px-4 py-3">
-                                <div class="text-sm font-semibold text-blue-700">🛡️ Pertahanan 1</div>
+                                <div class="text-sm font-medium text-blue-700">🛡️ Pertahanan 1</div>
                                 <div id="cz-p1" class="text-xl font-bold text-blue-800 mt-1">0</div>
                                 <div id="cz-p1-p" class="text-xs text-blue-600 leading-tight">0%</div>
                             </div>
 
                             <div class="rounded-xl border bg-orange-50 px-4 py-3">
-                                <div class="text-sm font-semibold text-orange-700">⚠️ Pertahanan 2</div>
+                                <div class="text-sm font-medium text-orange-700">⚠️ Pertahanan 2</div>
                                 <div id="cz-p2" class="text-xl font-bold text-orange-800 mt-1">0</div>
                                 <div id="cz-p2-p" class="text-xs text-orange-600 leading-tight">0%</div>
                             </div>
 
                             <div class="rounded-xl border bg-red-50 px-4 py-3">
-                                <div class="text-sm font-semibold text-red-700">📊 Kuantiti</div>
+                                <div class="text-sm font-medium text-red-700">📊 Kuantiti</div>
                                 <div id="cz-q" class="text-xl font-bold text-red-800 mt-1">0</div>
                                 <div id="cz-q-p" class="text-xs text-red-600 leading-tight">0%</div>
                             </div>
 
                             <div class="rounded-xl border bg-purple-50 px-4 py-3">
-                                <div class="text-sm font-semibold text-purple-700">👥 Jumlah Murid</div>
+                                <div class="text-sm font-medium text-purple-700">👥 Jumlah Murid</div>
                                 <div id="cz-total" class="text-xl font-bold text-purple-800 mt-1">0</div>
                                 <div class="text-xs text-purple-600 leading-tight">100%</div>
                             </div>
@@ -1549,23 +1556,23 @@ table td:nth-child(2) {
                             <div class="px-4 py-3 border-b bg-white">
                                 <div class="flex flex-wrap gap-2">
                                     <!-- Nota: data-zone mesti sama dengan label zon dalam data -->
-                                    <button type="button" class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-rose-600 text-white" data-zone="Kualiti 1" onclick="setCombatZoneTab(this)">
+                                    <button type="button" class="cz-tab px-3 py-2 rounded-lg text-sm font-semibold border bg-rose-600 text-white" data-zone="Kualiti 1" onclick="setCombatZoneTab(this)">
                                         Kualiti 1
                                     </button>
 
-                                    <button type="button" class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50" data-zone="Kualiti 2" onclick="setCombatZoneTab(this)">
+                                    <button type="button" class="cz-tab px-3 py-2 rounded-lg text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50" data-zone="Kualiti 2" onclick="setCombatZoneTab(this)">
                                         Kualiti 2
                                     </button>
 
-                                    <button type="button" class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50" data-zone="Pertahanan 1" onclick="setCombatZoneTab(this)">
+                                    <button type="button" class="cz-tab px-3 py-2 rounded-lg text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50" data-zone="Pertahanan 1" onclick="setCombatZoneTab(this)">
                                         Pertahanan 1
                                     </button>
 
-                                    <button type="button" class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50" data-zone="Pertahanan 2" onclick="setCombatZoneTab(this)">
+                                    <button type="button" class="cz-tab px-3 py-2 rounded-lg text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50" data-zone="Pertahanan 2" onclick="setCombatZoneTab(this)">
                                         Pertahanan 2
                                     </button>
 
-                                    <button type="button" class="cz-tab px-3 py-2 rounded-xl text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50" data-zone="Kuantiti" onclick="setCombatZoneTab(this)">
+                                    <button type="button" class="cz-tab px-3 py-2 rounded-lg text-sm font-semibold border bg-white text-gray-700 hover:bg-gray-50" data-zone="Kuantiti" onclick="setCombatZoneTab(this)">
                                         Kuantiti
                                     </button>
                                 </div>
