@@ -435,7 +435,7 @@ table td:nth-child(2) {
                             <div>
                                 <h1 class="text-2xl font-bold text-gray-900">PPSA Vs PRASPM</h1>
                                 <p class="text-sm text-gray-600">XCode Analisis</p>
-                                <p class="text-sm font-medium text-gray-800">SMKDK</p>
+                                <p class="text-sm font-medium text-gray-800">SMK KPG BAHAGIA</p>
                                 <div class="flex items-center space-x-2 mt-1">
                                     <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
                                     <span class="text-xs text-gray-600">CSV: PPSA &amp; PRASPM</span>
@@ -1609,331 +1609,167 @@ table td:nth-child(2) {
 
 
 
-<!-- ================= TAB: COMBAT ZONE – MURID KRITIKAL ================= -->
-<section id="panel-cz-murid" class="hidden" hidden>
-
-  <!-- ✅ TAMBAH CSS INI (boleh letak dalam <style> utama) -->
-  <style>
-    /* =========================================================
-       COMBAT ZONE: Warna button + bar table ikut warna kad
-       ========================================================= */
-
-    :root{
-      /* ✅ WARNA (tukar di sini jika perlu) */
-      --cz-kualiti-1-bg: #FEF3C7;  /* kad: amber-100 */
-      --cz-kualiti-1-fg: #92400E;  /* teks: amber-800 */
-      --cz-kualiti-1-bar:#F59E0B;  /* bar/button: amber-500 */
-
-      --cz-kualiti-2-bg: #F3F4F6;  /* kad: gray-100 */
-      --cz-kualiti-2-fg: #111827;  /* teks: gray-900 */
-      --cz-kualiti-2-bar:#6B7280;  /* bar/button: gray-500 */
-
-      --cz-pertahanan-1-bg:#EFF6FF;/* kad: blue-50 */
-      --cz-pertahanan-1-fg:#1D4ED8;/* teks: blue-700 */
-      --cz-pertahanan-1-bar:#2563EB;/* bar/button: blue-600 */
-
-      --cz-pertahanan-2-bg:#FFF7ED;/* kad: orange-50 */
-      --cz-pertahanan-2-fg:#C2410C;/* teks: orange-700 */
-      --cz-pertahanan-2-bar:#F97316;/* bar/button: orange-500 */
-
-      --cz-kuantiti-bg:#FFF1F2;    /* kad: rose-50 */
-      --cz-kuantiti-fg:#BE123C;    /* teks: rose-700 */
-      --cz-kuantiti-bar:#E11D48;   /* bar/button: rose-600 */
-    }
-
-    /* Button tab zon */
-    .cz-tab{
-      border: 1px solid #e5e7eb;
-      background: #fff;
-      color: #374151;
-      padding: 10px 16px;
-      border-radius: 14px;
-      font-weight: 600;
-      transition: .15s ease;
-      user-select: none;
-    }
-    .cz-tab:hover{ background:#f9fafb; }
-    .cz-tab.is-active{
-      color:#fff !important;
-      border-color: transparent !important;
-      box-shadow: 0 10px 18px rgba(16,24,40,.10);
-    }
-
-    /* Header table ikut zon */
-    .cz-table thead th{
-      color:#fff !important;
-      font-weight: 800;
-      letter-spacing:.2px;
-    }
-
-    /* ====== Mapping warna ikut data-zon ====== */
-    .cz-tab[data-zon="kualiti-1"].is-active{ background: var(--cz-kualiti-1-bar); }
-    .cz-tab[data-zon="kualiti-2"].is-active{ background: var(--cz-kualiti-2-bar); }
-    .cz-tab[data-zon="pertahanan-1"].is-active{ background: var(--cz-pertahanan-1-bar); }
-    .cz-tab[data-zon="pertahanan-2"].is-active{ background: var(--cz-pertahanan-2-bar); }
-    .cz-tab[data-zon="kuantiti"].is-active{ background: var(--cz-kuantiti-bar); }
-
-    .cz-table[data-zon="kualiti-1"] thead tr{ background: var(--cz-kualiti-1-bar); }
-    .cz-table[data-zon="kualiti-2"] thead tr{ background: var(--cz-kualiti-2-bar); }
-    .cz-table[data-zon="pertahanan-1"] thead tr{ background: var(--cz-pertahanan-1-bar); }
-    .cz-table[data-zon="pertahanan-2"] thead tr{ background: var(--cz-pertahanan-2-bar); }
-    .cz-table[data-zon="kuantiti"] thead tr{ background: var(--cz-kuantiti-bar); }
-
-    /* (Optional) kecilkan rasa “merah tebal” pada bar dengan round bawah */
-    .cz-table thead tr th:first-child{ border-top-left-radius: 12px; }
-    .cz-table thead tr th:last-child{ border-top-right-radius: 12px; }
-
-    /* Jadual kemas */
-    .cz-table td{
-      padding: 12px 14px;
-      border-bottom: 1px solid #e5e7eb;
-      font-weight: 500;
-      color:#111827;
-      background:#fff;
-    }
-  </style>
+<!-- TAB 4: GP MP KRITIKAL -->
+<section id="panel-mp-kritikal" class="hidden" hidden>
 
   <div class="soft-card p-5 space-y-4">
 
     <!-- HEADER -->
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
       <div>
-        <h2 class="text-xl font-extrabold text-gray-900">Combat Zone – Murid Kritikal</h2>
-        <p class="text-sm text-gray-500">Senarai murid mengikut zon (Kualiti 1 → Kuantiti)</p>
-      </div>
-      <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
-    </div>
-
-    <!-- ✅ KAD RINGKAS (contoh struktur - cikgu boleh kekalkan data sedia ada) -->
-    <div id="cz-card-kualiti-1" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <div class="rounded-2xl border p-4" style="background:var(--cz-kualiti-1-bg);border-color:#fde68a">
-        <div class="font-bold" style="color:var(--cz-kualiti-1-fg)">🏆 Kualiti 1</div>
-        <div class="text-3xl font-extrabold" style="color:var(--cz-kualiti-1-fg)" id="cz-k1">—</div>
-        <div class="text-sm" style="color:var(--cz-kualiti-1-fg)" id="cz-k1-p">—</div>
+        <h2 class="text-xl font-extrabold text-gray-900">GP Mata Pelajaran Kritikal – PPSA vs PraSPM</h2>
+        <p class="text-sm text-gray-500">
+          Ranking subjek ikut keutamaan intervensi (GPMP ↑, %Gagal ↑, C ke bawah ↑)
+        </p>
       </div>
 
-      <div id="cz-card-kualiti-2" class="rounded-2xl border p-4" style="background:var(--cz-kualiti-2-bg);border-color:#e5e7eb">
-        <div class="font-bold" style="color:var(--cz-kualiti-2-fg)">🥈 Kualiti 2</div>
-        <div class="text-3xl font-extrabold" style="color:var(--cz-kualiti-2-fg)" id="cz-k2">—</div>
-        <div class="text-sm text-gray-600" id="cz-k2-p">—</div>
-      </div>
-
-      <div id="cz-card-pertahanan-1" class="rounded-2xl border p-4" style="background:var(--cz-pertahanan-1-bg);border-color:#dbeafe">
-        <div class="font-bold" style="color:var(--cz-pertahanan-1-fg)">🛡️ Pertahanan 1</div>
-        <div class="text-3xl font-extrabold" style="color:var(--cz-pertahanan-1-fg)" id="cz-p1">—</div>
-        <div class="text-sm" style="color:var(--cz-pertahanan-1-fg)" id="cz-p1-p">—</div>
-      </div>
-
-      <div id="cz-card-pertahanan-2" class="rounded-2xl border p-4" style="background:var(--cz-pertahanan-2-bg);border-color:#fed7aa">
-        <div class="font-bold" style="color:var(--cz-pertahanan-2-fg)">⚠️ Pertahanan 2</div>
-        <div class="text-3xl font-extrabold" style="color:var(--cz-pertahanan-2-fg)" id="cz-p2">—</div>
-        <div class="text-sm" style="color:var(--cz-pertahanan-2-fg)" id="cz-p2-p">—</div>
-      </div>
-
-      <div id="cz-card-kuantiti" class="rounded-2xl border p-4" style="background:var(--cz-kuantiti-bg);border-color:#fecdd3">
-        <div class="font-bold" style="color:var(--cz-kuantiti-fg)">📊 Kuantiti</div>
-        <div class="text-3xl font-extrabold" style="color:var(--cz-kuantiti-fg)" id="cz-q">—</div>
-        <div class="text-sm" style="color:var(--cz-kuantiti-fg)" id="cz-q-p">—</div>
-      </div>
-
-      <div class="rounded-2xl border p-4" style="background:#F5F3FF;border-color:#EDE9FE">
-        <div class="font-bold" style="color:#6D28D9">👥 Jumlah Murid</div>
-        <div class="text-3xl font-extrabold" style="color:#6D28D9" id="cz-total">—</div>
-        <div class="text-sm" style="color:#6D28D9">100%</div>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">Lebih kritikal = lebih atas</span>
+        <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-200">Negatif beza = semakin baik</span>
       </div>
     </div>
 
-    <!-- KAD JADUAL -->
-    <div class="soft-card overflow-hidden">
-      <div class="px-5 py-4 border-b bg-rose-50/40 flex items-center justify-between">
-        <div class="font-extrabold text-gray-900">Combat Zone – Murid Kritikal</div>
+    <!-- FILTER -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
 
-        <select id="cz-topN" class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold">
-          <option value="5">Top 5</option>
-          <option value="10">Top 10</option>
-          <option value="20">Top 20</option>
-          <option value="999">Semua</option>
+      <!-- KELAS -->
+      <div class="md:col-span-4">
+        <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kelas</label>
+        <select id="t4-filter-kelas" class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="">Pilih Kelas</option>
+          <option value="ALL">SEMUA KELAS</option>
         </select>
       </div>
 
-      <!-- BUTTON ZON -->
-      <div class="px-5 py-4 border-b bg-white flex flex-wrap gap-2">
-        <button class="cz-tab is-active" data-zon="kualiti-1" type="button">Kualiti 1</button>
-        <button class="cz-tab" data-zon="kualiti-2" type="button">Kualiti 2</button>
-        <button class="cz-tab" data-zon="pertahanan-1" type="button">Pertahanan 1</button>
-        <button class="cz-tab" data-zon="pertahanan-2" type="button">Pertahanan 2</button>
-        <button class="cz-tab" data-zon="kuantiti" type="button">Kuantiti</button>
+      <!-- KUMPULAN -->
+      <div class="md:col-span-5">
+        <label class="block text-[0.95rem] font-semibold text-gray-700 mb-2">Kumpulan Subjek</label>
+        <select id="t4-filter-kumpulan" class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="ALL">SEMUA KUMPULAN</option>
+          <option value="Bahasa">Bahasa</option>
+          <option value="Kemanusiaan">Kemanusiaan</option>
+          <option value="Sains & Matematik">Sains & Matematik</option>
+          <option value="Teknik & Vokasional">Teknik & Vokasional</option>
+        </select>
       </div>
 
-      <!-- TABLE -->
-      <div class="overflow-x-auto">
-        <table id="cz-table" class="cz-table min-w-[980px] w-full text-sm" data-zon="kualiti-1">
-          <thead>
-            <tr>
-              <th class="px-4 py-4 text-left w-[60px]">#</th>
-              <th class="px-4 py-4 text-left">Nama Murid</th>
-              <th class="px-4 py-4 text-left">No. KP</th>
-              <th class="px-4 py-4 text-left">Kelas</th>
-              <th class="px-4 py-4 text-center">GP PPSA</th>
-              <th class="px-4 py-4 text-center">GP PraSPM</th>
-              <th class="px-4 py-4 text-center">Beza</th>
-            </tr>
-          </thead>
-          <tbody id="cz-tbody">
-            <!-- ✅ DATA DIISI OLEH JS SEDIA ADA CIKGU -->
-          </tbody>
-        </table>
+      <!-- BUTANG -->
+      <div class="md:col-span-3">
+        <button id="t4-btn-jana" class="w-full rounded-2xl px-5 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition">
+          Jana Analisis
+        </button>
       </div>
 
-      <div class="px-5 py-4 text-sm text-gray-500 border-t">
-        Paparan mengikut zon: <b id="cz-zon-label">Kualiti 1</b>
-      </div>
     </div>
+
+    <!-- STATUS -->
+    <div id="t4-status" class="text-sm text-gray-500">Pilih filter dan klik <b>Jana Analisis</b>.</div>
+
+    <!-- ✅ KAWASAN MERAH (HIDE DULU) -->
+    <div id="t4-result" class="hidden space-y-4">
+
+      <!-- KPI RINGKAS -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="kpi-card px-4 py-3">
+          <div class="text-[11px] text-gray-500 uppercase tracking-wide">Bil Subjek Dianalisis</div>
+          <div class="mt-1 text-2xl font-extrabold text-indigo-600" id="t4-kpi-count">—</div>
+          <div class="mt-1 text-xs text-gray-500">ikut filter semasa</div>
+        </div>
+
+        <div class="kpi-card px-4 py-3">
+          <div class="text-[11px] text-gray-500 uppercase tracking-wide">Subjek Paling Kritikal</div>
+          <div class="mt-1 text-lg font-extrabold text-rose-600" id="t4-kpi-top">—</div>
+          <div class="mt-1 text-xs text-gray-500">ranking #1</div>
+        </div>
+
+        <div class="kpi-card px-4 py-3">
+          <div class="text-[11px] text-gray-500 uppercase tracking-wide">GPMP Terburuk (PraSPM)</div>
+          <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t4-kpi-worst-gpmp">—</div>
+          <div class="mt-1 text-xs text-gray-500">lebih tinggi lebih lemah</div>
+        </div>
+
+        <div class="kpi-card px-4 py-3">
+          <div class="text-[11px] text-gray-500 uppercase tracking-wide">%Gagal Tertinggi (PraSPM)</div>
+          <div class="mt-1 text-2xl font-extrabold text-rose-600" id="t4-kpi-worst-fail">—</div>
+          <div class="mt-1 text-xs text-gray-500">ikut hadir sahaja</div>
+        </div>
+      </div>
+
+      <!-- JADUAL -->
+      <div class="soft-card overflow-hidden">
+        <div class="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+          <div class="font-bold text-gray-800">Ranking Subjek Kritikal</div>
+          <div class="text-xs text-gray-400">PPSA vs PraSPM</div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-[1100px] w-full text-sm">
+            <thead class="bg-indigo-600 text-white">
+              <tr>
+                <th class="px-4 py-3 text-center font-extrabold">#</th>
+                <th class="px-4 py-3 text-left font-extrabold">Subjek</th>
+                <th class="px-3 py-3 text-center font-extrabold">GPMP PPSA</th>
+                <th class="px-3 py-3 text-center font-extrabold">GPMP PraSPM</th>
+                <th class="px-3 py-3 text-center font-extrabold">Beza<br>(Pra−PPSA)</th>
+                <th class="px-3 py-3 text-center font-extrabold">%Gagal PPSA</th>
+                <th class="px-3 py-3 text-center font-extrabold">%Gagal PraSPM</th>
+                <th class="px-3 py-3 text-center font-extrabold">Beza %Gagal</th>
+                <th class="px-3 py-3 text-center font-extrabold">C↓ PPSA</th>
+                <th class="px-3 py-3 text-center font-extrabold">C↓ PraSPM</th>
+                <th class="px-3 py-3 text-center font-extrabold">Beza C↓</th>
+                <th class="px-4 py-3 text-center font-extrabold">Status</th>
+              </tr>
+            </thead>
+            <tbody id="t4-tbody" class="bg-white"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="text-xs text-gray-400">
+        Nota: “C↓” = bil murid gred <b>C, D, E, G</b> (ikut hadir). TH tidak dikira.
+      </div>
+
+    </div><!-- /#t4-result -->
 
   </div>
 
-  <!-- ✅ JS: Tukar warna button + bar table ikut zon yang dipilih -->
+  <!-- ✅ SCRIPT RINGKAS: HIDE MULA-MULA + SHOW LEPAS JANA -->
   <script>
     (function(){
-      const tabs  = document.querySelectorAll("#panel-cz-murid .cz-tab");
-      const table = document.getElementById("cz-table");
-      const lbl   = document.getElementById("cz-zon-label");
+      const $ = (id) => document.getElementById(id);
 
-      if(!tabs.length || !table) return;
+      // pastikan mula-mula hidden
+      $("t4-result")?.classList.add("hidden");
 
-      const LABEL = {
-        "kualiti-1":"Kualiti 1",
-        "kualiti-2":"Kualiti 2",
-        "pertahanan-1":"Pertahanan 1",
-        "pertahanan-2":"Pertahanan 2",
-        "kuantiti":"Kuantiti"
-      };
+      // bila klik jana, bila data siap / render berjaya → show
+      // (kalau cikgu dah ada fungsi janaTab4() sedia ada, guna hook di bawah)
+      const btn = $("t4-btn-jana");
+      if(!btn) return;
 
-      function setZon(zon){
-        // button active
-        tabs.forEach(b => b.classList.toggle("is-active", b.dataset.zon === zon));
+      btn.addEventListener("click", () => {
+        // NOTE: Kalau Cikgu ada function janaTab4() / generateMPCritical() dll,
+        // panggil function itu dulu, kemudian baru show.
+        // Contoh: window.janaMPKritikal?.();
 
-        // table header color
-        table.setAttribute("data-zon", zon);
-
-        // label
-        if(lbl) lbl.textContent = LABEL[zon] || zon;
-
-        // ✅ HOOK (pilihan): kalau cikgu ada fungsi render ikut zon, panggil di sini
-        // contoh:
-        // window.renderCombatZoneTable?.(zon);
-      }
-
-      tabs.forEach(btn=>{
-        btn.addEventListener("click", ()=> setZon(btn.dataset.zon));
+        // ✅ jika cikgu nak pastikan "t4-tbody" ada row baru show:
+        setTimeout(() => {
+          const hasRow = ($("t4-tbody") && $("t4-tbody").children.length > 0);
+          if (hasRow) {
+            $("t4-result")?.classList.remove("hidden");
+          } else {
+            $("t4-result")?.classList.add("hidden");
+          }
+        }, 50);
       });
 
-      // init default
-      setZon(table.getAttribute("data-zon") || "kualiti-1");
+      // optional: bila tukar filter, hide balik supaya kena klik jana semula
+      ["t4-filter-kelas","t4-filter-kumpulan"].forEach(id=>{
+        $(id)?.addEventListener("change", ()=> $("t4-result")?.classList.add("hidden"));
+      });
     })();
   </script>
 
-    <!--SINI -->
-    <script>
-(function () {
-  const panel = document.getElementById("panel-cz-murid") || document;
-  const table = document.getElementById("cz-table");
-
-  // ambil semua button zon (tak kisah class apa)
-  const btns = panel.querySelectorAll('button[data-zon]');
-  if (!btns.length || !table) return;
-
-  // mapping zon -> kad
-  const cardByZon = {
-    "kualiti-1": document.getElementById("cz-card-kualiti-1"),
-    "kualiti-2": document.getElementById("cz-card-kualiti-2"),
-    "pertahanan-1": document.getElementById("cz-card-pertahanan-1"),
-    "pertahanan-2": document.getElementById("cz-card-pertahanan-2"),
-    "kuantiti": document.getElementById("cz-card-kuantiti"),
-  };
-
-  // helper: dapatkan warna latar kad
-  function getCardBg(zon) {
-    const card = cardByZon[zon];
-    if (!card) return null;
-    const bg = getComputedStyle(card).backgroundColor;
-    return bg && bg !== "rgba(0, 0, 0, 0)" ? bg : null;
-  }
-
-  // helper: gelapkan bg untuk jadikan bar/button lebih “tegas”
-  function darkenRGB(rgb, factor = 0.18) {
-    // rgb(a) -> gelapkan sikit
-    const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-    if (!m) return rgb;
-    let r = +m[1], g = +m[2], b = +m[3];
-    r = Math.max(0, Math.round(r * (1 - factor)));
-    g = Math.max(0, Math.round(g * (1 - factor)));
-    b = Math.max(0, Math.round(b * (1 - factor)));
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
-  // apply warna zon pada button + bar table
-  function applyZon(zon) {
-    const bgCard = getCardBg(zon) || "rgb(220, 38, 38)"; // fallback
-    const bar = darkenRGB(bgCard, 0.25);
-
-    // set bar/header table (paksa !important)
-    const theadRow = table.querySelector("thead tr");
-    if (theadRow) {
-      theadRow.style.setProperty("background-color", bar, "important");
-    }
-    table.style.setProperty("--cz-bar", bar, "important");
-
-    // set button active: bg ikut bar, yang lain putih
-    btns.forEach(b => {
-      const isActive = (b.dataset.zon === zon);
-
-      // reset dulu
-      b.classList.toggle("is-active", isActive);
-
-      if (isActive) {
-        b.style.setProperty("background-color", bar, "important");
-        b.style.setProperty("color", "#ffffff", "important");
-        b.style.setProperty("border-color", "transparent", "important");
-        b.style.setProperty("box-shadow", "0 10px 18px rgba(16,24,40,.10)", "important");
-      } else {
-        b.style.removeProperty("background-color");
-        b.style.setProperty("background-color", "#ffffff", "important");
-        b.style.setProperty("color", "#374151", "important");
-        b.style.setProperty("border-color", "#e5e7eb", "important");
-        b.style.setProperty("box-shadow", "none", "important");
-      }
-
-      // kemas sikit (kalau button asal tiada style)
-      b.style.setProperty("border-width", "1px", "important");
-      b.style.setProperty("border-style", "solid", "important");
-      b.style.setProperty("border-radius", "14px", "important");
-      b.style.setProperty("padding", "10px 16px", "important");
-      b.style.setProperty("font-weight", "600", "important");
-    });
-  }
-
-  // klik handler
-  btns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const zon = btn.dataset.zon;
-      applyZon(zon);
-
-      // ✅ kalau cikgu ada fungsi render data ikut zon, panggil sini:
-      // window.applyCZTabs?.(zon);
-      // window.renderCombatZoneTable?.(zon);
-    });
-  });
-
-  // init: ambil button yang ada class is-active, kalau tiada guna kualiti-1
-  const activeBtn = Array.from(btns).find(b => b.classList.contains("is-active")) || btns[0];
-  applyZon(activeBtn?.dataset?.zon || "kualiti-1");
-})();
-</script>
-
 </section>
-<!-- ================= /TAB: COMBAT ZONE ================= -->
-
 
 
 
@@ -3863,275 +3699,6 @@ table td:nth-child(2) {
             }
         </script>
 
-<script>
-(function () {
-  // ========= CONFIG =========
-  const ZONES = [
-    { key: "kualiti-1",     label: "Kualiti 1" },
-    { key: "kualiti-2",     label: "Kualiti 2" },
-    { key: "pertahanan-1",  label: "Pertahanan 1" },
-    { key: "pertahanan-2",  label: "Pertahanan 2" },
-    { key: "kuantiti",      label: "Kuantiti" },
-  ];
-
-  // Cari panel Combat Zone (kalau id lain pun OK)
-  function getCZPanel() {
-    return document.getElementById("panel-cz-murid")
-      || document.querySelector('[id*="cz"]')
-      || document.body;
-  }
-
-  // ========= UTIL =========
-  function norm(s){ return String(s||"").replace(/\s+/g," ").trim().toLowerCase(); }
-
-  function isTransparent(bg){
-    return !bg || bg === "transparent" || bg === "rgba(0, 0, 0, 0)";
-  }
-
-  // cari backgroundColor yang betul (naik ke parent kalau anak transparent)
-  function getEffectiveBg(el){
-    let cur = el;
-    for (let i=0; i<10 && cur; i++){
-      const bg = getComputedStyle(cur).backgroundColor;
-      if (!isTransparent(bg)) return bg;
-      cur = cur.parentElement;
-    }
-    return null;
-  }
-
-  // gelapkan sikit supaya sesuai jadi warna bar/tab
-  function darkenRGB(rgb, factor = 0.22){
-    const m = String(rgb||"").match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-    if (!m) return rgb;
-    let r = +m[1], g = +m[2], b = +m[3];
-    r = Math.max(0, Math.round(r * (1 - factor)));
-    g = Math.max(0, Math.round(g * (1 - factor)));
-    b = Math.max(0, Math.round(b * (1 - factor)));
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
-  // ========= FIND CARDS BY TEXT =========
-  function findZoneCards(panel){
-    // Cari semua elemen yang mengandungi label (Kualiti 1, dll) lalu ambil parent kadnya
-    const map = {};
-    const all = panel.querySelectorAll("*");
-    for (const z of ZONES) map[z.key] = null;
-
-    all.forEach(el => {
-      const t = norm(el.textContent);
-      if (!t) return;
-
-      for (const z of ZONES){
-        if (map[z.key]) continue;
-        if (t.includes(norm(z.label))) {
-          // cuba ambil container kad: naik ke parent yang ada border/rounded/padding (heuristic)
-          let cur = el;
-          for (let i=0; i<8 && cur; i++){
-            const cs = getComputedStyle(cur);
-            const bg = cs.backgroundColor;
-            const br = cs.borderRadius;
-            const bd = cs.borderTopWidth;
-            if (!isTransparent(bg) && (parseFloat(br) > 8 || parseFloat(bd) > 0)) {
-              map[z.key] = cur;
-              break;
-            }
-            cur = cur.parentElement;
-          }
-          // fallback: guna parent terdekat
-          if (!map[z.key]) map[z.key] = el.parentElement || el;
-        }
-      }
-    });
-
-    return map;
-  }
-
-  // ========= FIND TAB BUTTONS =========
-  function findZoneTabs(panel){
-    // Cari container tab: biasanya satu baris pill sebelum table
-    // Kita ambil semua clickable yang mengandungi label zon.
-    const candidates = panel.querySelectorAll("button, a, div[role='tab'], li, span");
-    const tabs = [];
-
-    candidates.forEach(el => {
-      const t = norm(el.textContent);
-      if (!t) return;
-
-      for (const z of ZONES){
-        if (t === norm(z.label) || t.includes(norm(z.label))) {
-          // el mesti clickable / nampak macam tab
-          const cs = getComputedStyle(el);
-          const isHidden = cs.display === "none" || cs.visibility === "hidden";
-          if (isHidden) return;
-
-          // el atau parent dia yang clickable
-          let clickable = el;
-          for (let i=0; i<4 && clickable; i++){
-            const tag = clickable.tagName ? clickable.tagName.toLowerCase() : "";
-            const isBtnLike = (tag === "button" || tag === "a") || clickable.onclick || clickable.getAttribute("role")==="tab";
-            if (isBtnLike) break;
-            clickable = clickable.parentElement;
-          }
-
-          tabs.push({ zon: z.key, el: clickable || el });
-          break;
-        }
-      }
-    });
-
-    // buang duplicate (sama element)
-    const seen = new Set();
-    return tabs.filter(x => {
-      if (!x.el) return false;
-      if (seen.has(x.el)) return false;
-      seen.add(x.el);
-      return true;
-    });
-  }
-
-  // ========= FIND TABLE HEADER BAR =========
-  function findCZTable(panel){
-    // Utamakan id kalau ada
-    return document.getElementById("cz-table")
-      || panel.querySelector("table")
-      || null;
-  }
-
-  function setHeaderBarColor(table, color){
-    if (!table) return;
-
-    // 1) thead tr
-    const tr = table.querySelector("thead tr");
-    if (tr) tr.style.setProperty("background-color", color, "important");
-
-    // 2) thead th
-    table.querySelectorAll("thead th").forEach(th => {
-      th.style.setProperty("background-color", color, "important");
-      th.style.setProperty("color", "#fff", "important");
-    });
-
-    // 3) kalau header row guna class di tr dalam thead
-    const thead = table.querySelector("thead");
-    if (thead) {
-      thead.style.setProperty("background-color", color, "important");
-    }
-  }
-
-  // ========= APPLY STYLE =========
-  function styleTab(tabEl, isActive, color){
-    if (!tabEl) return;
-
-    // pastikan teks nampak (isu putih kosong)
-    tabEl.style.setProperty("opacity", "1", "important");
-    tabEl.style.setProperty("visibility", "visible", "important");
-
-    // kemas pill
-    tabEl.style.setProperty("border-radius", "14px", "important");
-    tabEl.style.setProperty("padding", "10px 16px", "important");
-    tabEl.style.setProperty("border-width", "1px", "important");
-    tabEl.style.setProperty("border-style", "solid", "important");
-    tabEl.style.setProperty("font-weight", "700", "important");
-
-    if (isActive){
-      tabEl.style.setProperty("background-color", color, "important");
-      tabEl.style.setProperty("border-color", "transparent", "important");
-      tabEl.style.setProperty("color", "#ffffff", "important");
-      tabEl.style.setProperty("box-shadow", "0 10px 18px rgba(16,24,40,.12)", "important");
-    } else {
-      tabEl.style.setProperty("background-color", "#ffffff", "important");
-      tabEl.style.setProperty("border-color", "#e5e7eb", "important");
-      tabEl.style.setProperty("color", "#374151", "important");
-      tabEl.style.setProperty("box-shadow", "none", "important");
-    }
-  }
-
-  // ========= MAIN BIND =========
-  let bound = false;
-  function bindOrRebind(){
-    const panel = getCZPanel();
-    const table = findCZTable(panel);
-    const cards = findZoneCards(panel);
-    const tabs = findZoneTabs(panel);
-
-    // kalau tab belum wujud (selalunya lepas jana), keluar dulu
-    if (!tabs.length) return;
-
-    // map zon -> bg kad
-    const bgByZon = {};
-    ZONES.forEach(z => {
-      const card = cards[z.key];
-      const bg = card ? getEffectiveBg(card) : null;
-      bgByZon[z.key] = bg;
-    });
-
-    // pilih zon aktif: cari yang ada class active/is-active dulu
-    let activeZon = null;
-    tabs.forEach(t => {
-      const cls = (t.el.className || "").toString().toLowerCase();
-      if (cls.includes("active") || cls.includes("is-active") || cls.includes("selected")) activeZon = t.zon;
-    });
-    if (!activeZon) activeZon = tabs[0].zon;
-
-    function apply(zon){
-      const cardBg = bgByZon[zon] || "rgb(239, 68, 68)"; // fallback
-      const barColor = darkenRGB(cardBg, 0.25);
-
-      // header bar/table ikut warna kad
-      setHeaderBarColor(table, barColor);
-
-      // button tabs ikut warna kad
-      tabs.forEach(t => styleTab(t.el, t.zon === zon, barColor));
-    }
-
-    // pasang click listener sekali sahaja untuk setiap element (guna flag dataset)
-    tabs.forEach(t => {
-      if (!t.el) return;
-      if (t.el.dataset.czBound === "1") return;
-      t.el.dataset.czBound = "1";
-
-      t.el.addEventListener("click", (e) => {
-        // elakkan click ditahan oleh parent
-        // (tak stopPropagation sebab mungkin cikgu ada handler lain)
-        apply(t.zon);
-        // kalau cikgu ada fungsi render table ikut zon, biarkan handler asal jalan.
-      }, true);
-    });
-
-    // apply awal
-    apply(activeZon);
-
-    bound = true;
-  }
-
-  // ========= OBSERVER (punca utama masalah cikgu) =========
-  function start(){
-    // cuba bind awal
-    bindOrRebind();
-
-    const panel = getCZPanel();
-    const obs = new MutationObserver(() => {
-      // setiap kali DOM berubah (lepas Jana Analisis / lepas render table), rebind
-      bindOrRebind();
-    });
-
-    obs.observe(panel, { childList:true, subtree:true });
-
-    // fallback timer (kalau mutation tak trigger)
-    let tries = 0;
-    const t = setInterval(() => {
-      tries++;
-      bindOrRebind();
-      if (bound || tries > 30) clearInterval(t);
-    }, 250);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start);
-  } else {
-    start();
-  }
-})();
-</script>
 
 
     </body>
